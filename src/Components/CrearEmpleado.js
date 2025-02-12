@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, notification } from 'antd';
+import { Button, Form, Input, notification, DatePicker } from 'antd';
 
 const layout = {
   labelCol: {
@@ -24,28 +24,32 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearUser = () => {
+const CrearEmpleado = () => {
   const [loading, setLoading] = useState(false); // Estado para manejar el loading
   const [form] = Form.useForm(); // Inicializar el formulario
 
   const onFinish = async (values) => {
     console.log(values); // Para depuración
 
-    const userData = {
+    const EmpleadoData = {
       firstname: values.firstname,
       lastname: values.lastname,
       email: values.email,
       domicilio: values.domicilio,
       celular: values.celular,
+      telefono: values.telefonoEmergencia,
       documento: values.documento,
       rol: values.rol,
-      area: values.area,
+      // area: values.area,
+      licenciaVencimiento: values.licenciaVencimiento?.format('YYYY-MM-DD'),
+      dniVencimiento: values.dniVencimiento?.format('YYYY-MM-DD'),
+      aptoFisicoVencimiento: values.aptoFisicoVencimiento?.format('YYYY-MM-DD'),
     };
 
     try {
       setLoading(true); // Iniciar loading
 
-      const url = 'https://prog-iii-swagger-nievas-nicolas.vercel.app/api/user'; 
+      const url = 'https://prog-iii-swagger-nievas-nicolas.vercel.app/api/Empleado'; 
       const method = 'POST'; 
 
       // Enviar datos a la API
@@ -54,22 +58,21 @@ const CrearUser = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData), 
+        body: JSON.stringify(EmpleadoData), 
       });
 
-      
       if (!response.ok) {
-        throw new Error('Error al crear el usuario');
+        throw new Error('Error al crear el Empleado');
       }
 
       const result = await response.json();
       console.log(result); 
-      openNotificationWithIcon('success', 'Usuario guardado', 'El usuario se ha guardado exitosamente.');
+      openNotificationWithIcon('success', 'Empleado guardado', 'El Empleado se ha guardado exitosamente.');
       form.resetFields();
      
     } catch (error) {
-      console.error('Error al crear el usuario:', error);
-      openNotificationWithIcon('error', 'Error', 'Hubo un problema al guardar el usuario.');
+      console.error('Error al crear el Empleado:', error);
+      openNotificationWithIcon('error', 'Error', 'Hubo un problema al guardar el Empleado.');
  
     } finally {
       setLoading(false); // Detener loading
@@ -128,6 +131,14 @@ const CrearUser = () => {
       </Form.Item>
 
       <Form.Item
+        name="telefonoEmergencia"
+        label="Telefono Emergencia"
+        rules={[{ required: true }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
         name="documento"
         label="Documento"
         rules={[{ required: true }]}
@@ -143,12 +154,37 @@ const CrearUser = () => {
         <Input />
       </Form.Item>
 
-      <Form.Item
+      {/* <Form.Item
         name="area"
         label="Área"
         rules={[{ required: true }]}
       >
         <Input />
+      </Form.Item> */}
+
+      {/* Nuevos campos de fecha */}
+      <Form.Item
+        name="licenciaVencimiento"
+        label="Vencimiento Licencia"
+        rules={[{ required: true }]}
+      >
+        <DatePicker format="YYYY-MM-DD" />
+      </Form.Item>
+
+      <Form.Item
+        name="dniVencimiento"
+        label="Vencimiento DNI"
+        rules={[{ required: true }]}
+      >
+        <DatePicker format="YYYY-MM-DD" />
+      </Form.Item>
+
+      <Form.Item
+        name="aptoFisicoVencimiento"
+        label="Vencimiento Apto Físico"
+        rules={[{ required: true }]}
+      >
+        <DatePicker format="YYYY-MM-DD" />
       </Form.Item>
 
       <Form.Item
@@ -158,12 +194,11 @@ const CrearUser = () => {
         }}
       >
         <Button type="primary" htmlType="submit" loading={loading}>
-          Crear Usuario
+          Crear Empleado
         </Button>
       </Form.Item>
     </Form>
   );
 };
 
-export default CrearUser;
-
+export default CrearEmpleado;
