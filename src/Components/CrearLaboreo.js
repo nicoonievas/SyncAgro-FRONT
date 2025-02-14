@@ -54,14 +54,17 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     const fetchData = async () => {
       try {
         const [empleadosRes, vehiculosRes, clientesRes] = await Promise.all([
-          axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/empleado'),
-          axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/vehiculos'),
-          axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/clientes'),
+          axios.get('http://localhost:6001/api/nominas'),
+          axios.get('http://localhost:6001/api/vehiculos'),
+          axios.get('http://localhost:6001/api/clientes'),
+          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/empleado'),
+          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/vehiculos'),
+          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/clientes'),
         ]);
 
-        setEmpleados(empleadosRes.data.data);
-        setVehiculos(vehiculosRes.data.data);
-        setClientes(clientesRes.data.data);
+        setEmpleados(empleadosRes.data);
+        setVehiculos(vehiculosRes.data);
+        setClientes(clientesRes.data);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }
@@ -84,7 +87,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     try {
       setLoading(true);
       const response = await axios.post(
-        'https://prog-iii-swagger-nievas-nicolas.vercel.app/api/laboreo',
+        'http://localhost:6001/api/laboreo',
         laboreoData,
         {
           headers: {
@@ -155,7 +158,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         >
           {empleados.map((empleado) => (
             <Option key={empleado._id} value={empleado._id}>
-              {`${empleado.lastname} - ${empleado.documento}`}
+              {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
             </Option>
           ))}
         </Select>
@@ -173,7 +176,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         >
           {vehiculos.map((vehiculo) => (
             <Option key={vehiculo._id} value={vehiculo._id}>
-              {`${vehiculo.modelo} - ${vehiculo.placa}`}
+              {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
             </Option>
           ))}
         </Select>
@@ -223,7 +226,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         >
           {clientes.map((cliente) => (
             <Option key={cliente._id} value={cliente._id}>
-              {cliente.nombre} {/* Suponiendo que el campo es 'nombre' */}
+              {cliente.nombre} - {cliente.apellido} {/* Suponiendo que el campo es 'nombre' */}
             </Option>
           ))}
         </Select>

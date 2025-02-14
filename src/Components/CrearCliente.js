@@ -21,10 +21,9 @@ const CrearCliente = () => {
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    console.log(values);
-
+    console.log("Enviando datos:", values);
+  
     const clienteData = {
-      idcliente: values.idcliente,
       nombre: values.nombre,
       apellido: values.apellido,
       domicilio: values.domicilio,
@@ -33,13 +32,16 @@ const CrearCliente = () => {
       telefono: values.telefono,
       mail: values.mail,
       estado: values.estado,
-      coordenadas: values.coordenadas,
+      coordenadas: {
+        latitud: parseFloat(values.coordenadas.latitud),
+        longitud: parseFloat(values.coordenadas.longitud),
+      },
     };
 
     try {
       setLoading(true);
-      
-      const url = 'https://api.example.com/clientes'; 
+
+      const url = 'https://api.example.com/clientes';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,9 +64,6 @@ const CrearCliente = () => {
 
   return (
     <Form {...layout} form={form} name="crear-cliente" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
-      <Form.Item name="idcliente" label="ID Cliente" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
 
       <Form.Item name="nombre" label="Nombre" rules={[{ required: true }]}>
         <Input />
@@ -90,7 +89,7 @@ const CrearCliente = () => {
         <Input />
       </Form.Item>
 
-      <Form.Item name="mail" label="Mail" rules={[{ required: true, type: 'email' }]}>
+      <Form.Item name="mail" label="Mail" rules={[{ required: false, type: 'email' }]}>
         <Input />
       </Form.Item>
 
@@ -101,8 +100,12 @@ const CrearCliente = () => {
         </Select>
       </Form.Item>
 
-      <Form.Item name="coordenadas" label="Coordenadas" rules={[{ required: true }]}>
-        <Input />
+      <Form.Item label="Latitud" name={['coordenadas', 'latitud']} rules={[{ required: false, message: 'Ingresa la latitud' }]}>
+        <Input type="number" step="any" placeholder="Ej: -34.603722" />
+      </Form.Item>
+
+      <Form.Item label="Longitud" name={['coordenadas', 'longitud']} rules={[{ required: false, message: 'Ingresa la longitud' }]}>
+        <Input type="number" step="any" placeholder="Ej: -58.381592" />
       </Form.Item>
 
       <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
