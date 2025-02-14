@@ -24,7 +24,7 @@ const CrearVehiculo = () => {
     console.log(values);
 
     const vehiculoData = {
-      idvehiculo: values.idvehiculo,
+      // idvehiculo: values.idvehiculo,
       marca: values.marca,
       modelo: values.modelo,
       dominio: values.dominio,
@@ -38,7 +38,7 @@ const CrearVehiculo = () => {
     try {
       setLoading(true);
       
-      const url = 'https://api.example.com/vehiculos'; 
+      const url = 'http://localhost:6001/api/vehiculo'; 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,9 +61,9 @@ const CrearVehiculo = () => {
 
   return (
     <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
-      <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
+      {/* <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
         <Input />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
         <Input />
