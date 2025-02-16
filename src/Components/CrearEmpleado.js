@@ -49,7 +49,7 @@ const CrearEmpleado = () => {
     try {
       setLoading(true); // Iniciar loading
 
-      const url = 'https://prog-iii-swagger-nievas-nicolas.vercel.app/api/Empleado'; 
+      const url = 'http://localhost:6001/api/nomina'; 
       const method = 'POST'; 
 
       // Enviar datos a la API

@@ -41,7 +41,7 @@ const CrearCliente = () => {
     try {
       setLoading(true);
 
-      const url = 'https://api.example.com/clientes';
+      const url = 'http://localhost:6001/api/cliente';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

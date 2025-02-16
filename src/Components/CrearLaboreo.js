@@ -101,7 +101,9 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       }
 
       openNotificationWithIcon('success', 'laboreo creado', 'El laboreo se ha creado exitosamente.');
-      form.resetFields();
+      form.resetFields(); 
+    
+      // setSelectedCliente(null);
     } catch (error) {
       console.error('Error al crear el laboreo:', error);
       openNotificationWithIcon('error', 'Error', 'Hubo un problema al crear el laboreo.');
@@ -119,6 +121,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
   return (
     <Form
       {...layout}
+      form={form}
       name="crear-laboreo"
       onFinish={onFinish}
       style={{ maxWidth: 600 }}
