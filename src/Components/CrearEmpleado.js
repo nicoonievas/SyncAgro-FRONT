@@ -41,9 +41,15 @@ const CrearEmpleado = () => {
       documento: values.documento,
       rol: values.rol,
       // area: values.area,
-      licenciaVencimiento: values.licenciaVencimiento?.format('YYYY-MM-DD'),
-      dniVencimiento: values.dniVencimiento?.format('YYYY-MM-DD'),
-      aptoFisicoVencimiento: values.aptoFisicoVencimiento?.format('YYYY-MM-DD'),
+      licenciaVencimiento: values.licenciaVencimiento 
+      ? values.licenciaVencimiento.format('YYYY-MM-DD') 
+      : null,
+    dniVencimiento: values.dniVencimiento 
+      ? values.dniVencimiento.format('YYYY-MM-DD') 
+      : null,
+    aptoFisicoVencimiento: values.aptoFisicoVencimiento 
+      ? values.aptoFisicoVencimiento.format('YYYY-MM-DD') 
+      : null,
     };
 
     try {

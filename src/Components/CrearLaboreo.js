@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Select, notification } from 'antd';
+import { Button, Form, Input, Select, notification, DatePicker } from 'antd';
 import axios from 'axios';
 
 const { Option } = Select;
@@ -45,6 +45,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         tarea: laboreoToAdd.tarea,
         grano: laboreoToAdd.grano,
         cliente: laboreoToAdd.cliente,
+        fechaInicio: laboreoToAdd.fechaInicio,
       });
     }
   }, [laboreoToAdd, form]);
@@ -82,6 +83,9 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       tarea: values.tarea,          // Tarea seleccionada
       grano: values.grano,          // Grano seleccionado
       cliente: selectedCliente?._id, // Usar el ID del cliente seleccionado
+      fechaInicio: values.fechaInicio
+        ? values.fechaInicio.format('YYYY-MM-DD')
+        : null,
     };
 
     try {
@@ -101,8 +105,8 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       }
 
       openNotificationWithIcon('success', 'laboreo creado', 'El laboreo se ha creado exitosamente.');
-      form.resetFields(); 
-    
+      form.resetFields();
+
       // setSelectedCliente(null);
     } catch (error) {
       console.error('Error al crear el laboreo:', error);
@@ -233,6 +237,14 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
             </Option>
           ))}
         </Select>
+      </Form.Item>
+
+      <Form.Item
+        name="fechaInicio"
+        label="Fecha de inicio"
+        rules={[{ required: true }]}
+      >
+        <DatePicker format="YYYY-MM-DD" />
       </Form.Item>
 
       <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>

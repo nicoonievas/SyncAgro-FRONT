@@ -14,11 +14,13 @@ import Home from './Home';
 import CrearEmpleado from './CrearEmpleado';
 import { useAuth0 } from '@auth0/auth0-react';
 import CrearLaboreo from './CrearLaboreo';
-import TablaTasks from './TablaTasks';
+import TablaLaboreos from './TablaLaboreos';
 import TablaNominas from './TablaNominas';
 import CrearVehiculo from './CrearVehiculo';
 import CrearCliente from './CrearCliente';
-
+import TablaTasks from './TablaTasks';
+// import TablaVehiculos from './TablaVehiculos';
+// import TablaClientes from './TablaClientes';
 
 const { Header, Sider, Content } = Layout;
 
@@ -141,7 +143,7 @@ const LeftMenu = () => {
             <Route path="/verClientes" element={<TablaTasks />} />
             <Route path="/verPersonal" element={<TablaNominas />} />
             <Route path="/verVehiculos" element={<TablaTasks />} />
-            <Route path="/verLaboreos" element={<TablaTasks />} />
+            <Route path="/verLaboreos" element={<TablaLaboreos />} />
           </Routes>
         </Content>
       </Layout>

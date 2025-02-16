@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker } from 'antd';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox } from 'antd';
 import axios from 'axios';
-
+import dayjs from 'dayjs';
 
 const TablaNominas = () => {
   const [nominas, setNominas] = useState([]);
@@ -16,7 +16,7 @@ const TablaNominas = () => {
     pageSize: 10,
   });
   const [totalNominas, setTotalNominas] = useState(0);
-  const [form] = Form.useForm(); // Formulario para el modal de edición
+  const [form] = Form.useForm();
 
   useEffect(() => {
     const fetchNominas = async () => {
@@ -50,40 +50,43 @@ const TablaNominas = () => {
   };
 
   const showDeleteConfirm = (id) => {
-    setNominaIdToDelete(id); // Guardar el ID de la nómina a eliminar
-    setIsDeleteModalVisible(true); // Mostrar el modal de confirmación de eliminación
+    setNominaIdToDelete(id);
+    setIsDeleteModalVisible(true);
   };
 
   const showEditModal = (nomina) => {
     setCurrentNomina(nomina);
-
-
-    form.setFieldsValue({
+    form.setFieldsValue({ 
       ...nomina,
-
+      licenciaVencimiento: nomina.licenciaVencimiento ? dayjs(nomina.licenciaVencimiento) : null,
+      aptoFisicoVencimiento: nomina.aptoFisicoVencimiento ? dayjs(nomina.aptoFisicoVencimiento) : null,
+      dniVencimiento: nomina.dniVencimiento ? dayjs(nomina.dniVencimiento) : null,
+      estado: nomina.estado === 1
     });
-
     setIsEditModalVisible(true);
   };
 
-
-
   const handleCancel = () => {
-    setIsDeleteModalVisible(false); // Ocultar el modal de eliminación
-    setIsEditModalVisible(false); // Ocultar el modal de edición
-    form.resetFields(); // Limpiar los campos del formulario
+    setIsDeleteModalVisible(false);
+    setIsEditModalVisible(false);
+    form.resetFields();
   };
 
-  // Función para manejar la edición de nóminas
   const handleEdit = async (values) => {
     try {
-      // Las fechas ya están en formato YYYY-MM-DD, por lo que las podemos enviar directamente
-      await axios.put(`http://localhost:6001/api/nomina/${currentNomina._id}`, values);
+      const formattedValues = {
+        ...values,
+        licenciaVencimiento: values.licenciaVencimiento ? values.licenciaVencimiento.format('YYYY-MM-DD') : null,
+        aptoFisicoVencimiento: values.aptoFisicoVencimiento ? values.aptoFisicoVencimiento.format('YYYY-MM-DD') : null,
+        dniVencimiento: values.dniVencimiento ? values.dniVencimiento.format('YYYY-MM-DD') : null,
+        estado: values.estado ? 1 : 0
+      };
 
-      // Actualizar el estado con los nuevos datos
+      await axios.put(`http://localhost:6001/api/nomina/${currentNomina._id}`, formattedValues);
+
       setNominas((prevNominas) =>
         prevNominas.map((nomina) =>
-          nomina._id === currentNomina._id ? { ...nomina, ...values } : nomina
+          nomina._id === currentNomina._id ? { ...nomina, ...formattedValues } : nomina
         )
       );
 
@@ -94,15 +97,13 @@ const TablaNominas = () => {
     }
   };
 
-  // Función para manejar la eliminación de nóminas
   const handleDelete = async () => {
     try {
       await axios.delete(`http://localhost:6001/api/nomina/${nominaIdToDelete}`);
 
-      // Actualizar el estado para eliminar la nómina
       setNominas((prevNominas) => prevNominas.filter((nomina) => nomina._id !== nominaIdToDelete));
 
-      setIsDeleteModalVisible(false); // Cerrar el modal de eliminación
+      setIsDeleteModalVisible(false);
       openNotificationWithIcon('success', 'Nómina Eliminada', 'La nómina ha sido eliminada exitosamente.');
     } catch (error) {
       console.error("Error deleting nomina:", error);
@@ -155,7 +156,6 @@ const TablaNominas = () => {
     });
   };
 
-
   return (
     <>
       <Table
@@ -175,8 +175,8 @@ const TablaNominas = () => {
       <Modal
         title="Confirmar Eliminación"
         open={isDeleteModalVisible}
-        onOk={handleDelete} // Manejar la eliminación al confirmar
-        onCancel={handleCancel} // Cerrar el modal al cancelar
+        onOk={handleDelete}
+        onCancel={handleCancel}
         okText="Eliminar"
         cancelText="Cancelar"
       >
@@ -188,100 +188,67 @@ const TablaNominas = () => {
         title="Editar Nómina"
         open={isEditModalVisible}
         onCancel={handleCancel}
-        footer={null} // No usar el footer predeterminado
+        footer={null}
       >
-        <Form
-          form={form}
-          onFinish={handleEdit}
-        >
-          <Form.Item
-            name="firstname"
-            label="Nombre"
-            rules={[{ required: true, message: 'Por favor ingresa el nombre del empleado' }]}
-          >
+
+        <Form form={form} onFinish={handleEdit}>
+          <Form.Item name="firstname" label="Nombre" rules={[{ required: true, message: 'Por favor ingresa el nombre del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="lastname"
-            label="Apellido"
-            rules={[{ required: true, message: 'Por favor ingresa el apellido del empleado' }]}
-          >
+          <Form.Item name="lastname" label="Apellido" rules={[{ required: true, message: 'Por favor ingresa el apellido del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ required: true, message: 'Por favor ingresa el email del empleado' }]}
-          >
+          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Por favor ingresa el email del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="domicilio"
-            label="Domicilio"
-            rules={[{ required: true, message: 'Por favor ingresa el domicilio del empleado' }]}
-          >
+          <Form.Item name="domicilio" label="Domicilio" rules={[{ required: true, message: 'Por favor ingresa el domicilio del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="celular"
-            label="Celular"
-            rules={[{ required: true, message: 'Por favor ingresa el celular del empleado' }]}
-          >
+          <Form.Item name="celular" label="Celular" rules={[{ required: true, message: 'Por favor ingresa el celular del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="telefono"
-            label="Telefono Emergencia"
-            rules={[{ required: true, message: 'Por favor ingresa el Telefono de emergencia' }]}
-          >
+          <Form.Item name="telefono" label="Teléfono Emergencia" rules={[{ required: true, message: 'Por favor ingresa el teléfono de emergencia' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="documento"
-            label="Documento"
-            rules={[{ required: true, message: 'Por favor ingresa el documento del empleado' }]}
-          >
+          <Form.Item name="documento" label="Documento" rules={[{ required: true, message: 'Por favor ingresa el documento del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="rol"
-            label="Rol"
-            rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}
-          >
+          <Form.Item name="rol" label="Rol" rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="area"
-            label="Área"
-            rules={[{ required: true, message: 'Por favor ingresa el área del empleado' }]}
-          >
+          <Form.Item name="area" label="Área">
             <Input />
           </Form.Item>
 
-          <Form.Item label="Vencimiento de Licencia">
-  <DatePicker format="YYYY-MM-DD" />
-</Form.Item>
+          <Form.Item label="Vencimiento de Licencia" name="licenciaVencimiento"
+            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
 
-<Form.Item label="Vencimiento de Apto Fisico">
-  <DatePicker format="YYYY-MM-DD" />
-</Form.Item>
+          <Form.Item label="Vencimiento de Apto Físico" name="aptoFisicoVencimiento"
+            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
 
-<Form.Item label="Vencimiento DNI">
-  <DatePicker format="YYYY-MM-DD" />
-</Form.Item>
+          <Form.Item label="Vencimiento DNI" name="dniVencimiento"
+            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+
+          <Form.Item name="estado" valuePropName="checked">
+            <Checkbox>Empleado Activo</Checkbox>
+          </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Guardar Cambios
-            </Button>
+            <Button type="primary" htmlType="submit">Guardar Cambios</Button>
           </Form.Item>
         </Form>
       </Modal>
@@ -290,4 +257,3 @@ const TablaNominas = () => {
 };
 
 export default TablaNominas;
-

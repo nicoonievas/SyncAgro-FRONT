@@ -31,7 +31,6 @@ const CrearCliente = () => {
       provincia: values.provincia,
       telefono: values.telefono,
       mail: values.mail,
-      estado: values.estado,
       coordenadas: {
         latitud: parseFloat(values.coordenadas.latitud),
         longitud: parseFloat(values.coordenadas.longitud),
@@ -91,13 +90,6 @@ const CrearCliente = () => {
 
       <Form.Item name="mail" label="Mail" rules={[{ required: false, type: 'email' }]}>
         <Input />
-      </Form.Item>
-
-      <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
-        <Select>
-          <Option value="activo">Activo</Option>
-          <Option value="inactivo">Inactivo</Option>
-        </Select>
       </Form.Item>
 
       <Form.Item label="Latitud" name={['coordenadas', 'latitud']} rules={[{ required: false, message: 'Ingresa la latitud' }]}>

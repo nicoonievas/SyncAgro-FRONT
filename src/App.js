@@ -13,7 +13,6 @@ function App() {
             {isAuthenticated && <LeftMenu />} {/* Renderiza el menú lateral solo si está autenticado */}
             <Routes>
                 <Route path="/" element={<Main />} /> {/* Ruta base para Main */}
-                {/* No necesitas definir las rutas aquí, se manejarán en LeftMenu */}
             </Routes>
         </div>
     );
