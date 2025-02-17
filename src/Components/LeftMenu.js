@@ -40,13 +40,21 @@ const LeftMenu = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-  <Sider trigger={null} collapsible collapsed={collapsed}>
-    <div className="demo-logo-vertical" />
-    <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} 
+      <Sider trigger={null} collapsible collapsed={collapsed}>
+        <div className="demo-logo-vertical" />
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}
           items={[
             {
               key: 'logo',
-              icon: <img src="https://i.imgur.com/ycOHrOl.png" alt="SyncAgro" style={{ width: '80px' }} />,
+              style: { height: collapsed ? '10vh' : '15vh', justifyContent: 'center', display: 'flex', alignItems: 'center' },
+              icon: <img src="https://i.imgur.com/ycOHrOl.png" alt="SyncAgro"
+                style={{
+                  width: collapsed ? '12vh' : '25vh',
+                  height: 'auto', // Mantener el aspect ratio original
+                  transition: 'width 0.3s, height 0.3s',
+                }} 
+              />
+ 
             },
             {
               key: '1',
@@ -93,11 +101,10 @@ const LeftMenu = () => {
               icon: <UserOutlined />,
               label: <Link to="/agregarCliente">Agregar Cliente</Link>
             }
-          ]} 
-    />
-  </Sider>
-  <Layout>
-
+          ]}
+        />
+      </Sider>
+      <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '16px' }}>
             <Button
@@ -123,7 +130,6 @@ const LeftMenu = () => {
             </div>
           </div>
         </Header>
-
         <Content
           style={{
             margin: '24px 16px',

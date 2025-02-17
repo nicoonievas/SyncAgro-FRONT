@@ -71,7 +71,7 @@ const TablaLaboreos = () => {
     fetchEmpleados();
     fetchVehiculos();
     fetchClientes();
-  }, [pagination]);
+  }, [pagination, selectedCliente]);
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
@@ -83,11 +83,12 @@ const TablaLaboreos = () => {
     form.setFieldsValue({
       ...laboreo,
       fechaInicio: laboreo.fechaInicio ? dayjs(laboreo.fechaInicio) : null,
-      cliente: `${laboreo.cliente.nombre} ${laboreo.cliente.apellido}`,
-      empleados: laboreo.empleados.map(emp => emp.firstname + ' ' + emp.lastname).join(', '),
-      vehiculos: laboreo.vehiculos.map(veh => veh.marca + ' ' + veh.modelo).join(', '),
+      cliente: laboreo.cliente ? laboreo.cliente._id : null,
+      empleados: laboreo.empleados ? laboreo.empleados.map(emp => emp._id) : [],
+      vehiculos: laboreo.vehiculos ? laboreo.vehiculos.map(veh => veh._id) : [],
       estado: laboreo.estado
     });
+
     setIsEditModalVisible(true);
   };
 
@@ -101,14 +102,18 @@ const TablaLaboreos = () => {
     try {
       const formattedValues = {
         ...values,
+        vehiculos: values.vehiculos,
+        empleados: values.empleados,
+        cliente: values.cliente,
         fechaInicio: values.fechaInicio ? values.fechaInicio.format('YYYY-MM-DD') : null,
 
       };
       await axios.put(`http://localhost:6001/api/laboreo/${currentLaboreo._id}`, formattedValues);
 
       setLaboreos(prevLaboreos =>
-        prevLaboreos.map(laboreo => laboreo._id === currentLaboreo._id ? { ...laboreo, ...formattedValues } : laboreo));
-
+        prevLaboreos.map(laboreo =>
+          laboreo._id === currentLaboreo._id ? { ...laboreo, ...formattedValues } : laboreo));
+      handleTableChange({ current: pagination.current, pageSize: pagination.pageSize });
       setIsEditModalVisible(false);
       notification.success({ message: 'Laboreo Editado', description: 'El laboreo ha sido editado exitosamente.' });
     } catch (error) {
@@ -128,7 +133,12 @@ const TablaLaboreos = () => {
       notification.error({ message: 'Error', description: 'Hubo un problema al eliminar el laboreo.' });
     }
   };
-
+  const estadoMapping = {
+    0: "Inactivo",
+    1: "Activo",
+    2: "Finalizado",
+    3: "Cancelado"
+  };
   const columns = [
     {
       title: 'Nombre', dataIndex: 'nombre', key: 'nombre',
@@ -139,7 +149,9 @@ const TablaLaboreos = () => {
       render: (_, record) => `${record.cliente.nombre} ${record.cliente.apellido}`
     },
     { title: 'Fecha Inicio', dataIndex: 'fechaInicio', key: 'fechaInicio' },
-    { title: 'Estado', dataIndex: 'estado', key: 'estado' },
+    { title: 'Estado', dataIndex: 'estado', key: 'estado',
+      render: (estado) => estadoMapping[estado] || "Desconocido"
+     },
     {
       title: 'Acción', key: 'action', render: (_, record) => (
         <Space size="middle">
@@ -155,7 +167,7 @@ const TablaLaboreos = () => {
     setSelectedCliente(selected);
   };
   const handleTableChange = (pagination) => {
-    setPagination({ current: pagination.current, pageSize: pagination.pageSize });
+    setPagination(pagination);
   };
 
   return (
@@ -164,12 +176,14 @@ const TablaLaboreos = () => {
         columns={columns}
         dataSource={laboreos}
         rowKey="_id"
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: totalLaboreos,
-          onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
-        }}
+        // pagination={{
+        //   current: pagination.current,
+        //   pageSize: pagination.pageSize,
+        //   total: totalLaboreos,
+        //   onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
+        // }}
+        pagination={pagination}
+        onChange={handleTableChange}
         loading={loading}
       />
 
@@ -210,7 +224,7 @@ const TablaLaboreos = () => {
             >
               {clientes.map((cliente) => (
                 <Option key={cliente._id} value={cliente._id}>
-                  {`${cliente.nombre} - ${cliente.apellido}`} {/* Suponiendo que el campo es 'nombre' */}
+                  {`${cliente.nombre} ${cliente.apellido}`}
                 </Option>
               ))}
             </Select>
