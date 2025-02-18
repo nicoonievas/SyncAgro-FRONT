@@ -24,7 +24,7 @@ const CrearVehiculo = () => {
     console.log(values);
 
     const vehiculoData = {
-      // idvehiculo: values.idvehiculo,
+      tipo: values.tipo,
       marca: values.marca,
       modelo: values.modelo,
       dominio: values.dominio,
@@ -37,8 +37,8 @@ const CrearVehiculo = () => {
 
     try {
       setLoading(true);
-      
-      const url = 'http://localhost:6001/api/vehiculo'; 
+
+      const url = 'http://localhost:6001/api/vehiculo';
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,6 +64,22 @@ const CrearVehiculo = () => {
       {/* <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
         <Input />
       </Form.Item> */}
+      <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
+        <Select>
+          <Option value="auto">Auto</Option>
+          <Option value="cabezal">Cabezal</Option>
+          <Option value="camion">Camion</Option>
+          <Option value="camioneta">Camioneta</Option>
+          <Option value="casilla">Casilla</Option>
+          <Option value="cisterna">Cisterna</Option>
+          <Option value="cosechadora">Cosechadora</Option>
+          <Option value="elevador">Elevador</Option>
+          <Option value="semirremolque">Semirremolque</Option>
+          <Option value="tolva">Tolva</Option>
+          <Option value="tractor">Tractor</Option>
+          <Option value="trailer">Trailer</Option>
+        </Select>
+      </Form.Item>
 
       <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
         <Input />
@@ -87,9 +103,9 @@ const CrearVehiculo = () => {
 
       <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
         <Select>
-          <Option value="activo">Activo</Option>
-          <Option value="inactivo">Inactivo</Option>
-          <Option value="en reparación">En reparación</Option>
+          <Option value="1">Activo</Option>
+          <Option value="0">Inactivo</Option>
+          <Option value="7">En reparación</Option>
         </Select>
       </Form.Item>
 
