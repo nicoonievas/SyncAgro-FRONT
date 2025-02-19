@@ -187,11 +187,11 @@ const TablaLaboreos = () => {
         loading={loading}
       />
 
-      <Modal title="Confirmar Eliminación" visible={isDeleteModalVisible} onOk={handleDelete} onCancel={handleCancel} okText="Eliminar" cancelText="Cancelar">
+      <Modal title="Confirmar Eliminación" open={isDeleteModalVisible} onOk={handleDelete} onCancel={handleCancel} okText="Eliminar" cancelText="Cancelar">
         <p>¿Estás seguro de que deseas eliminar este laboreo?</p>
       </Modal>
 
-      <Modal title="Editar Laboreo" visible={isEditModalVisible} onCancel={handleCancel} footer={null}>
+      <Modal title="Editar Laboreo" open={isEditModalVisible} onCancel={handleCancel} footer={null}>
         <Form form={form} onFinish={handleEdit}>
           <Form.Item name="nombre" label="Nombre" rules={[{ required: true, message: 'Por favor ingresa el nombre del laboreo' }]}>
             <Input />
@@ -271,11 +271,10 @@ const TablaLaboreos = () => {
           </Form.Item>
 
           <Form.Item name="estado" label="Estado">
-            <Select defaultValue={currentLaboreo?.estado} onChange={(value) => form.setFieldsValue({ estado: value })}>
-              <Option value={3}>Cancelado</Option>
-              <Option value={2}>Finalizado</Option>
-              <Option value={1}>Activo</Option>
-              <Option value={0}>Inactivo</Option>
+            <Select>
+              {Object.entries(estadoMapping).map(([value, label]) => (
+                <Option key={value} value={value}>{label}</Option>
+              ))}
             </Select>
           </Form.Item>
 

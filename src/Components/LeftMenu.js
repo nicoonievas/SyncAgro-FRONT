@@ -21,6 +21,8 @@ import CrearCliente from './CrearCliente';
 import TablaTasks from './TablaTasks';
 import TablaVehiculos from './TablaVehiculos';
 // import TablaClientes from './TablaClientes';
+import CrearEquipo from './CrearEquipo';
+import TablaEquipos from './TablaEquipos';
 
 const { Header, Sider, Content } = Layout;
 
@@ -72,35 +74,46 @@ const LeftMenu = () => {
               label: <Link to="/verLaboreos">Ver Campañas</Link>
             },
             {
-              key: '8',
+              key: '4',
               icon: <CarOutlined />,
               label: <Link to="/verVehiculos">Ver Vehículos</Link>
             },
             {
-              key: '9',
+              key: '5',
               icon: <UserOutlined />,
               label: <Link to="/verClientes">Ver Clientes</Link>
             },
             {
-              key: '4',
+              key: '11',
+              icon: <UserOutlined />,
+              label: <Link to="/verEquipos">Ver Equipos</Link>
+            },
+            {
+              key: '6',
               icon: <SolutionOutlined />,
               label: <Link to="/agregarEmpleado">Agregar Personal</Link>
             },
             {
-              key: '5',
+              key: '7',
               icon: <ToolOutlined />,
               label: <Link to="/agregarLaboreo">Agregar Campaña</Link>
             },
             {
-              key: '6',
+              key: '8',
+              icon: <ToolOutlined />,
+              label: <Link to="/agregarEquipo">Agregar Equipo</Link>
+            },
+            {
+              key: '9',
               icon: <CarOutlined />,
               label: <Link to="/agregarVehiculo">Agregar Vehículo</Link>
             },
             {
-              key: '7',
+              key: '10',
               icon: <UserOutlined />,
               label: <Link to="/agregarCliente">Agregar Cliente</Link>
             }
+            
           ]}
         />
       </Sider>
@@ -146,10 +159,12 @@ const LeftMenu = () => {
             <Route path="/agregarEmpleado" element={<CrearEmpleado />} />
             <Route path="/agregarVehiculo" element={<CrearVehiculo />} />
             <Route path="/agregarLaboreo" element={<CrearLaboreo />} />
+            <Route path="/agregarEquipo" element={<CrearEquipo />} />
             <Route path="/verClientes" element={<TablaTasks />} />
             <Route path="/verPersonal" element={<TablaNominas />} />
             <Route path="/verVehiculos" element={<TablaVehiculos />} />
             <Route path="/verLaboreos" element={<TablaLaboreos />} />
+            <Route path="/verEquipos" element={<TablaEquipos />} />
           </Routes>
         </Content>
       </Layout>

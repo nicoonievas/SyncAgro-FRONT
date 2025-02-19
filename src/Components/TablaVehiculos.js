@@ -60,6 +60,7 @@ const TablaVehiculos = () => {
       modelo: vehiculo.modelo || "",
       dominio: vehiculo.dominio || "",
       alias: vehiculo.alias || "",
+      numero: vehiculo.numero || "",
       estado: vehiculo.estado !== undefined ? String(vehiculo.estado) : "0",
       fecha_vencimiento_seguro: vehiculo.fecha_vencimiento_seguro ? dayjs(vehiculo.fecha_vencimiento_seguro) : null,
       fecha_vencimiento_vtv: vehiculo.fecha_vencimiento_vtv ? dayjs(vehiculo.fecha_vencimiento_vtv) : null,
@@ -114,8 +115,10 @@ const TablaVehiculos = () => {
   const estadoMapping = {
     0: "Inactivo",
     1: "Activo",
-    5: "Asignado",
-    6: "Libre",
+    // 2: "Finalizado",
+    // 3: "Cancelado",
+    // 5: "Asignado",
+    // 6: "Libre",
     7: "En reparación"
   };
 
@@ -205,7 +208,13 @@ const TablaVehiculos = () => {
             <Input />
           </Form.Item>
 
+        
+
           <Form.Item name="alias" label="Alias">
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="numero" label="Numero" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
