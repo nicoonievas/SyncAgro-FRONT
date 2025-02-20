@@ -45,8 +45,8 @@ const CrearEquipo = ({ equipoToAdd }) => {
     const fetchData = async () => {
       try {
         const [empleadosRes, vehiculosRes] = await Promise.all([
-          axios.get('http://localhost:6001/api/nominas'),
-          axios.get('http://localhost:6001/api/vehiculos'),
+          axios.get('http://localhost:6001/api/empleadosLibres'),
+          axios.get('http://localhost:6001/api/vehiculosLibres'),
         ]);
         setEmpleados(empleadosRes.data);
         setVehiculos(vehiculosRes.data);

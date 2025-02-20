@@ -30,9 +30,11 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
   const [empleados, setEmpleados] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [clientes, setClientes] = useState([]);
+  const [equipos, setEquipos] = useState([]);
   const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
   const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [selectedEquipo, setSelectedEquipo] = useState(null);
 
   useEffect(() => {
     if (laboreoToAdd) {
@@ -42,6 +44,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         resumen: laboreoToAdd.resumen,
         empleados: laboreoToAdd.empleados,
         vehiculos: laboreoToAdd.vehiculos,
+        equipo: laboreoToAdd.equipo,
         tarea: laboreoToAdd.tarea,
         grano: laboreoToAdd.grano,
         cliente: laboreoToAdd.cliente,
@@ -54,18 +57,17 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [empleadosRes, vehiculosRes, clientesRes] = await Promise.all([
-          axios.get('http://localhost:6001/api/nominas'),
-          axios.get('http://localhost:6001/api/vehiculos'),
+        const [empleadosRes, vehiculosRes, clientesRes, equiposRes] = await Promise.all([
+          axios.get('http://localhost:6001/api/empleadosLibres'),
+          axios.get('http://localhost:6001/api/vehiculosLibres'),
           axios.get('http://localhost:6001/api/clientes'),
-          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/empleado'),
-          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/vehiculos'),
-          // axios.get('https://prog-iii-swagger-nievas-nicolas.vercel.app/api/clientes'),
+          axios.get('http://localhost:6001/api/equiposLibres'),
         ]);
 
         setEmpleados(empleadosRes.data);
         setVehiculos(vehiculosRes.data);
         setClientes(clientesRes.data);
+        setEquipos(equiposRes.data);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }
@@ -73,11 +75,14 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     fetchData();
   }, []);
 
+
+
   const onFinish = async (values) => {
     const laboreoData = {
       nombre: values.nombre,
       descripcion: values.descripcion,
       resumen: values.resumen,
+      equipo: values.equipo,
       empleados: values.empleados,  // Array de empleados seleccionados
       vehiculos: values.vehiculos,  // Array de vehículos seleccionados
       tarea: values.tarea,          // Tarea seleccionada
@@ -121,6 +126,10 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     const selected = clientes.find((cliente) => cliente._id === clienteId);
     setSelectedCliente(selected);
   };
+  const handleEquipoSelect = (equipoId) => {
+    const selected = equipos.find((equipo) => equipo._id === equipoId);
+    setSelectedEquipo(selected);
+  };
 
   return (
     <Form
@@ -154,9 +163,31 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       </Form.Item>
 
       <Form.Item
+        name="equipo"
+        label="Equipo"
+        rules={[{ required: true }]}
+      >
+        <Select
+          showSearch
+          placeholder="Buscar equipo"
+          optionFilterProp="children"
+          onChange={handleEquipoSelect}
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {equipos.map((equipo) => (
+            <Option key={equipo._id} value={equipo._id}>
+              Equipo: {equipo.nombre} - Numero: {equipo.numero} {/* Suponiendo que el campo es 'nombre' */}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
         name="empleados"
-        label="Empleados"
-        rules={[{ required: true, message: 'Debe seleccionar al menos un empleado' }]}
+        label="Empleados Adicionales"
+        rules={[{ required: false, message: 'Debe seleccionar al menos un empleado' }]}
       >
         <Select
           mode="multiple"
@@ -173,8 +204,8 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
 
       <Form.Item
         name="vehiculos"
-        label="Vehículos"
-        rules={[{ required: true, message: 'Debe seleccionar al menos un vehículo' }]}
+        label="Vehículos Adicionales"
+        rules={[{ required: false, message: 'Debe seleccionar al menos un vehículo' }]}
       >
         <Select
           mode="multiple"
@@ -216,6 +247,9 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
           ))}
         </Select>
       </Form.Item>
+
+      
+
 
       <Form.Item
         name="cliente"

@@ -7,10 +7,14 @@ const { Option } = Select;
 const TablaLaboreos = () => {
   const [laboreos, setLaboreos] = useState([]);
   const [empleados, setEmpleados] = useState([]); // Agregar estado para empleados
+  const [empleadosLibres, setEmpleadosLibres] = useState([]);
   const [vehiculos, setVehiculos] = useState([]); // Agregar estado para vehículos
+  const [vehiculosLibres, setVehiculosLibres] = useState([]);
   const [clientes, setClientes] = useState([]);
+  const [equipos, setEquipos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [selectedEquipo, setSelectedEquipo] = useState(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [laboreoIdToDelete, setLaboreoIdToDelete] = useState(null);
@@ -48,11 +52,37 @@ const TablaLaboreos = () => {
         console.error('Error fetching empleados:', error);
       }
     };
+    const fetchEmpleadosLibres = async () => {
+      try {
+        const response = await axios.get('http://localhost:6001/api/empleadosLibres'); // URL de la API de empleados
+        setEmpleadosLibres(response.data);
+      } catch (error) {
+        console.error('Error fetching empleados:', error);
+      }
+    };
+
+    const fetchEquipos = async () => {
+      try {
+        const response = await axios.get('http://localhost:6001/api/equiposLibres'); 
+        setEquipos(response.data);
+      } catch (error) {
+        console.error('Error fetching equipos:', error);
+      }
+    };
 
     const fetchVehiculos = async () => {
       try {
         const response = await axios.get('http://localhost:6001/api/vehiculos'); // URL de la API de vehículos
         setVehiculos(response.data);
+      } catch (error) {
+        console.error('Error fetching vehiculos:', error);
+      }
+    };
+
+    const fetchVehiculosLibres = async () => {
+      try {
+        const response = await axios.get('http://localhost:6001/api/vehiculosLibres'); // URL de la API de vehículos
+        setVehiculosLibres(response.data);
       } catch (error) {
         console.error('Error fetching vehiculos:', error);
       }
@@ -68,8 +98,11 @@ const TablaLaboreos = () => {
     };
 
     fetchLaboreos();
+    fetchEquipos();
     fetchEmpleados();
+    fetchEmpleadosLibres();
     fetchVehiculos();
+    fetchVehiculosLibres();
     fetchClientes();
   }, [pagination, selectedCliente]);
 
@@ -86,6 +119,7 @@ const TablaLaboreos = () => {
       cliente: laboreo.cliente ? laboreo.cliente._id : null,
       empleados: laboreo.empleados ? laboreo.empleados.map(emp => emp._id) : [],
       vehiculos: laboreo.vehiculos ? laboreo.vehiculos.map(veh => veh._id) : [],
+      equipo: laboreo.equipo ? laboreo.equipo._id : null,
       estado: laboreo.estado
     });
 
@@ -102,6 +136,7 @@ const TablaLaboreos = () => {
     try {
       const formattedValues = {
         ...values,
+        equipo: values.equipo,
         vehiculos: values.vehiculos,
         empleados: values.empleados,
         cliente: values.cliente,
@@ -141,31 +176,54 @@ const TablaLaboreos = () => {
   };
   const columns = [
     {
-      title: 'Nombre', dataIndex: 'nombre', key: 'nombre',
+      title: 'Nombre',
+      dataIndex: 'nombre',
+      key: 'nombre',
       render: (text) => <a>{text}</a>,
     },
     {
-      title: 'Cliente', dataIndex: ['cliente', 'nombre'], key: 'cliente',
-      render: (_, record) => `${record.cliente.nombre} ${record.cliente.apellido}`
+      title: 'Cliente',
+      dataIndex: ['cliente', 'nombre'],
+      key: 'cliente',
+      render: (_, record) =>
+        record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente",
+    },
+    {
+      title: 'Equipo',
+      dataIndex: 'equipo',
+      key: 'equipo',
+      render: (_, record) =>
+        record.equipo ? `Equipo: ${record.equipo.nombre} - Número: ${record.equipo.numero}` : "Sin equipo",
     },
     { title: 'Fecha Inicio', dataIndex: 'fechaInicio', key: 'fechaInicio' },
-    { title: 'Estado', dataIndex: 'estado', key: 'estado',
-      render: (estado) => estadoMapping[estado] || "Desconocido"
-     },
     {
-      title: 'Acción', key: 'action', render: (_, record) => (
+      title: 'Estado',
+      dataIndex: 'estado',
+      key: 'estado',
+      render: (estado) => estadoMapping[estado] || "Desconocido",
+    },
+    {
+      title: 'Acción',
+      key: 'action',
+      render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showEditModal(record)}>Editar</a>
           <a onClick={() => showDeleteConfirm(record._id)}>Eliminar</a>
         </Space>
-      )
+      ),
     },
   ];
+  
 
   const handleClienteSelect = (clienteId) => {
     const selected = clientes.find((cliente) => cliente._id === clienteId);
     setSelectedCliente(selected);
   };
+
+  const handleEquipoSelect = (equipoId) => {
+    const selected = equipos.find((equipo) => equipo._id === equipoId);
+    setSelectedEquipo(selected);
+  }
   const handleTableChange = (pagination) => {
     setPagination(pagination);
   };
@@ -202,6 +260,24 @@ const TablaLaboreos = () => {
           <Form.Item name="resumen" label="Resumen" rules={[{ required: true, message: 'Por favor ingresa el resumen' }]}>
             <Input />
           </Form.Item>
+          <Form.Item name="equipo" label="Equipo">
+            <Select
+              showSearch
+              placeholder="Buscar equipo"
+              optionFilterProp="children"
+              onChange={handleEquipoSelect}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {equipos.map((equipo) => (
+                <Option key={equipo._id} value={equipo._id}>
+                  {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item name="tarea" label="Tarea">
             <Input />
           </Form.Item>
@@ -231,8 +307,8 @@ const TablaLaboreos = () => {
           </Form.Item>
           <Form.Item
             name="empleados"
-            label="Empleados"
-            rules={[{ required: true, message: 'Debe seleccionar al menos un empleado' }]}
+            label="Empleados Adicionales"
+            rules={[{ required: false, message: 'Debe seleccionar al menos un empleado' }]}
           >
             <Select
               mode="multiple"
@@ -249,8 +325,8 @@ const TablaLaboreos = () => {
 
           <Form.Item
             name="vehiculos"
-            label="Vehículos"
-            rules={[{ required: true, message: 'Debe seleccionar al menos un vehículo' }]}
+            label="Vehículos Adicionales"
+            rules={[{ required: false, message: 'Debe seleccionar al menos un vehículo' }]}
           >
             <Select
               mode="multiple"
