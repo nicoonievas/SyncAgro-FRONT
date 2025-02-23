@@ -12,6 +12,7 @@ const TablaLaboreos = () => {
   const [vehiculosLibres, setVehiculosLibres] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
+  const [equiposLibres, setEquiposLibres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [selectedEquipo, setSelectedEquipo] = useState(null);
@@ -61,9 +62,18 @@ const TablaLaboreos = () => {
       }
     };
 
+    const fetchEquiposLibres = async () => {
+      try {
+        const response = await axios.get('http://localhost:6001/api/equiposLibres');
+        setEquiposLibres(response.data);
+      } catch (error) {
+        console.error('Error fetching equipos:', error);
+      }
+    };
+
     const fetchEquipos = async () => {
       try {
-        const response = await axios.get('http://localhost:6001/api/equiposLibres'); 
+        const response = await axios.get('http://localhost:6001/api/equipos');
         setEquipos(response.data);
       } catch (error) {
         console.error('Error fetching equipos:', error);
@@ -99,12 +109,13 @@ const TablaLaboreos = () => {
 
     fetchLaboreos();
     fetchEquipos();
+    fetchEquiposLibres();
     fetchEmpleados();
     fetchEmpleadosLibres();
     fetchVehiculos();
     fetchVehiculosLibres();
     fetchClientes();
-  }, [pagination, selectedCliente]);
+  }, [pagination, selectedCliente, selectedEquipo]);
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
@@ -213,7 +224,7 @@ const TablaLaboreos = () => {
       ),
     },
   ];
-  
+
 
   const handleClienteSelect = (clienteId) => {
     const selected = clientes.find((cliente) => cliente._id === clienteId);
@@ -271,7 +282,7 @@ const TablaLaboreos = () => {
               }
             >
               {equipos.map((equipo) => (
-                <Option key={equipo._id} value={equipo._id}>
+                <Option key={equipo._id} value={equipo._id} disabled={!equiposLibres.some(e => e._id === equipo._id)}>
                   {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
                 </Option>
               ))}
@@ -315,13 +326,19 @@ const TablaLaboreos = () => {
               placeholder="Seleccionar empleados"
               optionLabelProp="children"
             >
-              {empleados.map((empleado) => (
-                <Option key={empleado._id} value={empleado._id}>
-                  {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
-                </Option>
-              ))}
+              {empleados.map((empleado) => {
+                const estaAsignado = currentLaboreo?.empleados?.some(e => e._id === empleado._id);
+                const estaLibre = empleadosLibres.some(e => e._id === empleado._id);
+
+                return (
+                  <Option key={empleado._id} value={empleado._id} disabled={!estaAsignado && !estaLibre}>
+                    {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
+
 
           <Form.Item
             name="vehiculos"
@@ -333,13 +350,19 @@ const TablaLaboreos = () => {
               placeholder="Seleccionar vehículos"
               optionLabelProp="children"
             >
-              {vehiculos.map((vehiculo) => (
-                <Option key={vehiculo._id} value={vehiculo._id}>
-                  {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
-                </Option>
-              ))}
+              {vehiculos.map((vehiculo) => {
+                const estaAsignado = currentLaboreo?.vehiculos?.some(v => v._id === vehiculo._id);
+                const estaLibre = vehiculosLibres.some(v => v._id === vehiculo._id);
+
+                return (
+                  <Option key={vehiculo._id} value={vehiculo._id} disabled={!estaAsignado && !estaLibre}>
+                    {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
+
 
           <Form.Item name="fechaInicio" label="Fecha Inicio"
             rules={[{ required: true, message: 'Por favor ingresa la fecha' }]}>
