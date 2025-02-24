@@ -1,145 +1,134 @@
-import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox } from 'antd';
-import axios from 'axios';
-import dayjs from 'dayjs';
+import React, { useEffect, useState } from "react";
+import { Space, Table, Modal, Form, Input, Button, notification } from "antd";
+import axios from "axios";
+import MapaSelector from "./MapSelector";
 
-const TablaNominas = () => {
-  const [nominas, setNominas] = useState([]);
+const TablaClientes = () => {
+  const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [nominaIdToDelete, setNominaIdToDelete] = useState(null);
-  const [currentNomina, setCurrentNomina] = useState(null);
-
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
-  const [totalNominas, setTotalNominas] = useState(0);
+  const [isMapModalVisible, setIsMapModalVisible] = useState(false); // Nuevo estado para el modal del mapa
+  const [clienteIdToDelete, setClienteIdToDelete] = useState(null);
+  const [currentCliente, setCurrentCliente] = useState(null);
   const [form] = Form.useForm();
-
+  const [mapCoordinates, setMapCoordinates] = useState(null);
   useEffect(() => {
-    const fetchNominas = async () => {
-      const { current, pageSize } = pagination;
+    const fetchClientes = async () => {
       try {
-        const response = await axios.get("http://localhost:6001/api/nominas", {
-          params: { page: current, perPage: pageSize },
-        });
+        const response = await axios.get("http://localhost:6001/api/clientes");
 
         if (response.data && Array.isArray(response.data)) {
-          setNominas(response.data);
-          setTotalNominas(response.data.length);
+          setClientes(response.data);
         } else {
-          console.error('Data is not in expected format:', response.data);
+          console.error("Los datos no tienen el formato esperado:", response.data);
         }
       } catch (error) {
-        console.error('Error fetching nominas:', error);
+        console.error("Error al obtener clientes:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNominas();
-  }, [pagination]);
+    fetchClientes();
+  }, []);
 
   const openNotificationWithIcon = (type, message, description) => {
-    notification[type]({
+    notification[type]( {
       message,
       description,
     });
   };
 
   const showDeleteConfirm = (id) => {
-    setNominaIdToDelete(id);
+    setClienteIdToDelete(id);
     setIsDeleteModalVisible(true);
   };
 
-  const showEditModal = (nomina) => {
-    setCurrentNomina(nomina);
-    form.setFieldsValue({ 
-      ...nomina,
-      licenciaVencimiento: nomina.licenciaVencimiento ? dayjs(nomina.licenciaVencimiento) : null,
-      aptoFisicoVencimiento: nomina.aptoFisicoVencimiento ? dayjs(nomina.aptoFisicoVencimiento) : null,
-      dniVencimiento: nomina.dniVencimiento ? dayjs(nomina.dniVencimiento) : null,
-      estado: nomina.estado === 1
-    });
+  const showEditModal = (cliente) => {
+    setCurrentCliente(cliente);
+    form.setFieldsValue(cliente);
+    
+    // Si el cliente tiene coordenadas, las enviamos al mapa
+    const initialLatLng = cliente.coordenadas ? cliente.coordenadas : null;
+    setMapCoordinates(initialLatLng);
+    console.log("Coordenadas iniciales:", mapCoordinates);
+  
     setIsEditModalVisible(true);
   };
 
   const handleCancel = () => {
     setIsDeleteModalVisible(false);
     setIsEditModalVisible(false);
+    setIsMapModalVisible(false); // Cerrar modal del mapa
     form.resetFields();
   };
 
   const handleEdit = async (values) => {
     try {
-      const formattedValues = {
-        ...values,
-        licenciaVencimiento: values.licenciaVencimiento ? values.licenciaVencimiento.format('YYYY-MM-DD') : null,
-        aptoFisicoVencimiento: values.aptoFisicoVencimiento ? values.aptoFisicoVencimiento.format('YYYY-MM-DD') : null,
-        dniVencimiento: values.dniVencimiento ? values.dniVencimiento.format('YYYY-MM-DD') : null,
-        estado: values.estado ? 1 : 0
-      };
+      await axios.put(`http://localhost:6001/api/cliente/${currentCliente._id}`, values);
 
-      await axios.put(`http://localhost:6001/api/nomina/${currentNomina._id}`, formattedValues);
-
-      setNominas((prevNominas) =>
-        prevNominas.map((nomina) =>
-          nomina._id === currentNomina._id ? { ...nomina, ...formattedValues } : nomina
+      setClientes((prevClientes) =>
+        prevClientes.map((cliente) =>
+          cliente._id === currentCliente._id ? { ...cliente, ...values } : cliente
         )
       );
 
       setIsEditModalVisible(false);
-      openNotificationWithIcon('success', 'Nómina Editada', 'La nómina ha sido editada exitosamente.');
+      openNotificationWithIcon("success", "Cliente Editado", "El cliente ha sido editado exitosamente.");
     } catch (error) {
-      console.error('Error editing nomina:', error);
+      console.error("Error al editar cliente:", error);
     }
   };
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:6001/api/nomina/${nominaIdToDelete}`);
+      await axios.delete(`http://localhost:6001/api/cliente/${clienteIdToDelete}`);
 
-      setNominas((prevNominas) => prevNominas.filter((nomina) => nomina._id !== nominaIdToDelete));
+      setClientes((prevClientes) => prevClientes.filter((cliente) => cliente._id !== clienteIdToDelete));
 
       setIsDeleteModalVisible(false);
-      openNotificationWithIcon('success', 'Nómina Eliminada', 'La nómina ha sido eliminada exitosamente.');
+      openNotificationWithIcon("success", "Cliente Eliminado", "El cliente ha sido eliminado exitosamente.");
     } catch (error) {
-      console.error("Error deleting nomina:", error);
+      console.error("Error al eliminar cliente:", error);
     }
   };
 
   const columns = [
     {
-      title: 'Nombre',
-      dataIndex: 'firstname',
-      key: 'firstname',
-      render: (text, record) => <span>{text} {record.lastname}</span>,
+      title: "Nombre",
+      dataIndex: "nombre",
+      key: "nombre",
+      render: (text, record) => <span>{text} {record.apellido}</span>,
     },
     {
-      title: 'Domicilio',
-      dataIndex: 'domicilio',
-      key: 'domicilio',
+      title: "Domicilio",
+      dataIndex: "domicilio",
+      key: "domicilio",
     },
     {
-      title: 'Celular',
-      dataIndex: 'celular',
-      key: 'celular',
+      title: "Localidad",
+      dataIndex: "localidad",
+      key: "localidad",
     },
     {
-      title: 'Documento',
-      dataIndex: 'documento',
-      key: 'documento',
+      title: "Provincia",
+      dataIndex: "provincia",
+      key: "provincia",
     },
     {
-      title: 'Rol',
-      dataIndex: 'rol',
-      key: 'rol',
+      title: "Teléfono",
+      dataIndex: "telefono",
+      key: "telefono",
     },
     {
-      title: 'Acción',
-      key: 'action',
+      title: "Correo",
+      dataIndex: "mail",
+      key: "mail",
+    },
+    {
+      title: "Acción",
+      key: "action",
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showEditModal(record)}>Editar</a>
@@ -149,25 +138,23 @@ const TablaNominas = () => {
     },
   ];
 
-  const handleTableChange = (pagination) => {
-    setPagination({
-      current: pagination.current,
-      pageSize: pagination.pageSize,
+  const showMapModal = () => {
+    setIsMapModalVisible(true); // Mostrar el modal del mapa
+  };
+
+  const handleMapSelect = (latlng) => {
+    form.setFieldsValue({
+      coordenadas: { latitud: latlng.lat, longitud: latlng.lng },
     });
+    setIsMapModalVisible(false); // Cerrar el modal después de seleccionar
   };
 
   return (
     <>
       <Table
         columns={columns}
-        dataSource={nominas}
+        dataSource={clientes}
         rowKey="_id"
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: totalNominas,
-          onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
-        }}
         loading={loading}
       />
 
@@ -180,80 +167,114 @@ const TablaNominas = () => {
         okText="Eliminar"
         cancelText="Cancelar"
       >
-        <p>¿Estás seguro de que deseas eliminar esta nómina?</p>
+        <p>¿Estás seguro de que deseas eliminar este cliente?</p>
       </Modal>
 
       {/* Modal de Edición */}
       <Modal
-        title="Editar Nómina"
+        title="Editar Cliente"
         open={isEditModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
-
         <Form form={form} onFinish={handleEdit}>
-          <Form.Item name="firstname" label="Nombre" rules={[{ required: true, message: 'Por favor ingresa el nombre del empleado' }]}>
+          <Form.Item
+            name="nombre"
+            label="Nombre"
+            rules={[{ required: true, message: "Por favor ingresa el nombre del cliente" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="lastname" label="Apellido" rules={[{ required: true, message: 'Por favor ingresa el apellido del empleado' }]}>
+          <Form.Item
+            name="apellido"
+            label="Apellido"
+            rules={[{ required: true, message: "Por favor ingresa el apellido del cliente" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Por favor ingresa el email del empleado' }]}>
+          <Form.Item
+            name="domicilio"
+            label="Domicilio"
+            rules={[{ required: true, message: "Por favor ingresa el domicilio" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="domicilio" label="Domicilio" rules={[{ required: true, message: 'Por favor ingresa el domicilio del empleado' }]}>
+          <Form.Item
+            name="localidad"
+            label="Localidad"
+            rules={[{ required: true, message: "Por favor ingresa la localidad" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="celular" label="Celular" rules={[{ required: true, message: 'Por favor ingresa el celular del empleado' }]}>
+          <Form.Item
+            name="provincia"
+            label="Provincia"
+            rules={[{ required: true, message: "Por favor ingresa la provincia" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="telefono" label="Teléfono Emergencia" rules={[{ required: true, message: 'Por favor ingresa el teléfono de emergencia' }]}>
+          <Form.Item
+            name="telefono"
+            label="Teléfono"
+            rules={[{ required: true, message: "Por favor ingresa el teléfono" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="documento" label="Documento" rules={[{ required: true, message: 'Por favor ingresa el documento del empleado' }]}>
+          <Form.Item
+            name="mail"
+            label="Correo Electrónico"
+            rules={[{ required: true, message: "Por favor ingresa el correo" }]}
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item name="rol" label="Rol" rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}>
-            <Input />
+          <Form.Item label="Ubicación en Mapa">
+            <Button type="default" onClick={showMapModal}>Seleccionar Ubicación en Mapa</Button>
           </Form.Item>
 
-          <Form.Item name="area" label="Área">
-            <Input />
+          <Form.Item label="Latitud" name={["coordenadas", "latitud"]} rules={[{ required: false, message: "Ingresa la latitud" }]}>
+            <Input type="number" step="any" placeholder="Ej: -34.603722" />
           </Form.Item>
 
-          <Form.Item label="Vencimiento de Licencia" name="licenciaVencimiento"
-            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
-          </Form.Item>
-
-          <Form.Item label="Vencimiento de Apto Físico" name="aptoFisicoVencimiento"
-            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
-          </Form.Item>
-
-          <Form.Item label="Vencimiento DNI" name="dniVencimiento"
-            rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
-          </Form.Item>
-
-          <Form.Item name="estado" valuePropName="checked">
-            <Checkbox>Empleado Activo</Checkbox>
+          <Form.Item label="Longitud" name={["coordenadas", "longitud"]} rules={[{ required: false, message: "Ingresa la longitud" }]}>
+            <Input type="number" step="any" placeholder="Ej: -58.381592" />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">Guardar Cambios</Button>
+            <Button type="primary" htmlType="submit">
+              Guardar Cambios
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Modal del Mapa */}
+      <Modal
+              title="Seleccionar Lugar en el Mapa"
+              visible={isMapModalVisible}
+              onOk={handleCancel}
+              onCancel={handleCancel}
+              okText="Guardar"
+              cancelText="Cancelar"
+              width={800}
+            >
+              <MapaSelector
+                onChange={handleMapSelect}
+                isModalVisible={isEditModalVisible}
+                initialCoordinates={mapCoordinates}
+              
+              />
+            </Modal>
+           
     </>
   );
+  
 };
 
-export default TablaNominas;
+export default TablaClientes;

@@ -20,7 +20,7 @@ import CrearVehiculo from './CrearVehiculo';
 import CrearCliente from './CrearCliente';
 import TablaTasks from './TablaTasks';
 import TablaVehiculos from './TablaVehiculos';
-// import TablaClientes from './TablaClientes';
+import TablaClientes from './TablaClientes';
 import CrearEquipo from './CrearEquipo';
 import TablaEquipos from './TablaEquipos';
 
@@ -160,7 +160,7 @@ const LeftMenu = () => {
             <Route path="/agregarVehiculo" element={<CrearVehiculo />} />
             <Route path="/agregarLaboreo" element={<CrearLaboreo />} />
             <Route path="/agregarEquipo" element={<CrearEquipo />} />
-            <Route path="/verClientes" element={<TablaTasks />} />
+            <Route path="/verClientes" element={<TablaClientes />} />
             <Route path="/verPersonal" element={<TablaNominas />} />
             <Route path="/verVehiculos" element={<TablaVehiculos />} />
             <Route path="/verLaboreos" element={<TablaLaboreos />} />

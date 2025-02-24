@@ -93,11 +93,11 @@ const CrearCliente = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item name="localidad" label="Localidad" rules={[{ required: true }]}>
+        <Form.Item name="provincia" label="Provincia" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="provincia" label="Provincia" rules={[{ required: true }]}>
+        <Form.Item name="localidad" label="Localidad" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
@@ -114,11 +114,11 @@ const CrearCliente = () => {
           <Button type="default" onClick={showMapModal}>Seleccionar Ubicación en Mapa</Button>
         </Form.Item>
 
-        <Form.Item label="Latitud" name={["coordenadas", "latitud"]} rules={[{ required: true, message: "Ingresa la latitud" }]}>
+        <Form.Item label="Latitud" name={["coordenadas", "latitud"]} rules={[{ required: false, message: "Ingresa la latitud" }]}>
           <Input type="number" step="any" placeholder="Ej: -34.603722" />
         </Form.Item>
 
-        <Form.Item label="Longitud" name={["coordenadas", "longitud"]} rules={[{ required: true, message: "Ingresa la longitud" }]}>
+        <Form.Item label="Longitud" name={["coordenadas", "longitud"]} rules={[{ required: false, message: "Ingresa la longitud" }]}>
           <Input type="number" step="any" placeholder="Ej: -58.381592" />
         </Form.Item>
 
@@ -137,8 +137,12 @@ const CrearCliente = () => {
         onCancel={handleCancel}
         okText="Guardar"
         cancelText="Cancelar"
+        width={800}
       >
-        <MapaSelector onChange={handleMapSelect} />
+        <MapaSelector
+          onChange={handleMapSelect}
+          isModalVisible={isEditModalVisible}
+        />
       </Modal>
     </>
   );

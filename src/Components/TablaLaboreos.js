@@ -130,7 +130,7 @@ const TablaLaboreos = () => {
       cliente: laboreo.cliente ? laboreo.cliente._id : null,
       empleados: laboreo.empleados ? laboreo.empleados.map(emp => emp._id) : [],
       vehiculos: laboreo.vehiculos ? laboreo.vehiculos.map(veh => veh._id) : [],
-      equipo: laboreo.equipo ? laboreo.equipo._id : null,
+      equipos: laboreo.equipos ? laboreo.equipos.map(eq => eq._id) : [],
       estado: laboreo.estado
     });
 
@@ -147,7 +147,7 @@ const TablaLaboreos = () => {
     try {
       const formattedValues = {
         ...values,
-        equipo: values.equipo,
+        equipos: values.equipos,
         vehiculos: values.vehiculos,
         empleados: values.empleados,
         cliente: values.cliente,
@@ -200,11 +200,13 @@ const TablaLaboreos = () => {
         record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente",
     },
     {
-      title: 'Equipo',
-      dataIndex: 'equipo',
-      key: 'equipo',
-      render: (_, record) =>
-        record.equipo ? `Equipo: ${record.equipo.nombre} - Número: ${record.equipo.numero}` : "Sin equipo",
+      title: 'Equipos',
+      dataIndex: 'equipos',
+      key: 'equipos',
+      render: (equipos) =>
+        equipos && equipos.length > 0
+          ? equipos.map(equipo => `${equipo.nombre} (${equipo.numero})`).join(', ')
+          : "Sin equipos"
     },
     { title: 'Fecha Inicio', dataIndex: 'fechaInicio', key: 'fechaInicio' },
     {
@@ -271,23 +273,29 @@ const TablaLaboreos = () => {
           <Form.Item name="resumen" label="Resumen" rules={[{ required: true, message: 'Por favor ingresa el resumen' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="equipo" label="Equipo">
-            <Select
-              showSearch
-              placeholder="Buscar equipo"
-              optionFilterProp="children"
-              onChange={handleEquipoSelect}
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {equipos.map((equipo) => (
-                <Option key={equipo._id} value={equipo._id} disabled={!equiposLibres.some(e => e._id === equipo._id)}>
-                  {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Form.Item name="equipos" label="Equipos">
+  <Select
+    showSearch
+    mode="multiple"
+    placeholder="Buscar equipo"
+    optionFilterProp="children"
+    onChange={handleEquipoSelect}
+    filterOption={(input, option) =>
+      option.children.toLowerCase().includes(input.toLowerCase())
+    }
+  >
+    {equipos.map((equipo) => {
+      const estaAsignado = currentLaboreo?.equipos?.some(e => e._id === equipo._id);
+      const estaLibre = equiposLibres.some(e => e._id === equipo._id);
+
+      return (
+        <Option key={equipo._id} value={equipo._id} disabled={!estaAsignado && !estaLibre}>
+          {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
+        </Option>
+      );
+    })}
+  </Select>
+</Form.Item>
 
           <Form.Item name="tarea" label="Tarea">
             <Input />
