@@ -7,6 +7,8 @@ import {
   UserOutlined,
   CarOutlined,
   SolutionOutlined,
+  CarryOutOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
@@ -18,13 +20,14 @@ import TablaLaboreos from './TablaLaboreos';
 import TablaNominas from './TablaNominas';
 import CrearVehiculo from './CrearVehiculo';
 import CrearCliente from './CrearCliente';
-import TablaTasks from './TablaTasks';
 import TablaVehiculos from './TablaVehiculos';
 import TablaClientes from './TablaClientes';
 import CrearEquipo from './CrearEquipo';
 import TablaEquipos from './TablaEquipos';
+import TablasVencimientos from './TablaVencimientos';
 
 const { Header, Sider, Content } = Layout;
+const { SubMenu } = Menu;
 
 const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -42,83 +45,83 @@ const LeftMenu = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Sider trigger={null}
+        collapsible collapsed={collapsed}
+        style={{
+          position: 'fixed',
+          height: '100vh',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          overflow: 'auto',
+        }}>
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}
-          items={[
-            {
-              key: 'logo',
-              style: { height: collapsed ? '10vh' : '15vh', justifyContent: 'center', display: 'flex', alignItems: 'center' },
-              icon: <img src="https://i.imgur.com/ycOHrOl.png" alt="SyncAgro"
-                style={{
-                  width: collapsed ? '12vh' : '25vh',
-                  height: 'auto', // Mantener el aspect ratio original
-                  transition: 'width 0.3s, height 0.3s',
-                }} 
-              />
- 
-            },
-            {
-              key: '1',
-              icon: <HomeOutlined />,
-              label: <Link to="/home">Home</Link>
-            },
-            {
-              key: '2',
-              icon: <SolutionOutlined />,
-              label: <Link to="/verPersonal">Ver Nóminas</Link>
-            },
-            {
-              key: '3',
-              icon: <ToolOutlined />,
-              label: <Link to="/verLaboreos">Ver Campañas</Link>
-            },
-            {
-              key: '4',
-              icon: <CarOutlined />,
-              label: <Link to="/verVehiculos">Ver Vehículos</Link>
-            },
-            {
-              key: '5',
-              icon: <UserOutlined />,
-              label: <Link to="/verClientes">Ver Clientes</Link>
-            },
-            {
-              key: '11',
-              icon: <UserOutlined />,
-              label: <Link to="/verEquipos">Ver Equipos</Link>
-            },
-            {
-              key: '6',
-              icon: <SolutionOutlined />,
-              label: <Link to="/agregarEmpleado">Agregar Personal</Link>
-            },
-            {
-              key: '7',
-              icon: <ToolOutlined />,
-              label: <Link to="/agregarLaboreo">Agregar Campaña</Link>
-            },
-            {
-              key: '8',
-              icon: <ToolOutlined />,
-              label: <Link to="/agregarEquipo">Agregar Equipo</Link>
-            },
-            {
-              key: '9',
-              icon: <CarOutlined />,
-              label: <Link to="/agregarVehiculo">Agregar Vehículo</Link>
-            },
-            {
-              key: '10',
-              icon: <UserOutlined />,
-              label: <Link to="/agregarCliente">Agregar Cliente</Link>
-            }
-            
-          ]}
-        />
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+          {/* Logo */}
+          <Menu.Item key="logo" style={{ height: collapsed ? '10vh' : '15vh', justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+            <img src="https://i.imgur.com/ycOHrOl.png" alt="SyncAgro"
+              style={{
+                width: collapsed ? '12vh' : '20vh',
+                height: 'auto',
+                transition: 'width 0.3s, height 0.3s',
+              }}
+            />
+          </Menu.Item>
+
+          <Menu.Item key="1" icon={<HomeOutlined />}>
+            <Link to="/home">Home</Link>
+          </Menu.Item>
+
+          {/* Vehículos */}
+          <SubMenu key="vehiculos" icon={<CarOutlined />} title="Vehículos">
+            <Menu.Item key="verVehiculos"><Link to="/verVehiculos">Ver Vehículos</Link></Menu.Item>
+            <Menu.Item key="agregarVehiculo"><Link to="/agregarVehiculo">Agregar Vehículo</Link></Menu.Item>
+          </SubMenu>
+
+          {/* Empleados */}
+          <SubMenu key="empleados" icon={<SolutionOutlined />} title="Empleados">
+            <Menu.Item key="verPersonal"><Link to="/verPersonal">Ver Nóminas</Link></Menu.Item>
+            <Menu.Item key="agregarEmpleado"><Link to="/agregarEmpleado">Agregar Personal</Link></Menu.Item>
+          </SubMenu>
+
+          {/* Campañas */}
+          <SubMenu key="laboreos" icon={<ToolOutlined />} title="Campañas">
+            <Menu.Item key="verLaboreos"><Link to="/verLaboreos">Ver Campañas</Link></Menu.Item>
+            <Menu.Item key="agregarLaboreo"><Link to="/agregarLaboreo">Agregar Campaña</Link></Menu.Item>
+          </SubMenu>
+
+          {/* Clientes */}
+          <SubMenu key="clientes" icon={<UserOutlined />} title="Clientes">
+            <Menu.Item key="verClientes"><Link to="/verClientes">Ver Clientes</Link></Menu.Item>
+            <Menu.Item key="agregarCliente"><Link to="/agregarCliente">Agregar Cliente</Link></Menu.Item>
+          </SubMenu>
+
+          {/* Equipos */}
+          <SubMenu key="equipos" icon={<TeamOutlined />} title="Equipos">
+            <Menu.Item key="verEquipos"><Link to="/verEquipos">Ver Equipos</Link></Menu.Item>
+            <Menu.Item key="agregarEquipo"><Link to="/agregarEquipo">Agregar Equipo</Link></Menu.Item>
+          </SubMenu>
+
+          {/* Vencimientos */}
+          <Menu.Item key="verVencimientos" icon={<CarryOutOutlined />}>
+            <Link to="/verVencimientos">Ver Vencimientos</Link>
+          </Menu.Item>
+        </Menu>
       </Sider>
-      <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
+
+      <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.3s' }}>
+
+        <Header
+          style={{
+            position: 'fixed',
+            width: collapsed ? '90%' : '85%',
+            top: 0,
+            zIndex: 1000,
+            padding: 0,
+            background: colorBgContainer,
+            borderBottom: '1px solid #d9d9d9',
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '16px' }}>
             <Button
               type="text"
@@ -143,14 +146,15 @@ const LeftMenu = () => {
             </div>
           </div>
         </Header>
+
         <Content
           style={{
-            margin: '24px 16px',
+            margin: '80px 16px 24px 16px', // Ajusta según la altura del Header
             padding: 24,
-            minHeight: 280,
+            minHeight: 'calc(100vh - 80px)', // Resta la altura del Header
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-            marginTop: '20px',
+            overflow: 'auto',
           }}
         >
           <Routes>
@@ -165,6 +169,7 @@ const LeftMenu = () => {
             <Route path="/verVehiculos" element={<TablaVehiculos />} />
             <Route path="/verLaboreos" element={<TablaLaboreos />} />
             <Route path="/verEquipos" element={<TablaEquipos />} />
+            <Route path="/verVencimientos" element={<TablasVencimientos />} />
           </Routes>
         </Content>
       </Layout>
