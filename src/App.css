@@ -13,6 +13,16 @@
   }
 }
 
+html, body {
+  overflow: hidden; /* Oculta el scrollbar cuando no hay desbordamiento */
+}
+
+#root, .ant-layout {
+  height: 100vh; /* Asegura que el contenedor principal ocupe toda la pantalla */
+  overflow: auto; /* Permite el scroll solo cuando sea necesario */
+}
+
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

@@ -58,7 +58,13 @@ const LeftMenu = () => {
         <div className="demo-logo-vertical" />
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
           {/* Logo */}
-          <Menu.Item key="logo" style={{ height: collapsed ? '10vh' : '15vh', justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+          <Menu.Item key="logo"
+            style={{
+              height: collapsed ? '10vh' : '15vh',
+              justifyContent: 'center',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
             <img src="https://i.imgur.com/ycOHrOl.png" alt="SyncAgro"
               style={{
                 width: collapsed ? '12vh' : '20vh',
@@ -109,17 +115,24 @@ const LeftMenu = () => {
         </Menu>
       </Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.3s' }}>
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 200,
+          transition: 'margin-left 0.3s',
+          overflow: 'hidden'
+        }}>
 
         <Header
           style={{
             position: 'fixed',
-            width: collapsed ? '90%' : '85%',
+            marginLeft: 15,
+            width: collapsed ? '92%' : '85%',
             top: 0,
             zIndex: 1000,
             padding: 0,
             background: colorBgContainer,
             borderBottom: '1px solid #d9d9d9',
+            borderRadius: borderRadiusLG
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '16px' }}>
