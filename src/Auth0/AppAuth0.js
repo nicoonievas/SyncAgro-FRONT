@@ -1,15 +1,30 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { useState, useEffect } from 'react';
 import Style from "./App.module.css";
 import { Button } from 'antd';
 
 function AppAuth0() {
-  const { user, loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { user, loginWithRedirect, logout, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const accessToken = await getAccessTokenSilently();
+        setToken(accessToken); // Guardar el token en el estado
+      } catch (error) {
+        console.error("Error obteniendo el token:", error);
+      }
+    };
+
+    fetchToken();
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
     <div className={Style.Container}>
       {!isAuthenticated ? (
         <div className={Style.LoginContainer}>
-          {/* Imagen opcional antes de login */}
           <img src="https://i.imgur.com/ycOHrOl.png" alt="Imagen" height={200} className={Style.LoginImage} />
           <Button type="primary" className={Style.BotonLogin} onClick={() => loginWithRedirect()}>
             Log In

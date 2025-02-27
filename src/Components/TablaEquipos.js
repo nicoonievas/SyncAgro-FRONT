@@ -223,7 +223,7 @@ const TablaEquipos = () => {
             <Select
               mode="multiple"
               placeholder="Seleccionar empleados"
-              optionLabelProp="children"
+              optionLabelProp="items"
             >
               {empleados.map((empleado) => (
                 <Option key={empleado._id} value={empleado._id}>
@@ -242,7 +242,7 @@ const TablaEquipos = () => {
             <Select
               mode="multiple"
               placeholder="Seleccionar vehículos"
-              optionLabelProp="children"
+              optionLabelProp="items"
             >
               {vehiculos.map((vehiculo) => (
                 <Option key={vehiculo._id} value={vehiculo._id}>

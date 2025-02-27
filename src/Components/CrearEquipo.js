@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Select, notification } from 'antd';
 import axios from 'axios';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Option } = Select;
 
@@ -29,7 +30,7 @@ const CrearEquipo = ({ equipoToAdd }) => {
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
-
+  const api = useAxiosInterceptor();
   useEffect(() => {
     if (equipoToAdd) {
       form.setFieldsValue({
@@ -55,7 +56,7 @@ const CrearEquipo = ({ equipoToAdd }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [api]);
 
   const onFinish = async (values) => {
     const equipoData = {

@@ -32,16 +32,19 @@ const { SubMenu } = Menu;
 const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
-  const { user, isAuthenticated, logout, getIdTokenClaims } = useAuth0();
-  const [token, setToken] = useState("");
+  const { user, isAuthenticated, logout, 
+    // claim, getIdTokenClaims 
+  } = useAuth0();
+  // const [token, setToken] = useState("");
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      const tokenClaims = await getIdTokenClaims();
-      setToken(tokenClaims?.__raw || "");
-    };
-    fetchToken();
-  }, [getIdTokenClaims]);
+  // useEffect(() => {
+  //   const fetchToken = async () => {
+  //     const tokenClaims = await getIdTokenClaims();
+  //     setToken(tokenClaims?.__raw || "");
+  //     console.log(tokenClaims.__raw);
+  //   };
+  //   fetchToken();
+  // }, [getIdTokenClaims]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

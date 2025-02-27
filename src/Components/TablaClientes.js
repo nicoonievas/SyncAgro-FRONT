@@ -257,7 +257,7 @@ const TablaClientes = () => {
       {/* Modal del Mapa */}
       <Modal
               title="Seleccionar Lugar en el Mapa"
-              visible={isMapModalVisible}
+              open={isMapModalVisible}
               onOk={handleCancel}
               onCancel={handleCancel}
               okText="Guardar"
