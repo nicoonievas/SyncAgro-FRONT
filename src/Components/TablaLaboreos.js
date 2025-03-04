@@ -28,94 +28,52 @@ const TablaLaboreos = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const fetchLaboreos = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       const { current, pageSize } = pagination;
+  
       try {
-        const response = await axios.get("http://localhost:6001/api/laboreos", {
-          params: { page: current, perPage: pageSize },
-        });
-        if (response.data && Array.isArray(response.data)) {
-          setLaboreos(response.data);
-          setTotalLaboreos(response.data.total);
-        }
+        const [
+          laboreosResponse,
+          equiposResponse,
+          equiposLibresResponse,
+          empleadosResponse,
+          empleadosLibresResponse,
+          vehiculosResponse,
+          vehiculosLibresResponse,
+          clientesResponse
+        ] = await Promise.all([
+          axios.get("http://localhost:6001/api/laboreos", { params: { page: current, perPage: pageSize } }),
+          axios.get("http://localhost:6001/api/equipos"),
+          axios.get("http://localhost:6001/api/equiposLibres"),
+          axios.get("http://localhost:6001/api/nominas"),
+          axios.get("http://localhost:6001/api/empleadosLibres"),
+          axios.get("http://localhost:6001/api/vehiculos"),
+          axios.get("http://localhost:6001/api/vehiculosLibres"),
+          axios.get("http://localhost:6001/api/clientes")
+        ]);
+  
+        // Seteamos los estados con los datos recibidos
+        setLaboreos(laboreosResponse.data);
+        setTotalLaboreos(laboreosResponse.data.total);
+        setEquipos(equiposResponse.data);
+        setEquiposLibres(equiposLibresResponse.data);
+        setEmpleados(empleadosResponse.data);
+        setEmpleadosLibres(empleadosLibresResponse.data);
+        setVehiculos(vehiculosResponse.data);
+        setVehiculosLibres(vehiculosLibresResponse.data);
+        setClientes(clientesResponse.data);
+  
       } catch (error) {
-        console.error('Error fetching laboreos:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    const fetchEmpleados = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/nominas'); // URL de la API de empleados
-        setEmpleados(response.data);
-      } catch (error) {
-        console.error('Error fetching empleados:', error);
-      }
-    };
-    const fetchEmpleadosLibres = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/empleadosLibres'); // URL de la API de empleados
-        setEmpleadosLibres(response.data);
-      } catch (error) {
-        console.error('Error fetching empleados:', error);
-      }
-    };
-
-    const fetchEquiposLibres = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/equiposLibres');
-        setEquiposLibres(response.data);
-      } catch (error) {
-        console.error('Error fetching equipos:', error);
-      }
-    };
-
-    const fetchEquipos = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/equipos');
-        setEquipos(response.data);
-      } catch (error) {
-        console.error('Error fetching equipos:', error);
-      }
-    };
-
-    const fetchVehiculos = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/vehiculos'); // URL de la API de vehículos
-        setVehiculos(response.data);
-      } catch (error) {
-        console.error('Error fetching vehiculos:', error);
-      }
-    };
-
-    const fetchVehiculosLibres = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/vehiculosLibres'); // URL de la API de vehículos
-        setVehiculosLibres(response.data);
-      } catch (error) {
-        console.error('Error fetching vehiculos:', error);
-      }
-    };
-
-    const fetchClientes = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/clientes'); // URL de la API de vehículos
-        setClientes(response.data);
-      } catch (error) {
-        console.error('Error fetching Clientes:', error);
-      }
-    };
-
-    fetchLaboreos();
-    fetchEquipos();
-    fetchEquiposLibres();
-    fetchEmpleados();
-    fetchEmpleadosLibres();
-    fetchVehiculos();
-    fetchVehiculosLibres();
-    fetchClientes();
+  
+    fetchData();
   }, [pagination, selectedCliente, selectedEquipo]);
+  
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
@@ -274,28 +232,28 @@ const TablaLaboreos = () => {
             <Input />
           </Form.Item>
           <Form.Item name="equipos" label="Equipos">
-  <Select
-    showSearch
-    mode="multiple"
-    placeholder="Buscar equipo"
-    optionFilterProp="children"
-    onChange={handleEquipoSelect}
-    filterOption={(input, option) =>
-      option.children.toLowerCase().includes(input.toLowerCase())
-    }
-  >
-    {equipos.map((equipo) => {
-      const estaAsignado = currentLaboreo?.equipos?.some(e => e._id === equipo._id);
-      const estaLibre = equiposLibres.some(e => e._id === equipo._id);
+            <Select
+              showSearch
+              mode="multiple"
+              placeholder="Buscar equipo"
+              optionFilterProp="children"
+              onChange={handleEquipoSelect}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {equipos.map((equipo) => {
+                const estaAsignado = currentLaboreo?.equipos?.some(e => e._id === equipo._id);
+                const estaLibre = equiposLibres.some(e => e._id === equipo._id);
 
-      return (
-        <Option key={equipo._id} value={equipo._id} disabled={!estaAsignado && !estaLibre}>
-          {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
-        </Option>
-      );
-    })}
-  </Select>
-</Form.Item>
+                return (
+                  <Option key={equipo._id} value={equipo._id} disabled={!estaAsignado && !estaLibre}>
+                    {`Equipo: ${equipo.nombre} - Número: ${equipo.numero}`}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
 
           <Form.Item name="tarea" label="Tarea">
             <Input />

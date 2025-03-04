@@ -46,8 +46,8 @@ const CrearEquipo = ({ equipoToAdd }) => {
     const fetchData = async () => {
       try {
         const [empleadosRes, vehiculosRes] = await Promise.all([
-          axios.get('http://localhost:6001/api/empleadosLibres'),
-          axios.get('http://localhost:6001/api/vehiculosLibres'),
+          api.get('http://localhost:6001/api/empleadosLibres'),
+          api.get('http://localhost:6001/api/vehiculosLibres'),
         ]);
         setEmpleados(empleadosRes.data);
         setVehiculos(vehiculosRes.data);
@@ -62,13 +62,14 @@ const CrearEquipo = ({ equipoToAdd }) => {
     const equipoData = {
       nombre: values.nombre,
       descripcion: values.descripcion,
+      numero: values.numero,
       empleados: values.empleados,
       vehiculos: values.vehiculos,
     };
 
     try {
       setLoading(true);
-      const response = await axios.post(
+      const response = await api.post(
         'http://localhost:6001/api/equipo',
         equipoData,
         {

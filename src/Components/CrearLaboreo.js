@@ -34,7 +34,6 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
   const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
   const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
   const [selectedCliente, setSelectedCliente] = useState(null);
-  const [selectedEquipo, setSelectedEquipo] = useState(null);
 
   useEffect(() => {
     if (laboreoToAdd) {
@@ -44,7 +43,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         resumen: laboreoToAdd.resumen,
         empleados: laboreoToAdd.empleados,
         vehiculos: laboreoToAdd.vehiculos,
-        equipo: laboreoToAdd.equipo,
+        equipos: laboreoToAdd.equipos,
         tarea: laboreoToAdd.tarea,
         grano: laboreoToAdd.grano,
         cliente: laboreoToAdd.cliente,
@@ -75,14 +74,12 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     fetchData();
   }, []);
 
-
-
   const onFinish = async (values) => {
     const laboreoData = {
       nombre: values.nombre,
       descripcion: values.descripcion,
       resumen: values.resumen,
-      equipo: values.equipo,
+      equipos: values.equipos, 
       empleados: values.empleados,  // Array de empleados seleccionados
       vehiculos: values.vehiculos,  // Array de vehículos seleccionados
       tarea: values.tarea,          // Tarea seleccionada
@@ -111,8 +108,6 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
 
       openNotificationWithIcon('success', 'laboreo creado', 'El laboreo se ha creado exitosamente.');
       form.resetFields();
-
-      // setSelectedCliente(null);
     } catch (error) {
       console.error('Error al crear el laboreo:', error);
       openNotificationWithIcon('error', 'Error', 'Hubo un problema al crear el laboreo.');
@@ -121,14 +116,9 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     }
   };
 
-
   const handleClienteSelect = (clienteId) => {
     const selected = clientes.find((cliente) => cliente._id === clienteId);
     setSelectedCliente(selected);
-  };
-  const handleEquipoSelect = (equipoId) => {
-    const selected = equipos.find((equipo) => equipo._id === equipoId);
-    setSelectedEquipo(selected);
   };
 
   return (
@@ -163,22 +153,22 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       </Form.Item>
 
       <Form.Item
-        name="equipo"
-        label="Equipo"
-        rules={[{ required: true }]}
+        name="equipos" // Cambié 'equipo' a 'equipos'
+        label="Equipos"
+        rules={[{ required: false }]}
       >
         <Select
           showSearch
-          placeholder="Buscar equipo"
+          placeholder="Buscar equipos"
+          mode="multiple"
           optionFilterProp="children"
-          onChange={handleEquipoSelect}
           filterOption={(input, option) =>
             option.children.toLowerCase().includes(input.toLowerCase())
           }
         >
           {equipos.map((equipo) => (
             <Option key={equipo._id} value={equipo._id}>
-              Equipo: {equipo.nombre} - Numero: {equipo.numero} {/* Suponiendo que el campo es 'nombre' */}
+              Equipo: {equipo.nombre} - Numero: {equipo.numero}
             </Option>
           ))}
         </Select>
@@ -187,7 +177,6 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       <Form.Item
         name="empleados"
         label="Empleados Adicionales"
-        rules={[{ required: false, message: 'Debe seleccionar al menos un empleado' }]}
       >
         <Select
           mode="multiple"
@@ -205,7 +194,6 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       <Form.Item
         name="vehiculos"
         label="Vehículos Adicionales"
-        rules={[{ required: false, message: 'Debe seleccionar al menos un vehículo' }]}
       >
         <Select
           mode="multiple"
@@ -248,9 +236,6 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         </Select>
       </Form.Item>
 
-      
-
-
       <Form.Item
         name="cliente"
         label="Cliente Seleccionado"
@@ -267,7 +252,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
         >
           {clientes.map((cliente) => (
             <Option key={cliente._id} value={cliente._id}>
-              {cliente.nombre} - {cliente.apellido} {/* Suponiendo que el campo es 'nombre' */}
+              {cliente.nombre} - {cliente.apellido}
             </Option>
           ))}
         </Select>

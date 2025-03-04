@@ -1,50 +1,28 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from 'react';
+import { useAuth } from '../Auth0/AuthProvider';
 
 const api = axios.create({
-  baseURL: 'http://localhost:6001/api',  // Base URL de tu API
+  baseURL: 'http://localhost:6001/api',
 });
 
 const useAxiosInterceptor = () => {
-  const { getIdTokenClaims } = useAuth0();
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    const fetchToken = async () => {
-      const tokenClaims = await getIdTokenClaims();  // Obtener las claims del token
-      setToken(tokenClaims?.__raw || "");  // Guardar el token en el estado
-      console.log('Token obtained:', tokenClaims?.__raw);
-    };
-
-    fetchToken();
-  }, [getIdTokenClaims]);
+  const { token } = useAuth(); // Obtener el token desde el contexto
 
   useEffect(() => {
     if (token) {
-      const setupInterceptor = () => {
-        api.interceptors.request.use(
-          (config) => {
-            if (token) {
-              // Añadir el token en la cabecera Authorization como Bearer <token>
-              config.headers.Authorization = `Bearer ${token}`;
-              console.log('Token set in header:', token);
-            } else {
-              console.log('No token available');
-            }
-            return config;
-          },
-          (error) => {
-            return Promise.reject(error);
-          }
-        );
-      };
-
-      setupInterceptor();
+      api.interceptors.request.use(
+        (config) => {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log('Token set in header:', token);
+          return config;
+        },
+        (error) => Promise.reject(error)
+      );
     }
   }, [token]);
 
-  return api;  // Retornar la instancia configurada de Axios
+  return api;
 };
 
 export default useAxiosInterceptor;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, notification, DatePicker } from 'antd';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const layout = {
   labelCol: {
@@ -28,6 +29,8 @@ const CrearEmpleado = () => {
   const [loading, setLoading] = useState(false); // Estado para manejar el loading
   const [form] = Form.useForm(); // Inicializar el formulario
 
+  const api = useAxiosInterceptor();
+
   const onFinish = async (values) => {
     console.log(values); // Para depuración
 
@@ -40,46 +43,32 @@ const CrearEmpleado = () => {
       telefono: values.telefonoEmergencia,
       documento: values.documento,
       rol: values.rol,
-      // area: values.area,
-      licenciaVencimiento: values.licenciaVencimiento 
-      ? values.licenciaVencimiento.format('YYYY-MM-DD') 
-      : null,
-    dniVencimiento: values.dniVencimiento 
-      ? values.dniVencimiento.format('YYYY-MM-DD') 
-      : null,
-    aptoFisicoVencimiento: values.aptoFisicoVencimiento 
-      ? values.aptoFisicoVencimiento.format('YYYY-MM-DD') 
-      : null,
+      licenciaVencimiento: values.licenciaVencimiento
+        ? values.licenciaVencimiento.format('YYYY-MM-DD')
+        : null,
+      dniVencimiento: values.dniVencimiento
+        ? values.dniVencimiento.format('YYYY-MM-DD')
+        : null,
+      aptoFisicoVencimiento: values.aptoFisicoVencimiento
+        ? values.aptoFisicoVencimiento.format('YYYY-MM-DD')
+        : null,
     };
 
     try {
       setLoading(true); // Iniciar loading
 
-      const url = 'http://localhost:6001/api/nomina'; 
-      const method = 'POST'; 
+      const response = await api.post('/nomina', EmpleadoData);
 
-      // Enviar datos a la API
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(EmpleadoData), 
-      });
-
-      if (!response.ok) {
+      // Verificar la respuesta
+      if (response.status === 201) {
+        openNotificationWithIcon('success', 'Empleado guardado', 'El Empleado se ha guardado exitosamente.');
+        form.resetFields();
+      } else {
         throw new Error('Error al crear el Empleado');
       }
-
-      const result = await response.json();
-      console.log(result); 
-      openNotificationWithIcon('success', 'Empleado guardado', 'El Empleado se ha guardado exitosamente.');
-      form.resetFields();
-     
     } catch (error) {
       console.error('Error al crear el Empleado:', error);
       openNotificationWithIcon('error', 'Error', 'Hubo un problema al guardar el Empleado.');
- 
     } finally {
       setLoading(false); // Detener loading
     }

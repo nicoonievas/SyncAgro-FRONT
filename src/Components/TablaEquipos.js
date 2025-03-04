@@ -16,6 +16,9 @@ const TablaEquipos = () => {
   const [empleados, setEmpleados] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [currentEquipo, setCurrentEquipo] = useState(null);
+  const [empleadosLibres, setEmpleadosLibres] = useState([]);
+  const [vehiculosLibres, setVehiculosLibres] = useState([]);
+
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -24,45 +27,42 @@ const TablaEquipos = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const fetchEquipos = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       const { current, pageSize } = pagination;
+  
       try {
-        const response = await axios.get("http://localhost:6001/api/equipos", {
-          params: { page: current, perPage: pageSize },
-        });
-        if (response.data && Array.isArray(response.data)) {
-          setEquipos(response.data);
-          // setTotalEquipos(response.data.total);
-        }
+        const [
+          equiposResponse,
+          empleadosResponse,
+          empleadosLibresResponse,
+          vehiculosResponse,
+          vehiculosLibresResponse
+        ] = await Promise.all([
+          axios.get("http://localhost:6001/api/equipos", { params: { page: current, perPage: pageSize } }),
+          axios.get("http://localhost:6001/api/nominas"),
+          axios.get("http://localhost:6001/api/empleadosLibres"),
+          axios.get("http://localhost:6001/api/vehiculos"),
+          axios.get("http://localhost:6001/api/vehiculosLibres")
+        ]);
+  
+        // Seteamos los estados con los datos recibidos
+        setEquipos(equiposResponse.data);
+        setEmpleados(empleadosResponse.data);
+        setEmpleadosLibres(empleadosLibresResponse.data);
+        setVehiculos(vehiculosResponse.data);
+        setVehiculosLibres(vehiculosLibresResponse.data);
+  
       } catch (error) {
-        console.error('Error fetching equipos:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    const fetchEmpleados = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/nominas'); // URL de la API de empleados
-        setEmpleados(response.data);
-      } catch (error) {
-        console.error('Error fetching empleados:', error);
-      }
-    };
-
-    const fetchVehiculos = async () => {
-      try {
-        const response = await axios.get('http://localhost:6001/api/vehiculos'); // URL de la API de vehículos
-        setVehiculos(response.data);
-      } catch (error) {
-        console.error('Error fetching vehiculos:', error);
-      }
-    };
-    fetchEquipos();
-    fetchEmpleados();
-    fetchVehiculos();
-
+  
+    fetchData();
   }, [pagination]);
+  
 
   const verDetalles = (id) => {
     console.log("Ver detalles del equipo:", id);
@@ -158,14 +158,27 @@ const TablaEquipos = () => {
       title: "Empleados",
       dataIndex: "empleados",
       key: "empleados",
-      render: empleados => empleados.map(e => `${e.rol} ${e.lastname}`).join(" - ")
+      render: empleados => (
+        <span>
+          {empleados.map((e, index) => (
+            <span key={e.id || index}>{e.rol} {e.lastname}{index !== empleados.length - 1 ? " - " : ""}</span>
+          ))}
+        </span>
+      )
     },
     {
       title: "Vehiculos",
-      dataIndex: 'vehiculos',
+      dataIndex: "vehiculos",
       key: "vehiculos",
-      render: vehiculos => vehiculos.map(v => `${v.modelo} ${v.dominio}`).join(" - ")
-    },
+      render: vehiculos => (
+        <span>
+          {vehiculos.map((v, index) => (
+            <span key={v.id || index}>{v.modelo} {v.dominio}{index !== vehiculos.length - 1 ? " - " : ""}</span>
+          ))}
+        </span>
+      )
+    }
+    ,
     {
       title: "Estado",
       dataIndex: "estado",
@@ -200,55 +213,65 @@ const TablaEquipos = () => {
 
       <Modal title="Editar Equipo" open={isEditModalVisible} onCancel={handleCancel} footer={null}>
         <Form form={form} onFinish={handleEdit}>
-          <Form.Item name="nombre" 
-          label="Nombre del Equipo" 
-          rules={[{ required: true, message: "Campo obligatorio" }]}>
+          <Form.Item name="nombre"
+            label="Nombre del Equipo"
+            rules={[{ required: true, message: "Campo obligatorio" }]}>
             <Input />
           </Form.Item>
           {/* <Form.Item name="responsable" label="Responsable" rules={[{ required: true, message: "Campo obligatorio" }]}>
             <Input />
           </Form.Item> */}
 
-          <Form.Item name="numero" 
-          label="Numero de Equipo"
-          rules={[{ required: true, message: "Campo obligatorio" }]}>
+          <Form.Item name="numero"
+            label="Numero de Equipo"
+            rules={[{ required: true, message: "Campo obligatorio" }]}>
             <Input />
           </Form.Item>
 
           <Form.Item
             name="empleados"
-            label="Empleados"
-            rules={[{ required: true, message: 'Debe seleccionar al menos un empleado' }]}
+            label="Empleados Adicionales"
+            rules={[{ required: false, message: 'Debe seleccionar al menos un empleado' }]}
           >
             <Select
               mode="multiple"
               placeholder="Seleccionar empleados"
-              optionLabelProp="items"
+              optionLabelProp="children"
             >
-              {empleados.map((empleado) => (
-                <Option key={empleado._id} value={empleado._id}>
-                  {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
-                </Option>
-              ))}
+              {empleados.map((empleado) => {
+                const estaAsignado = currentEquipo?.empleados?.some(e => e._id === empleado._id);
+                const estaLibre = empleadosLibres.some(e => e._id === empleado._id);
+
+                return (
+                  <Option key={empleado._id} value={empleado._id} disabled={!estaAsignado && !estaLibre}>
+                    {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
 
           <Form.Item
             name="vehiculos"
-            label="Vehículos"
-            rules={[{ required: true, message: 'Debe seleccionar al menos un vehículo' }]}
+            label="Vehículos Adicionales"
+            rules={[{ required: false, message: 'Debe seleccionar al menos un vehículo' }]}
           >
             <Select
               mode="multiple"
               placeholder="Seleccionar vehículos"
-              optionLabelProp="items"
+              optionLabelProp="children"
             >
-              {vehiculos.map((vehiculo) => (
-                <Option key={vehiculo._id} value={vehiculo._id}>
-                  {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
-                </Option>
-              ))}
+              {vehiculos.map((vehiculo) => {
+                const estaAsignado = currentEquipo?.vehiculos?.some(v => v._id === vehiculo._id);
+                const estaLibre = vehiculosLibres.some(v => v._id === vehiculo._id);
+
+                return (
+                  <Option key={vehiculo._id} value={vehiculo._id} disabled={!estaAsignado && !estaLibre}>
+                    {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 

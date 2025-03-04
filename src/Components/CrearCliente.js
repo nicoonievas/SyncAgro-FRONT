@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, Modal, notification } from 'antd';
 import MapaSelector from "./MapSelector";
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const layout = {
   labelCol: { span: 8 },
@@ -19,6 +20,8 @@ const CrearCliente = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false); // Aquí controlas la visibilidad del modal
+
+  const api = useAxiosInterceptor();
 
   const onFinish = async (values) => {
     console.log("Enviando datos:", values);
@@ -40,17 +43,10 @@ const CrearCliente = () => {
     try {
       setLoading(true);
 
-      const url = 'http://localhost:6001/api/cliente';
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(clienteData),
-      });
+      // Usamos el método `api.post` para enviar los datos
+      const response = await api.post('/cliente', clienteData);
 
-      if (!response.ok) {
-        throw new Error('Error al crear el cliente');
-      }
-
+      // No es necesario revisar el código de respuesta manualmente ya que Axios lanza un error si la respuesta no es OK
       openNotificationWithIcon('success', 'Cliente guardado', 'El cliente se ha guardado exitosamente.');
       form.resetFields();
     } catch (error) {
