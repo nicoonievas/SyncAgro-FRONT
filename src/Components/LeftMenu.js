@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from "axios";
 import {
   HomeOutlined,
   MenuFoldOutlined,
@@ -25,6 +26,8 @@ import TablaClientes from './TablaClientes';
 import CrearEquipo from './CrearEquipo';
 import TablaEquipos from './TablaEquipos';
 import TablasVencimientos from './TablaVencimientos';
+import CrearEmpresa from './CrearEmpresa';
+import TablaUsuarios from './TablaUsuarios';
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -32,7 +35,9 @@ const { SubMenu } = Menu;
 const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
-  const { user, isAuthenticated, logout, 
+  const [usuarios, setUsuarios] = useState([]);
+  const [empresa, setEmpresa] = useState("");
+  const { user, isAuthenticated, logout,
     // claim, getIdTokenClaims 
   } = useAuth0();
   // const [token, setToken] = useState("");
@@ -45,6 +50,19 @@ const LeftMenu = () => {
   //   };
   //   fetchToken();
   // }, [getIdTokenClaims]);
+
+  useEffect(() => {
+    axios.get("http://localhost:6001/api/usuarios")  // Reemplaza con tu URL real
+      .then(response => {
+        setUsuarios(response.data);
+        // Buscar el usuario logueado en la lista de usuarios
+        const usuarioEncontrado = response.data.find(u => u.email === user?.email);
+        if (usuarioEncontrado) {
+          setEmpresa(usuarioEncontrado.empresa.razonSocial || "No asignado");
+        }
+      })
+      .catch(error => console.error("Error al obtener usuarios:", error));
+  }, [user]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -148,8 +166,12 @@ const LeftMenu = () => {
             <div className="Container" style={{ display: 'flex', alignItems: 'center' }}>
               {isAuthenticated && (
                 <div className="UserInfo" style={{ display: 'flex', alignItems: 'center' }}>
-                  <img src={user.picture} alt={user.name} style={{ width: '40px', borderRadius: '50%', marginRight: '10px' }} />
-                  <span>{user.name}</span>
+                  <img src={user.picture} style={{ width: '40px', borderRadius: '50%', marginRight: '10px' }} />
+
+                  <span>{user.name} - {empresa}
+                  </span>
+
+
                   <Button
                     type="primary"
                     onClick={() => logout({ returnTo: window.location.origin })}
@@ -186,6 +208,9 @@ const LeftMenu = () => {
             <Route path="/verLaboreos" element={<TablaLaboreos />} />
             <Route path="/verEquipos" element={<TablaEquipos />} />
             <Route path="/verVencimientos" element={<TablasVencimientos />} />
+            <Route path="/agregarEmpresa" element={<CrearEmpresa />} />
+            <Route path="/verUsuarios" element={<TablaUsuarios />} />
+
           </Routes>
         </Content>
       </Layout>
