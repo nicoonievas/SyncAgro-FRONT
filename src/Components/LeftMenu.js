@@ -28,6 +28,7 @@ import TablaEquipos from './TablaEquipos';
 import TablasVencimientos from './TablaVencimientos';
 import CrearEmpresa from './CrearEmpresa';
 import TablaUsuarios from './TablaUsuarios';
+import CrearMarcaTipoModelo from './AgregarMarcasModelos';
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -36,6 +37,7 @@ const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
   const [usuarios, setUsuarios] = useState([]);
+  const [usuario, setUsuario] = useState([]);
   const [empresa, setEmpresa] = useState("");
   const { user, isAuthenticated, logout,
     // claim, getIdTokenClaims 
@@ -59,6 +61,7 @@ const LeftMenu = () => {
         const usuarioEncontrado = response.data.find(u => u.email === user?.email);
         if (usuarioEncontrado) {
           setEmpresa(usuarioEncontrado.empresa.razonSocial || "No asignado");
+          setUsuario(usuarioEncontrado);
         }
       })
       .catch(error => console.error("Error al obtener usuarios:", error));
@@ -166,11 +169,15 @@ const LeftMenu = () => {
             <div className="Container" style={{ display: 'flex', alignItems: 'center' }}>
               {isAuthenticated && (
                 <div className="UserInfo" style={{ display: 'flex', alignItems: 'center' }}>
-                  <img src={user.picture} style={{ width: '40px', borderRadius: '50%', marginRight: '10px' }} />
+                  <img
+                    src={user.picture}
+                    style={{ width: '40px', borderRadius: '50%', marginRight: '10px' }}
+                  />
 
-                  <span>{user.name} - {empresa}
-                  </span>
-
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
+                    <span>{usuario.nombre} {usuario.apellido}</span>
+                    <span style={{ fontSize: '12px', color: '#888' }}>{empresa}</span>
+                  </div>
 
                   <Button
                     type="primary"
@@ -182,6 +189,7 @@ const LeftMenu = () => {
                 </div>
               )}
             </div>
+
           </div>
         </Header>
 
@@ -210,6 +218,7 @@ const LeftMenu = () => {
             <Route path="/verVencimientos" element={<TablasVencimientos />} />
             <Route path="/agregarEmpresa" element={<CrearEmpresa />} />
             <Route path="/verUsuarios" element={<TablaUsuarios />} />
+            <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo />} />
 
           </Routes>
         </Content>

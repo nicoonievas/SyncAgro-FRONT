@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, DatePicker, Select, notification } from 'antd';
 
 const { Option } = Select;
@@ -19,6 +19,38 @@ const openNotificationWithIcon = (type, message, description) => {
 const CrearVehiculo = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [marcasModelos, setMarcasModelos] = useState([]);
+  const [tipos, setTipos] = useState([]);
+  const [modelos, setModelos] = useState([]);
+
+
+  useEffect(() => {
+    const fetchMarcasModelos = async () => {
+      try {
+        const response = await fetch('http://localhost:6001/api/marcasModelos');
+        const data = await response.json();
+        setMarcasModelos(data);
+      } catch (error) {
+        console.error('Error al obtener marcas y modelos:', error);
+      }
+    };
+
+    fetchMarcasModelos();
+  }, []);
+
+
+ const handleMarcaChange = (marca) => {
+    const marcaSeleccionada = marcasModelos.find((m) => m.marca === marca);
+    setTipos(marcaSeleccionada ? marcaSeleccionada.vehiculos || [] : []);
+    setModelos([]); // Reiniciar modelos al cambiar la marca
+    form.setFieldsValue({ tipo: undefined, modelo: undefined });
+  };
+
+  const handleTipoChange = (tipo) => {
+    const tipoSeleccionado = tipos.find((t) => t.tipo === tipo);
+    setModelos(tipoSeleccionado ? tipoSeleccionado.modelos || [] : []);
+    form.setFieldsValue({ modelo: undefined });
+  };
 
   const onFinish = async (values) => {
     console.log(values);
@@ -60,35 +92,39 @@ const CrearVehiculo = () => {
   };
 
   return (
+
     <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
-      {/* <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item> */}
-      <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
-        <Select>
-          <Option value="auto">Auto</Option>
-          <Option value="cabezal">Cabezal</Option>
-          <Option value="camion">Camion</Option>
-          <Option value="camioneta">Camioneta</Option>
-          <Option value="casilla">Casilla</Option>
-          <Option value="cisterna">Cisterna</Option>
-          <Option value="cosechadora">Cosechadora</Option>
-          <Option value="elevador">Elevador</Option>
-          <Option value="semirremolque">Semirremolque</Option>
-          <Option value="tolva">Tolva</Option>
-          <Option value="tractor">Tractor</Option>
-          <Option value="trailer">Trailer</Option>
+      <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
+        <Select onChange={handleMarcaChange} placeholder="Selecciona una marca">
+          {marcasModelos.map((marca) => (
+            <Option key={marca.marca} value={marca.marca}>
+              {marca.marca}
+            </Option>
+          ))}
         </Select>
       </Form.Item>
 
-      <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
-        <Input />
+      <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
+        <Select onChange={handleTipoChange} placeholder="Selecciona un tipo" disabled={tipos.length === 0}>
+          {tipos.map((tipo) => (
+            <Option key={tipo.tipo} value={tipo.tipo}>
+              {tipo.tipo}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
 
       <Form.Item name="modelo" label="Modelo" rules={[{ required: true }]}>
-        <Input />
+        <Select placeholder="Selecciona un modelo" disabled={modelos.length === 0}>
+          {modelos.map((modelo) => (
+            <Option key={modelo} value={modelo}>
+              {modelo}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
 
+    
       <Form.Item name="dominio" label="Dominio" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
@@ -127,3 +163,33 @@ const CrearVehiculo = () => {
 };
 
 export default CrearVehiculo;
+
+
+{/* <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}> */}
+      {/* <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item> */}
+      {/* <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
+        <Select>
+          <Option value="auto">Auto</Option>
+          <Option value="cabezal">Cabezal</Option>
+          <Option value="camion">Camion</Option>
+          <Option value="camioneta">Camioneta</Option>
+          <Option value="casilla">Casilla</Option>
+          <Option value="cisterna">Cisterna</Option>
+          <Option value="cosechadora">Cosechadora</Option>
+          <Option value="elevador">Elevador</Option>
+          <Option value="semirremolque">Semirremolque</Option>
+          <Option value="tolva">Tolva</Option>
+          <Option value="tractor">Tractor</Option>
+          <Option value="trailer">Trailer</Option>
+        </Select>
+      </Form.Item> */}
+
+      {/* <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+
+      <Form.Item name="modelo" label="Modelo" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item> */}

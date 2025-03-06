@@ -13,7 +13,10 @@ const TablaVehiculos = () => {
   const [vehiculoIdToDelete, setVehiculoIdToDelete] = useState(null);
   const [currentVehiculo, setCurrentVehiculo] = useState(null);
   const [form] = Form.useForm();
-
+  const [selectedMarca, setSelectedMarca] = useState(null);
+  const [selectedTipo, setSelectedTipo] = useState(null);
+  const [modelosDisponibles, setModelosDisponibles] = useState([]);
+  const [marcaVehiculos, setMarcaVehiculos] = useState([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -39,7 +42,19 @@ const TablaVehiculos = () => {
       }
     };
 
+    const fetchMarcaVehiculos = async () => {
+      try {
+        const response = await axios.get("http://localhost:6001/api/marcasModelos"); // Endpoint de marcas
+        if (Array.isArray(response.data)) {
+          setMarcaVehiculos(response.data);
+        }
+      } catch (error) {
+        console.error('Error al obtener marcas:', error);
+      }
+    };
+
     fetchVehiculos();
+    fetchMarcaVehiculos();
   }, [pagination]);
 
   const openNotificationWithIcon = (type, message, description) => {
@@ -53,6 +68,14 @@ const TablaVehiculos = () => {
 
   const showEditModal = (vehiculo) => {
     setCurrentVehiculo(vehiculo);
+    setSelectedMarca(vehiculo.marca);
+    setSelectedTipo(vehiculo.tipo);
+
+    const marcaSeleccionada = marcaVehiculos.find(m => m.marca === vehiculo.marca);
+    if (marcaSeleccionada) {
+      const vehiculoTipo = marcaSeleccionada.vehiculos.find(v => v.tipo === vehiculo.tipo);
+      setModelosDisponibles(vehiculoTipo ? vehiculoTipo.modelos : []);
+    }
 
     form.setFieldsValue({
       tipo: vehiculo.tipo || "",
@@ -74,7 +97,27 @@ const TablaVehiculos = () => {
     setIsEditModalVisible(false);
     form.resetFields();
   };
+  const handleMarcaChange = (value) => {
+    setSelectedMarca(value);
+    form.setFieldsValue({ tipo: "", modelo: "" });
+    setSelectedTipo(null);
+    setModelosDisponibles([]);
 
+    const marcaSeleccionada = marcaVehiculos.find(m => m.marca === value);
+    if (marcaSeleccionada) {
+      setSelectedTipo(null);
+    }
+  };
+  const handleTipoChange = (value) => {
+    setSelectedTipo(value);
+    form.setFieldsValue({ modelo: "" });
+
+    const marcaSeleccionada = marcaVehiculos.find(m => m.marca === selectedMarca);
+    if (marcaSeleccionada) {
+      const vehiculoTipo = marcaSeleccionada.vehiculos.find(v => v.tipo === value);
+      setModelosDisponibles(vehiculoTipo ? vehiculoTipo.modelos : []);
+    }
+  };
   const handleEdit = async (values) => {
     try {
       const formattedValues = {
@@ -179,29 +222,29 @@ const TablaVehiculos = () => {
         footer={null}
       >
         <Form form={form} onFinish={handleEdit} >
-          <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
-          <Select>
-            <Option value="Auto">Auto</Option>
-            <Option value="Cabezal">Cabezal</Option>
-            <Option value="Camion">Camion</Option>
-            <Option value="Camioneta">Camioneta</Option>
-            <Option value="Casilla">Casilla</Option>
-            <Option value="Cisterna">Cisterna</Option>
-            <Option value="Cosechadora">Cosechadora</Option>
-            <Option value="Elevador">Elevador</Option>
-            <Option value="Semirremolque">Semirremolque</Option>
-            <Option value="Tolva">Tolva</Option>
-            <Option value="Tractor">Tractor</Option>
-            <Option value="Trailer">Trailer</Option>
-          </Select>
-          </Form.Item>
 
           <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
-            <Input />
+            <Select onChange={handleMarcaChange}>
+              {marcaVehiculos.map(marca => (
+                <Option key={marca.marca} value={marca.marca}>{marca.marca}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
+            <Select onChange={handleTipoChange} disabled={!selectedMarca}>
+              {marcaVehiculos.find(m => m.marca === selectedMarca)?.vehiculos.map(v => (
+                <Option key={v.tipo} value={v.tipo}>{v.tipo}</Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item name="modelo" label="Modelo" rules={[{ required: true }]}>
-            <Input />
+            <Select disabled={!selectedTipo}>
+              {modelosDisponibles.map(modelo => (
+                <Option key={modelo} value={modelo}>{modelo}</Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item name="dominio" label="Dominio" rules={[{ required: true }]}>
