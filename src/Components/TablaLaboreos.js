@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select } from 'antd';
+import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 const { Option } = Select;
@@ -18,6 +19,7 @@ const TablaLaboreos = () => {
   const [selectedEquipo, setSelectedEquipo] = useState(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [laboreoIdToDelete, setLaboreoIdToDelete] = useState(null);
   const [currentLaboreo, setCurrentLaboreo] = useState(null);
   const [pagination, setPagination] = useState({
@@ -26,6 +28,7 @@ const TablaLaboreos = () => {
   });
   const [totalLaboreos, setTotalLaboreos] = useState(0);
   const [form] = Form.useForm();
+  const [record, setRecord] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,9 +98,16 @@ const TablaLaboreos = () => {
     setIsEditModalVisible(true);
   };
 
+  const showViewModal = (record) => {
+    console.log(record);
+    setRecord(record);
+    setIsViewModalVisible(true); // Abre el modal
+  };
+
   const handleCancel = () => {
     setIsDeleteModalVisible(false);
     setIsEditModalVisible(false);
+    setIsViewModalVisible(false);
     form.resetFields();
   };
 
@@ -148,7 +158,10 @@ const TablaLaboreos = () => {
       title: 'Nombre',
       dataIndex: 'nombre',
       key: 'nombre',
-      render: (text) => <a>{text}</a>,
+      render: (text, record) => (
+        <a onClick={() => showViewModal(record)}>{text}</a>
+      ),
+
     },
     {
       title: 'Cliente',
@@ -178,8 +191,8 @@ const TablaLaboreos = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => showEditModal(record)}>Editar</a>
-          <a onClick={() => showDeleteConfirm(record._id)}>Eliminar</a>
+          <a onClick={() => showEditModal(record)}><EditOutlined /></a>
+          <a onClick={() => showDeleteConfirm(record._id)}><DeleteOutlined /></a>
         </Space>
       ),
     },
@@ -348,6 +361,24 @@ const TablaLaboreos = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+     <Modal title="Visualizar Laboreo" visible={isViewModalVisible} onCancel={handleCancel} footer={null}>
+        {currentLaboreo && (
+          <div>
+            <p><strong>Fecha:</strong> {currentLaboreo.fecha}</p>
+            <p><strong>Equipo:</strong> {currentLaboreo.equipo}</p>
+            <p><strong>Tarea:</strong> {currentLaboreo.tarea}</p>
+            <p><strong>Grano:</strong> {currentLaboreo.grano}</p>
+            <p><strong>Cliente:</strong> {currentLaboreo.cliente}</p>
+            <p><strong>Empleados:</strong> {currentLaboreo.empleados.join(', ')}</p>
+            <p><strong>Vehículos:</strong> {currentLaboreo.vehiculos.join(', ')}</p>
+            <p><strong>Estado:</strong> {currentLaboreo.estado}</p>
+          </div>
+        )}
+      </Modal>
+
+   
+
     </>
   );
 };

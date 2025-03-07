@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Space, Table, Modal, Form, Input, Button, notification, Select } from "antd";
+import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from "axios";
 
 const TablaUsuarios = () => {
@@ -167,8 +168,8 @@ const [pagination, setPagination] = useState({
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => showEditModal(record)}>Editar</a>
-          <a onClick={() => showDeleteConfirm(record._id)}>Eliminar</a>
+          <a onClick={() => showEditModal(record)}><EditOutlined /></a>
+          <a onClick={() => showDeleteConfirm(record._id)}><DeleteOutlined /></a>
         </Space>
       ),
     },
