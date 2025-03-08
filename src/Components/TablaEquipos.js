@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select } from 'antd';
+import { Space, Table, Modal, Form, Input, Button, notification, Select, Typography } from 'antd';
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
+const { Title } = Typography;
 
 const TablaEquipos = () => {
   const [equipos, setEquipos] = useState([]);
@@ -201,6 +202,7 @@ const TablaEquipos = () => {
 
   return (
     <>
+    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Equipos</Title>
       <Table dataSource={equipos}
         columns={columns}
         rowKey="id"

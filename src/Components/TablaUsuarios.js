@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Space, Table, Modal, Form, Input, Button, notification, Select } from "antd";
+import { Space, Table, Modal, Form, Input, Button, notification, Select, Typography } from "antd";
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from "axios";
+
+const { Title } = Typography; 
 
 const TablaUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -177,6 +179,7 @@ const [pagination, setPagination] = useState({
 
   return (
     <>
+    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Usuarios - Administrador</Title>
       <Table columns={columns} dataSource={usuarios} rowKey="_id" loading={loading} />
 
       {/* Modal de Confirmación para Eliminación */}

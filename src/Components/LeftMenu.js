@@ -149,11 +149,13 @@ const LeftMenu = () => {
         <Header
           style={{
             position: 'fixed',
-            marginLeft: 15,
-            width: collapsed ? '92%' : '85%',
+
+            width: collapsed ? '93%' : '85%',
             top: 0,
+            right: 0,
             zIndex: 1000,
             padding: 0,
+
             background: colorBgContainer,
             borderBottom: '1px solid #d9d9d9',
             borderRadius: borderRadiusLG

@@ -143,7 +143,7 @@ const CrearEmpleado = () => {
 
       <Form.Item
         name="rol"
-        label="Rol"
+        label="Rol / Cargo"
         rules={[{ required: true }]}
       >
         <Input />

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select } from 'antd';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography } from 'antd';
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
-
+const { Title } = Typography;
 const TablaVehiculos = () => {
   const [vehiculos, setVehiculos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -168,9 +168,21 @@ const TablaVehiculos = () => {
 
   const columns = [
     { title: 'Tipo', dataIndex: 'tipo', key: 'tipo' },
-    { title: 'Marca', dataIndex: 'marca', key: 'marca' },
-    { title: 'Modelo', dataIndex: 'modelo', key: 'modelo' },
-    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio' },
+    // { title: 'Marca', dataIndex: 'marca', key: 'marca' },
+    // { title: 'Modelo', dataIndex: 'modelo', key: 'modelo' },
+    {
+      title: 'Marca y Modelo',
+      dataIndex: 'marca',
+      key: 'marca_modelo',
+      render: (text, record) => (
+        <span>{record.marca} {record.modelo}</span>
+      ),
+    },
+    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio',  render: (dominio) => (
+      <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
+        {dominio}
+      </span>
+    ) },
     { title: 'Alias', dataIndex: 'alias', key: 'alias' },
     {
       title: 'Estado',
@@ -192,6 +204,8 @@ const TablaVehiculos = () => {
 
   return (
     <>
+    {/* Título de la tabla */}
+    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehículos</Title>
       <Table
         columns={columns}
         dataSource={vehiculos}

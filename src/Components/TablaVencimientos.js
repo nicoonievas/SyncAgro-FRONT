@@ -268,7 +268,7 @@ const TablasVencimientos = () => {
 
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <h2>Vehículos</h2>
+      <h3>Documentacion de Vehículos</h3>
       <Table
         columns={vehiculosColumns}
         dataSource={vehiculos}
@@ -277,7 +277,7 @@ const TablasVencimientos = () => {
         pagination={{ pageSize: 4 }}
       />
 
-      <h2>Empleados</h2>
+      <h3>Documentacion de Empleados</h3>
       <Table
         columns={empleadosColumns}
         dataSource={empleados}
@@ -291,6 +291,7 @@ const TablasVencimientos = () => {
         visible={modalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
+        width={300}
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Fecha Vencimiento" name="fecha_vencimiento">

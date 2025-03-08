@@ -26,6 +26,8 @@ const CrearCliente = () => {
   const [localidades, setLocalidades] = useState([]);
   const [selectedProvincia, setSelectedProvincia] = useState(null);
   const [selectedLocalidad, setSelectedLocalidad] = useState(null);
+  const [campos, setCampos] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(null);
 
   const api = useAxiosInterceptor();
 
@@ -61,6 +63,28 @@ const CrearCliente = () => {
     }
   }, [selectedProvincia, api]);
 
+  const addCampo = () => {
+    setCampos([...campos, { nombre: '', latitud: '', longitud: '' }]);
+  };
+
+  const removeCampo = (index) => {
+    setCampos(campos.filter((_, i) => i !== index));
+  };
+
+  const updateCampo = (index, key, value) => {
+    const nuevosCampos = [...campos];
+    nuevosCampos[index][key] = value;
+    setCampos(nuevosCampos);
+  };
+
+  const handleMapSelect = (latlng) => {
+    if (currentIndex !== null) {
+      updateCampo(currentIndex, 'latitud', latlng.lat);
+      updateCampo(currentIndex, 'longitud', latlng.lng);
+    }
+    setIsEditModalVisible(false);
+  };
+
   const onFinish = async (values) => {
     console.log("Enviando datos:", values);
     
@@ -74,10 +98,7 @@ const CrearCliente = () => {
       provincia: provinciaName,
       telefono: values.telefono,
       mail: values.mail,
-      coordenadas: {
-        latitud: parseFloat(values.coordenadas.latitud),
-        longitud: parseFloat(values.coordenadas.longitud),
-      },
+      coordenadas: campos,
     };
 
     try {
@@ -88,6 +109,7 @@ const CrearCliente = () => {
 
       openNotificationWithIcon('success', 'Cliente guardado', 'El cliente se ha guardado exitosamente.');
       form.resetFields();
+      setCampos([]);
     } catch (error) {
       console.error('Error al crear el cliente:', error);
       openNotificationWithIcon('error', 'Error', 'Hubo un problema al guardar el cliente.');
@@ -96,12 +118,12 @@ const CrearCliente = () => {
     }
   };
 
-  const handleMapSelect = (latlng) => {
-    form.setFieldsValue({
-      coordenadas: { latitud: latlng.lat, longitud: latlng.lng },
-    });
-    setIsEditModalVisible(false); // Cerrar el modal después de seleccionar
-  };
+  // const handleMapSelect = (latlng) => {
+  //   form.setFieldsValue({
+  //     coordenadas: { latitud: latlng.lat, longitud: latlng.lng },
+  //   });
+  //   setIsEditModalVisible(false); // Cerrar el modal después de seleccionar
+  // };
 
   const handleCancel = () => {
     setIsEditModalVisible(false); // Cerrar modal
@@ -176,17 +198,17 @@ const CrearCliente = () => {
           <Input />
         </Form.Item>
 
-        {/* Campo para el Mapa */}
-        <Form.Item label="Ubicación en Mapa">
-          <Button type="default" onClick={showMapModal}>Seleccionar Ubicación en Mapa</Button>
-        </Form.Item>
-
-        <Form.Item label="Latitud" name={["coordenadas", "latitud"]} rules={[{ required: false, message: "Ingresa la latitud" }]}>
-          <Input type="number" step="any" placeholder="Ej: -34.603722" />
-        </Form.Item>
-
-        <Form.Item label="Longitud" name={["coordenadas", "longitud"]} rules={[{ required: false, message: "Ingresa la longitud" }]}>
-          <Input type="number" step="any" placeholder="Ej: -58.381592" />
+        <Form.Item name="campos" label="Campos" rules={[{ required: false }]}>
+        {campos.map((campo, index) => (
+          <div key={index} style={{ marginBottom: 10, border: '1px solid #ddd', padding: 10, borderRadius: 5 }}>
+            <Input placeholder="Nombre del campo" value={campo.nombre} onChange={e => updateCampo(index, 'nombre', e.target.value)} style={{ marginBottom: 5 }} />
+            <Button type="default" onClick={() => { setCurrentIndex(index); setIsEditModalVisible(true); }}>Seleccionar Ubicación</Button>
+            <Input placeholder="Latitud" value={campo.latitud} readOnly style={{ marginTop: 5 }} />
+            <Input placeholder="Longitud" value={campo.longitud} readOnly style={{ marginTop: 5 }} />
+            <Button type="link" danger onClick={() => removeCampo(index)}>Eliminar</Button>
+          </div>
+        ))}
+        <Button type="dashed" onClick={addCampo}>Agregar Campo</Button>
         </Form.Item>
 
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
@@ -196,19 +218,8 @@ const CrearCliente = () => {
         </Form.Item>
       </Form>
 
-      <Modal
-        title="Seleccionar Lugar en el Mapa"
-        visible={isEditModalVisible}
-        onOk={handleCancel}
-        onCancel={handleCancel}
-        okText="Guardar"
-        cancelText="Cancelar"
-        width={800}
-      >
-        <MapaSelector
-          onChange={handleMapSelect}
-          isModalVisible={isEditModalVisible}
-        />
+      <Modal title="Seleccionar Lugar en el Mapa" visible={isEditModalVisible} onCancel={() => setIsEditModalVisible(false)} footer={null}>
+        <MapaSelector onChange={handleMapSelect} isModalVisible={isEditModalVisible} />
       </Modal>
     </>
   );

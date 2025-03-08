@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select } from 'antd';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography } from 'antd';
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 const { Option } = Select;
+const { Title } = Typography;
 
 const TablaLaboreos = () => {
   const [laboreos, setLaboreos] = useState([]);
@@ -213,7 +214,9 @@ const TablaLaboreos = () => {
   };
 
   return (
+    
     <>
+<Title level={5} style={{ marginTop: '0px' }}>Gestión de Campañas</Title>
       <Table
         columns={columns}
         dataSource={laboreos}

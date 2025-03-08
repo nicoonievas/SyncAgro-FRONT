@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox } from 'antd';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox, Typography } from 'antd';
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+
+const { Title } = Typography;
 
 const TablaNominas = () => {
   const [nominas, setNominas] = useState([]);
@@ -159,6 +161,7 @@ const TablaNominas = () => {
 
   return (
     <>
+    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empleados</Title>
       <Table
         columns={columns}
         dataSource={nominas}
@@ -221,7 +224,7 @@ const TablaNominas = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="rol" label="Rol" rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}>
+          <Form.Item name="rol" label="Rol / Cargo" rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}>
             <Input />
           </Form.Item>
 
