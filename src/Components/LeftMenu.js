@@ -9,7 +9,8 @@ import {
   CarOutlined,
   SolutionOutlined,
   CarryOutOutlined,
-  TeamOutlined
+  TeamOutlined,
+  ExportOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
@@ -29,9 +30,16 @@ import TablasVencimientos from './TablaVencimientos';
 import CrearEmpresa from './CrearEmpresa';
 import TablaUsuarios from './TablaUsuarios';
 import CrearMarcaTipoModelo from './AgregarMarcasModelos';
+import WebView from './webView';
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
+
+
+
+const handleOpenPopup = () => {
+  window.open('https://map.deere.com/', 'MapaDeere', 'width=800,height=600');
+};
 
 const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -52,6 +60,8 @@ const LeftMenu = () => {
   //   };
   //   fetchToken();
   // }, [getIdTokenClaims]);
+
+
 
   useEffect(() => {
     axios.get("http://localhost:6001/api/usuarios")  // Reemplaza con tu URL real
@@ -102,6 +112,12 @@ const LeftMenu = () => {
             <Link to="/home">Home</Link>
           </Menu.Item>
 
+          {/* Clientes */}
+          <SubMenu key="clientes" icon={<UserOutlined />} title="Clientes">
+            <Menu.Item key="verClientes"><Link to="/verClientes">Ver Clientes</Link></Menu.Item>
+            <Menu.Item key="agregarCliente"><Link to="/agregarCliente">Agregar Cliente</Link></Menu.Item>
+          </SubMenu>
+
           {/* Vehículos */}
           <SubMenu key="vehiculos" icon={<CarOutlined />} title="Vehículos">
             <Menu.Item key="verVehiculos"><Link to="/verVehiculos">Ver Vehículos</Link></Menu.Item>
@@ -114,27 +130,27 @@ const LeftMenu = () => {
             <Menu.Item key="agregarEmpleado"><Link to="/agregarEmpleado">Agregar Personal</Link></Menu.Item>
           </SubMenu>
 
-          {/* Campañas */}
-          <SubMenu key="laboreos" icon={<ToolOutlined />} title="Campañas">
-            <Menu.Item key="verLaboreos"><Link to="/verLaboreos">Ver Campañas</Link></Menu.Item>
-            <Menu.Item key="agregarLaboreo"><Link to="/agregarLaboreo">Agregar Campaña</Link></Menu.Item>
-          </SubMenu>
-
-          {/* Clientes */}
-          <SubMenu key="clientes" icon={<UserOutlined />} title="Clientes">
-            <Menu.Item key="verClientes"><Link to="/verClientes">Ver Clientes</Link></Menu.Item>
-            <Menu.Item key="agregarCliente"><Link to="/agregarCliente">Agregar Cliente</Link></Menu.Item>
-          </SubMenu>
-
           {/* Equipos */}
           <SubMenu key="equipos" icon={<TeamOutlined />} title="Equipos">
             <Menu.Item key="verEquipos"><Link to="/verEquipos">Ver Equipos</Link></Menu.Item>
             <Menu.Item key="agregarEquipo"><Link to="/agregarEquipo">Agregar Equipo</Link></Menu.Item>
           </SubMenu>
 
+          {/* Campañas */}
+          <SubMenu key="laboreos" icon={<ToolOutlined />} title="Campañas">
+            <Menu.Item key="verLaboreos"><Link to="/verLaboreos">Ver Campañas</Link></Menu.Item>
+            <Menu.Item key="agregarLaboreo"><Link to="/agregarLaboreo">Agregar Campaña</Link></Menu.Item>
+          </SubMenu>
+
+
           {/* Vencimientos */}
           <Menu.Item key="verVencimientos" icon={<CarryOutOutlined />}>
             <Link to="/verVencimientos">Ver Vencimientos</Link>
+          </Menu.Item>
+
+
+          <Menu.Item key="verSistemaProveedor" icon={<ExportOutlined />} onClick={handleOpenPopup}>
+            Ver Sistema Proveedor
           </Menu.Item>
         </Menu>
       </Sider>
@@ -149,8 +165,9 @@ const LeftMenu = () => {
         <Header
           style={{
             position: 'fixed',
-
             width: collapsed ? '93%' : '85%',
+            left: collapsed ? 80 : 200,
+            transition: 'left 0.3s',
             top: 0,
             right: 0,
             zIndex: 1000,
@@ -206,22 +223,22 @@ const LeftMenu = () => {
           }}
         >
           <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/agregarCliente" element={<CrearCliente />} />
-            <Route path="/agregarEmpleado" element={<CrearEmpleado />} />
-            <Route path="/agregarVehiculo" element={<CrearVehiculo />} />
-            <Route path="/agregarLaboreo" element={<CrearLaboreo />} />
-            <Route path="/agregarEquipo" element={<CrearEquipo />} />
-            <Route path="/verClientes" element={<TablaClientes />} />
-            <Route path="/verPersonal" element={<TablaNominas />} />
-            <Route path="/verVehiculos" element={<TablaVehiculos />} />
-            <Route path="/verLaboreos" element={<TablaLaboreos />} />
-            <Route path="/verEquipos" element={<TablaEquipos />} />
-            <Route path="/verVencimientos" element={<TablasVencimientos />} />
-            <Route path="/agregarEmpresa" element={<CrearEmpresa />} />
-            <Route path="/verUsuarios" element={<TablaUsuarios />} />
-            <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo />} />
-
+            <Route path="/home" element={<Home usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarCliente" element={<CrearCliente usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarEmpleado" element={<CrearEmpleado usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarVehiculo" element={<CrearVehiculo usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarLaboreo" element={<CrearLaboreo usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarEquipo" element={<CrearEquipo usuario={usuario} empresa={empresa} />} />
+            <Route path="/verClientes" element={<TablaClientes usuario={usuario} empresa={empresa} />} />
+            <Route path="/verPersonal" element={<TablaNominas usuario={usuario} empresa={empresa} />} />
+            <Route path="/verVehiculos" element={<TablaVehiculos usuario={usuario} empresa={empresa} />} />
+            <Route path="/verLaboreos" element={<TablaLaboreos usuario={usuario} empresa={empresa} />} />
+            <Route path="/verEquipos" element={<TablaEquipos usuario={usuario} empresa={empresa} />} />
+            <Route path="/verVencimientos" element={<TablasVencimientos usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarEmpresa" element={<CrearEmpresa usuario={usuario} empresa={empresa} />} />
+            <Route path="/verUsuarios" element={<TablaUsuarios usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo usuario={usuario} empresa={empresa} />} />
+            <Route path="/verSistemaProveedor" element={<WebView usuario={usuario} empresa={empresa} />} />
           </Routes>
         </Content>
       </Layout>

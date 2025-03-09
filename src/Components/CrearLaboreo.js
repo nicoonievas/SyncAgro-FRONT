@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Select, notification, DatePicker } from 'antd';
+import { Button, Form, Input, Select, notification, DatePicker, Row, Col } from 'antd';
 import axios from 'axios';
 
 const { Option } = Select;
@@ -24,7 +24,7 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearLaboreo = ({ laboreoToAdd }) => {
+const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
@@ -79,7 +79,7 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
       nombre: values.nombre,
       descripcion: values.descripcion,
       resumen: values.resumen,
-      equipos: values.equipos, 
+      equipos: values.equipos,
       empleados: values.empleados,  // Array de empleados seleccionados
       vehiculos: values.vehiculos,  // Array de vehículos seleccionados
       tarea: values.tarea,          // Tarea seleccionada
@@ -121,158 +121,181 @@ const CrearLaboreo = ({ laboreoToAdd }) => {
     setSelectedCliente(selected);
   };
 
-  return (
-    <Form
-      {...layout}
-      form={form}
-      name="crear-laboreo"
-      onFinish={onFinish}
-      style={{ maxWidth: 600 }}
-      validateMessages={validateMessages}
+
+return (
+  <Form
+    {...layout}
+    form={form}
+    name="crear-laboreo"
+    onFinish={onFinish}
+    style={{ maxWidth: 600 }}
+    validateMessages={validateMessages}
+  >
+    <Form.Item
+      name="nombre"
+      label="Nombre del laboreo"
+      rules={[{ required: true }]}
+      labelAlign="right" // Alineación de la etiqueta
     >
-      <Form.Item
-        name="nombre"
-        label="Nombre del laboreo"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
+      <Input />
+    </Form.Item>
 
-      <Form.Item
-        name="descripcion"
-        label="Descripción del laboreo"
-      >
-        <Input.TextArea />
-      </Form.Item>
+    <Form.Item
+      name="descripcion"
+      label="Descripción del laboreo"
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Input.TextArea />
+    </Form.Item>
 
-      <Form.Item
-        name="resumen"
-        label="Resumen del laboreo"
-      >
-        <Input.TextArea />
-      </Form.Item>
+    <Form.Item
+      name="resumen"
+      label="Resumen del laboreo"
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Input.TextArea />
+    </Form.Item>
 
-      <Form.Item
-        name="equipos" // Cambié 'equipo' a 'equipos'
-        label="Equipos"
-        rules={[{ required: false }]}
+    <Form.Item
+      name="equipos"
+      label="Equipos"
+      rules={[{ required: false }]}
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Select
+        showSearch
+        placeholder="Buscar equipos"
+        mode="multiple"
+        optionFilterProp="children"
+        filterOption={(input, option) =>
+          option.children.toLowerCase().includes(input.toLowerCase())
+        }
+        style={{ width: '100%' }} // Ajusta el tamaño del Select
       >
-        <Select
-          showSearch
-          placeholder="Buscar equipos"
-          mode="multiple"
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            option.children.toLowerCase().includes(input.toLowerCase())
-          }
+        {equipos.map((equipo) => (
+          <Option key={equipo._id} value={equipo._id}>
+            Equipo: {equipo.nombre} - Numero: {equipo.numero}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    <Form.Item
+      name="empleados"
+      label="Empleados Adicionales"
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Select
+        mode="multiple"
+        placeholder="Seleccionar empleados"
+        optionLabelProp="children"
+        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      >
+        {empleados.map((empleado) => (
+          <Option key={empleado._id} value={empleado._id}>
+            {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    <Form.Item
+      name="vehiculos"
+      label="Vehículos Adicionales"
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Select
+        mode="multiple"
+        placeholder="Seleccionar vehículos"
+        optionLabelProp="children"
+        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      >
+        {vehiculos.map((vehiculo) => (
+          <Option key={vehiculo._id} value={vehiculo._id}>
+            {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
+
+    {/* Agrupar Tarea y Grano en un Row */}
+    <Row gutter={16}>
+      <Col span={12}>
+        <Form.Item
+          name="tarea"
+          label="Tarea"
+          rules={[{ required: true }]}
+          labelAlign="right" // Alineación de la etiqueta
         >
-          {equipos.map((equipo) => (
-            <Option key={equipo._id} value={equipo._id}>
-              Equipo: {equipo.nombre} - Numero: {equipo.numero}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
+          <Select placeholder="Seleccionar tarea" style={{ width: '100%' }}>
+            {tareas.map((tarea, index) => (
+              <Option key={index} value={tarea}>
+                {tarea}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
 
-      <Form.Item
-        name="empleados"
-        label="Empleados Adicionales"
-      >
-        <Select
-          mode="multiple"
-          placeholder="Seleccionar empleados"
-          optionLabelProp="children"
+      <Col span={12}>
+        <Form.Item
+          name="grano"
+          label="Grano"
+          rules={[{ required: true }]}
+          labelAlign="right" // Alineación de la etiqueta
         >
-          {empleados.map((empleado) => (
-            <Option key={empleado._id} value={empleado._id}>
-              {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
+          <Select placeholder="Seleccionar tipo de grano" style={{ width: '100%' }}>
+            {granos.map((grano, index) => (
+              <Option key={index} value={grano}>
+                {grano}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Col>
+    </Row>
 
-      <Form.Item
-        name="vehiculos"
-        label="Vehículos Adicionales"
+    <Form.Item
+      name="cliente"
+      label="Cliente Seleccionado"
+      rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <Select
+        showSearch
+        placeholder="Buscar cliente"
+        optionFilterProp="children"
+        onChange={handleClienteSelect}
+        filterOption={(input, option) =>
+          option.children.toLowerCase().includes(input.toLowerCase())
+        }
+        style={{ width: '100%' }} // Ajusta el tamaño del Select
       >
-        <Select
-          mode="multiple"
-          placeholder="Seleccionar vehículos"
-          optionLabelProp="children"
-        >
-          {vehiculos.map((vehiculo) => (
-            <Option key={vehiculo._id} value={vehiculo._id}>
-              {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
+        {clientes.map((cliente) => (
+          <Option key={cliente._id} value={cliente._id}>
+            {cliente.nombre} - {cliente.apellido}
+          </Option>
+        ))}
+      </Select>
+    </Form.Item>
 
-      <Form.Item
-        name="tarea"
-        label="Tarea"
-        rules={[{ required: true }]}
-      >
-        <Select placeholder="Seleccionar tarea">
-          {tareas.map((tarea, index) => (
-            <Option key={index} value={tarea}>
-              {tarea}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
+    <Form.Item
+      name="fechaInicio"
+      label="Fecha de inicio"
+      rules={[{ required: true }]}
+      labelAlign="right" // Alineación de la etiqueta
+    >
+      <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+    </Form.Item>
 
-      <Form.Item
-        name="grano"
-        label="Grano"
-        rules={[{ required: true }]}
-      >
-        <Select placeholder="Seleccionar tipo de grano">
-          {granos.map((grano, index) => (
-            <Option key={index} value={grano}>
-              {grano}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
+    <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+      <Button type="primary" htmlType="submit" loading={loading}>
+        Crear laboreo
+      </Button>
+    </Form.Item>
+  </Form>
+);
 
-      <Form.Item
-        name="cliente"
-        label="Cliente Seleccionado"
-        rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
-      >
-        <Select
-          showSearch
-          placeholder="Buscar cliente"
-          optionFilterProp="children"
-          onChange={handleClienteSelect}
-          filterOption={(input, option) =>
-            option.children.toLowerCase().includes(input.toLowerCase())
-          }
-        >
-          {clientes.map((cliente) => (
-            <Option key={cliente._id} value={cliente._id}>
-              {cliente.nombre} - {cliente.apellido}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        name="fechaInicio"
-        label="Fecha de inicio"
-        rules={[{ required: true }]}
-      >
-        <DatePicker format="YYYY-MM-DD" />
-      </Form.Item>
-
-      <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Crear laboreo
-        </Button>
-      </Form.Item>
-    </Form>
-  );
 };
 
 export default CrearLaboreo;

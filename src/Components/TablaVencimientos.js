@@ -200,7 +200,11 @@ const TablasVencimientos = () => {
       key: 'marca_modelo',
       render: (_, record) => `${record.marca} ${record.modelo}`
     },
-    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio' },
+    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio',  render: (dominio) => (
+      <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
+        {dominio}
+      </span>
+    ) },
     { title: 'Alias', dataIndex: 'alias', key: 'alias' },
     {
       title: 'Seguro Venc.',
@@ -233,7 +237,11 @@ const TablasVencimientos = () => {
       key: 'nombre_apellido',
       render: (_, record) => `${record.firstname} ${record.lastname}`
     },
-    { title: 'Documento', dataIndex: 'documento', key: 'documento' },
+    { title: 'Documento', dataIndex: 'documento', key: 'documento',  render: (documento) => (
+      <span style={{ fontWeight: 'bold'}}>
+        {documento}
+      </span> )
+      },
     {
       title: 'Licencia Venc.',
       dataIndex: 'licenciaVencimiento',

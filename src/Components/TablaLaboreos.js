@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography } from 'antd';
-import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography,
+Row, Col} from 'antd';
+import { DeleteOutlined, FormOutlined, EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import FinishModal from './FinishModal';
 const { Option } = Select;
 const { Title } = Typography;
 
@@ -27,15 +29,19 @@ const TablaLaboreos = () => {
     current: 1,
     pageSize: 10,
   });
+  const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
+  const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
   const [totalLaboreos, setTotalLaboreos] = useState(0);
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);
+  const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const { current, pageSize } = pagination;
-  
+
       try {
         const [
           laboreosResponse,
@@ -56,7 +62,7 @@ const TablaLaboreos = () => {
           axios.get("http://localhost:6001/api/vehiculosLibres"),
           axios.get("http://localhost:6001/api/clientes")
         ]);
-  
+
         // Seteamos los estados con los datos recibidos
         setLaboreos(laboreosResponse.data);
         setTotalLaboreos(laboreosResponse.data.total);
@@ -67,22 +73,35 @@ const TablaLaboreos = () => {
         setVehiculos(vehiculosResponse.data);
         setVehiculosLibres(vehiculosLibresResponse.data);
         setClientes(clientesResponse.data);
-  
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [pagination, selectedCliente, selectedEquipo]);
-  
+
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
     setIsDeleteModalVisible(true);
   };
+
+  const showFinishModal = (record) => {
+    console.log("ID del laboreo a finalizar:", record);
+    setSelectedRecord(record);  // Pasamos el record completo
+    setIsFinishModalVisible(true);
+  };
+
+
+  const handleFinishModalClose = () => {
+    setIsFinishModalVisible(false);
+    setSelectedRecord(null);
+  };
+
 
   const showEditModal = (laboreo) => {
     setCurrentLaboreo(laboreo);
@@ -151,7 +170,7 @@ const TablaLaboreos = () => {
   const estadoMapping = {
     0: "Inactivo",
     1: "Activo",
-    2: "Finalizado",
+    // 2: "Finalizado",
     3: "Cancelado"
   };
   const columns = [
@@ -185,16 +204,39 @@ const TablaLaboreos = () => {
       title: 'Estado',
       dataIndex: 'estado',
       key: 'estado',
-      render: (estado) => estadoMapping[estado] || "Desconocido",
+      render: (estado) => estadoMapping[estado] || estado,
     },
     {
       title: 'Acción',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => showEditModal(record)}><EditOutlined /></a>
+          <a
+            onClick={(e) => {
+              if (record.estado === "Finalizado") {
+                e.preventDefault(); // Evita que el clic se ejecute
+              } else {
+                showEditModal(record);
+              }
+            }}
+            disabled={record.estado === "Finalizado"}
+          >      <EditOutlined />
+          </a>
           <a onClick={() => showDeleteConfirm(record._id)}><DeleteOutlined /></a>
-        </Space>
+          <a
+            onClick={(e) => {
+              if (record.estado === "Finalizado") {
+                e.preventDefault(); // Evita que el clic se ejecute
+              } else {
+                showFinishModal(record);
+              }
+            }}
+            disabled={record.estado === "Finalizado"}
+          >
+            <CheckCircleOutlined />
+
+          </a>
+        </Space >
       ),
     },
   ];
@@ -212,11 +254,14 @@ const TablaLaboreos = () => {
   const handleTableChange = (pagination) => {
     setPagination(pagination);
   };
-
+  const handleUpdate = () => {
+    console.log("Actualizar datos después de finalizar laboreo");
+    // Aquí puedes recargar la tabla o actualizar el estado según sea necesario
+  };
   return (
-    
+
     <>
-<Title level={5} style={{ marginTop: '0px' }}>Gestión de Campañas</Title>
+      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Campañas</Title>
       <Table
         columns={columns}
         dataSource={laboreos}
@@ -271,12 +316,41 @@ const TablaLaboreos = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="tarea" label="Tarea">
-            <Input />
-          </Form.Item>
-          <Form.Item name="grano" label="Grano">
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="tarea"
+                label="Tarea"
+                rules={[{ required: true }]}
+                labelAlign="right" // Alineación de la etiqueta
+              >
+                <Select placeholder="Seleccionar tarea" style={{ width: '100%' }}>
+                  {tareas.map((tarea, index) => (
+                    <Option key={index} value={tarea}>
+                      {tarea}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                name="grano"
+                label="Grano"
+                rules={[{ required: true }]}
+                labelAlign="right" // Alineación de la etiqueta
+              >
+                <Select placeholder="Seleccionar tipo de grano" style={{ width: '100%' }}>
+                  {granos.map((grano, index) => (
+                    <Option key={index} value={grano}>
+                      {grano}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item
             name="cliente"
             label="Cliente"
@@ -365,22 +439,28 @@ const TablaLaboreos = () => {
         </Form>
       </Modal>
 
-     <Modal title="Visualizar Laboreo" visible={isViewModalVisible} onCancel={handleCancel} footer={null}>
-        {currentLaboreo && (
+      <Modal title="Detalles del Laboreo" open={isViewModalVisible} onCancel={handleCancel} footer={null}>
+        {record && (
           <div>
-            <p><strong>Fecha:</strong> {currentLaboreo.fecha}</p>
-            <p><strong>Equipo:</strong> {currentLaboreo.equipo}</p>
-            <p><strong>Tarea:</strong> {currentLaboreo.tarea}</p>
-            <p><strong>Grano:</strong> {currentLaboreo.grano}</p>
-            <p><strong>Cliente:</strong> {currentLaboreo.cliente}</p>
-            <p><strong>Empleados:</strong> {currentLaboreo.empleados.join(', ')}</p>
-            <p><strong>Vehículos:</strong> {currentLaboreo.vehiculos.join(', ')}</p>
-            <p><strong>Estado:</strong> {currentLaboreo.estado}</p>
+            <p><strong>Nombre:</strong> {record.nombre}</p>
+            <p><strong>Cliente:</strong> {record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente"}</p>
+            <p><strong>Equipos:</strong> {record.equipos?.map(equipo => `${equipo.nombre} (${equipo.numero})`).join(', ') || "Sin equipos"}</p>
+            <p><strong>Fecha Inicio:</strong> {record.fechaInicio ? new Date(record.fechaInicio).toLocaleDateString('es-ES') : "No iniciado"}</p>
+            <p><strong>Fecha Fin:</strong> {record.fechaCierre ? new Date(record.fechaCierre).toLocaleDateString('es-ES') : "No finalizado"}</p>
+            <p><strong>Estado:</strong> {record.estado || "Desconocido"}</p>
           </div>
         )}
       </Modal>
 
-   
+      <FinishModal
+        visible={isFinishModalVisible}
+        onClose={handleFinishModalClose}
+        laboreo={selectedRecord}  // Pasamos el record completo
+        onUpdate={handleUpdate}
+      />
+
+
+
 
     </>
   );

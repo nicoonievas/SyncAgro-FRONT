@@ -16,7 +16,7 @@ const openNotificationWithIcon = (type, message, description) => {
   notification[type]({ message, description });
 };
 
-const CrearVehiculo = () => {
+const CrearVehiculo = ({ usuario, empresa }) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [marcasModelos, setMarcasModelos] = useState([]);
@@ -65,6 +65,9 @@ const CrearVehiculo = () => {
       estado: values.estado,
       fecha_vencimiento_seguro: values.fecha_vencimiento_seguro.format('YYYY-MM-DD'),
       fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('YYYY-MM-DD'),
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioId: usuario._id
     };
 
     try {
