@@ -12,6 +12,8 @@ const TablasVencimientos = () => {
   const [selectedId, setSelectedId] = useState('');
   const [isVehiculo, setIsVehiculo] = useState(false);
   const [form] = Form.useForm();
+  const [totalEmpleados, setTotalEmpleados] = useState(0);
+  const [totalVehiculos, setTotalVehiculos] = useState(0);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -30,7 +32,9 @@ const TablasVencimientos = () => {
       ]);
 
       setVehiculos(vehiculosResponse.data);
+      setTotalVehiculos(vehiculosResponse.data.length);
       setEmpleados(empleadosResponse.data);
+      setTotalEmpleados(empleadosResponse.data.length);
 
       validarVencimientos(vehiculosResponse.data, empleadosResponse.data);
     } catch (error) {
@@ -169,7 +173,7 @@ const TablasVencimientos = () => {
       await axios.put(url, formattedValues);
 
       notification.success({
-        message: 'Fecha Editada',
+        message: 'Fecha Modificada',
         description: 'El Vencimiento ha sido editado exitosamente.',
       });
 
@@ -200,11 +204,13 @@ const TablasVencimientos = () => {
       key: 'marca_modelo',
       render: (_, record) => `${record.marca} ${record.modelo}`
     },
-    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio',  render: (dominio) => (
-      <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
-        {dominio}
-      </span>
-    ) },
+    {
+      title: 'Dominio', dataIndex: 'dominio', key: 'dominio', render: (dominio) => (
+        <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
+          {dominio}
+        </span>
+      )
+    },
     { title: 'Alias', dataIndex: 'alias', key: 'alias' },
     {
       title: 'Seguro Venc.',
@@ -237,11 +243,12 @@ const TablasVencimientos = () => {
       key: 'nombre_apellido',
       render: (_, record) => `${record.firstname} ${record.lastname}`
     },
-    { title: 'Documento', dataIndex: 'documento', key: 'documento',  render: (documento) => (
-      <span style={{ fontWeight: 'bold'}}>
-        {documento}
-      </span> )
-      },
+    {
+      title: 'Documento', dataIndex: 'documento', key: 'documento', render: (documento) => (
+        <span style={{ fontWeight: 'bold' }}>
+          {documento}
+        </span>)
+    },
     {
       title: 'Licencia Venc.',
       dataIndex: 'licenciaVencimiento',
@@ -282,7 +289,15 @@ const TablasVencimientos = () => {
         dataSource={vehiculos}
         rowKey="_id"
         loading={loading}
-        pagination={{ pageSize: 4 }}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: totalEmpleados,
+          // showSizeChanger: true, // Habilita el selector de cantidad de registros por página
+          // pageSizeOptions: ['5', '10', '20', '50'], // Opciones disponibles en el selector
+          onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
+        }}
+
       />
 
       <h3>Documentacion de Empleados</h3>
@@ -291,7 +306,14 @@ const TablasVencimientos = () => {
         dataSource={empleados}
         rowKey="_id"
         loading={loading}
-        pagination={{ pageSize: 4 }}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: totalVehiculos,
+          showSizeChanger: true, // Habilita el selector de cantidad de registros por página
+          pageSizeOptions: ['5', '10', '20', '50'], // Opciones disponibles en el selector
+          onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
+        }}
       />
 
       <Modal

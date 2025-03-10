@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography } from 'antd';
-import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
+import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -18,21 +18,23 @@ const TablaVehiculos = () => {
   const [selectedTipo, setSelectedTipo] = useState(null);
   const [modelosDisponibles, setModelosDisponibles] = useState([]);
   const [marcaVehiculos, setMarcaVehiculos] = useState([]);
+  const [totalVehiculos, setTotalVehiculos] = useState(0);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 6,
   });
 
   useEffect(() => {
     const fetchVehiculos = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:6001/api/vehiculos", {
-          params: { page: pagination.current, perPage: pagination.pageSize },
-        });
+        const response = await axios.get("http://localhost:6001/api/vehiculos", 
+          // {params: { page: pagination.current, perPage: pagination.pageSize },}
+        );
 
         if (Array.isArray(response.data)) {
           setVehiculos(response.data);
+          setTotalVehiculos(response.data.length);
         } else {
           console.error('Formato de datos inesperado:', response.data);
         }
@@ -85,7 +87,7 @@ const TablaVehiculos = () => {
       dominio: vehiculo.dominio || "",
       alias: vehiculo.alias || "",
       numero: vehiculo.numero || "",
-      estado: vehiculo.estado !== undefined ? String(vehiculo.estado) : "0",
+      estado: vehiculo.estado || "",
       fecha_vencimiento_seguro: vehiculo.fecha_vencimiento_seguro ? dayjs(vehiculo.fecha_vencimiento_seguro) : null,
       fecha_vencimiento_vtv: vehiculo.fecha_vencimiento_vtv ? dayjs(vehiculo.fecha_vencimiento_vtv) : null,
     });
@@ -125,7 +127,7 @@ const TablaVehiculos = () => {
         ...values,
         fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.format('YYYY-MM-DD') : null,
         fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.format('YYYY-MM-DD') : null,
-        estado: Number(values.estado), // Asegurar que el estado sea un número
+        // estado: Number(values.estado), // Asegurar que el estado sea un número
       };
 
       await axios.put(`http://localhost:6001/api/vehiculo/${currentVehiculo._id}`, formattedValues);
@@ -156,15 +158,15 @@ const TablaVehiculos = () => {
     }
   };
 
-  const estadoMapping = {
-    0: "Inactivo",
-    1: "Activo",
-    // 2: "Finalizado",
-    // 3: "Cancelado",
-    // 5: "Asignado",
-    // 6: "Libre",
-    7: "En reparación"
-  };
+  // const estadoMapping = {
+  //   0: "Inactivo",
+  //   1: "Activo",
+  //   // 2: "Finalizado",
+  //   // 3: "Cancelado",
+  //   // 5: "Asignado",
+  //   // 6: "Libre",
+  //   7: "En reparación"
+  // };
 
   const columns = [
     { title: 'Tipo', dataIndex: 'tipo', key: 'tipo' },
@@ -178,17 +180,19 @@ const TablaVehiculos = () => {
         <span>{record.marca} {record.modelo}</span>
       ),
     },
-    { title: 'Dominio', dataIndex: 'dominio', key: 'dominio',  render: (dominio) => (
-      <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
-        {dominio}
-      </span>
-    ) },
+    {
+      title: 'Dominio', dataIndex: 'dominio', key: 'dominio', render: (dominio) => (
+        <span style={{ fontWeight: 'bold', border: '1px solid black', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '4px' }}>
+          {dominio}
+        </span>
+      )
+    },
     { title: 'Alias', dataIndex: 'alias', key: 'alias' },
     {
       title: 'Estado',
       dataIndex: 'estado',
       key: 'estado',
-      render: (estado) => estadoMapping[estado] || "Desconocido",
+      // render: (estado) => estadoMapping[estado] || "Desconocido",
     },
     {
       title: 'Acción',
@@ -204,8 +208,8 @@ const TablaVehiculos = () => {
 
   return (
     <>
-    {/* Título de la tabla */}
-    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehículos</Title>
+      {/* Título de la tabla */}
+      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehículos</Title>
       <Table
         columns={columns}
         dataSource={vehiculos}
@@ -214,6 +218,8 @@ const TablaVehiculos = () => {
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: vehiculos.length,
+          showSizeChanger: true, // Habilita el selector de cantidad de registros por página
+          pageSizeOptions: ['5', '10', '20', '50'], // Opciones disponibles en el selector
           onChange: (page, pageSize) => setPagination({ current: page, pageSize }),
         }}
         loading={loading}
@@ -266,13 +272,11 @@ const TablaVehiculos = () => {
             <Input />
           </Form.Item>
 
-        
-
           <Form.Item name="alias" label="Alias">
             <Input />
           </Form.Item>
 
-          <Form.Item name="numero" label="Numero" rules={[{ required: true }]}>
+          <Form.Item name="numero" label="Numero">
             <Input />
           </Form.Item>
 
@@ -286,9 +290,9 @@ const TablaVehiculos = () => {
 
           <Form.Item name="estado" label="Estado">
             <Select>
-              {Object.entries(estadoMapping).map(([value, label]) => (
-                <Option key={value} value={value}>{label}</Option>
-              ))}
+              <Option value="Activo">Activo</Option>
+              <Option value="Inactivo">Inactivo</Option>
+              <Option value="En Reparación">En reparación</Option>
             </Select>
           </Form.Item>
 

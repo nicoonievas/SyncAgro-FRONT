@@ -67,7 +67,7 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('YYYY-MM-DD'),
       empresaId: empresa._id,
       razonSocial: empresa.razonSocial,
-      usuarioId: usuario._id
+      usuarioCreacion: usuario._id
     };
 
     try {
@@ -132,19 +132,19 @@ const CrearVehiculo = ({ usuario, empresa }) => {
         <Input />
       </Form.Item>
 
-      <Form.Item name="numero" label="Número" rules={[{ required: true }]}>
+      <Form.Item name="numero" label="Número" rules={[{ required: false }]}>
         <Input />
       </Form.Item>
 
-      <Form.Item name="alias" label="Alias" rules={[{ required: true }]}>
+      <Form.Item name="alias" label="Alias" rules={[{ required: false }]}>
         <Input />
       </Form.Item>
 
       <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
         <Select>
-          <Option value="1">Activo</Option>
-          <Option value="0">Inactivo</Option>
-          <Option value="7">En reparación</Option>
+          <Option value="Activo">Activo</Option>
+          <Option value="Inctivo">Inactivo</Option>
+          <Option value="En Reparación">En reparación</Option>
         </Select>
       </Form.Item>
 

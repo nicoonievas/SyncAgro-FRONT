@@ -25,7 +25,7 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearEmpleado = () => {
+const CrearEmpleado = ({empresa, usuario}) => {
   const [loading, setLoading] = useState(false); // Estado para manejar el loading
   const [form] = Form.useForm(); // Inicializar el formulario
 
@@ -35,6 +35,9 @@ const CrearEmpleado = () => {
     console.log(values); // Para depuración
 
     const EmpleadoData = {
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioCreacion: usuario._id,
       firstname: values.firstname,
       lastname: values.lastname,
       email: values.email,

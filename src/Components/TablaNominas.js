@@ -16,7 +16,7 @@ const TablaNominas = () => {
 
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
   });
   const [totalNominas, setTotalNominas] = useState(0);
   const [form] = Form.useForm();
@@ -25,9 +25,9 @@ const TablaNominas = () => {
     const fetchNominas = async () => {
       const { current, pageSize } = pagination;
       try {
-        const response = await axios.get("http://localhost:6001/api/nominas", {
-          params: { page: current, perPage: pageSize },
-        });
+        const response = await axios.get("http://localhost:6001/api/nominas", 
+          // {params: { page: current, perPage: pageSize },}
+        );
 
         if (response.data && Array.isArray(response.data)) {
           setNominas(response.data);
@@ -170,6 +170,8 @@ const TablaNominas = () => {
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: totalNominas,
+          showSizeChanger: true, // Habilita el selector de cantidad de registros por página
+          pageSizeOptions: ['5', '10', '20', '50'], // Opciones disponibles en el selector
           onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
         }}
         loading={loading}

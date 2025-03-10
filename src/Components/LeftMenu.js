@@ -47,7 +47,10 @@ const LeftMenu = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [usuario, setUsuario] = useState([]);
   const [empresa, setEmpresa] = useState("");
+  const [razonSocial, setRazonSocial] = useState("");
   const { user, isAuthenticated, logout,
+ 
+  
     // claim, getIdTokenClaims 
   } = useAuth0();
   // const [token, setToken] = useState("");
@@ -69,9 +72,11 @@ const LeftMenu = () => {
         setUsuarios(response.data);
         // Buscar el usuario logueado en la lista de usuarios
         const usuarioEncontrado = response.data.find(u => u.email === user?.email);
+        // console.log("empresa:", usuarioEncontrado.empresa);
         if (usuarioEncontrado) {
-          setEmpresa(usuarioEncontrado.empresa.razonSocial || "No asignado");
+          setEmpresa(usuarioEncontrado.empresa || "No asignado");
           setUsuario(usuarioEncontrado);
+          setRazonSocial(usuarioEncontrado.empresa.razonSocial);
         }
       })
       .catch(error => console.error("Error al obtener usuarios:", error));
@@ -195,7 +200,7 @@ const LeftMenu = () => {
 
                   <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
                     <span>{usuario.nombre} {usuario.apellido}</span>
-                    <span style={{ fontSize: '12px', color: '#888' }}>{empresa}</span>
+                    <span style={{ fontSize: '12px', color: '#888' }}>{empresa.razonSocial}</span>
                   </div>
 
                   <Button
