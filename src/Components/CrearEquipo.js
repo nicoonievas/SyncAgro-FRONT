@@ -25,7 +25,7 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearEquipo = ({ equipoToAdd }) => {
+const CrearEquipo = ({ equipoToAdd, empresa, usuario}) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
@@ -60,6 +60,9 @@ const CrearEquipo = ({ equipoToAdd }) => {
 
   const onFinish = async (values) => {
     const equipoData = {
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioCreacion: usuario._id,
       nombre: values.nombre,
       descripcion: values.descripcion,
       numero: values.numero,

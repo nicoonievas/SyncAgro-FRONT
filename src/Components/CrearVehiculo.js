@@ -56,6 +56,9 @@ const CrearVehiculo = ({ usuario, empresa }) => {
     console.log(values);
 
     const vehiculoData = {
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioCreacion: usuario._id,
       tipo: values.tipo,
       marca: values.marca,
       modelo: values.modelo,
@@ -65,9 +68,6 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       estado: values.estado,
       fecha_vencimiento_seguro: values.fecha_vencimiento_seguro.format('YYYY-MM-DD'),
       fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('YYYY-MM-DD'),
-      empresaId: empresa._id,
-      razonSocial: empresa.razonSocial,
-      usuarioCreacion: usuario._id
     };
 
     try {
@@ -167,32 +167,3 @@ const CrearVehiculo = ({ usuario, empresa }) => {
 
 export default CrearVehiculo;
 
-
-{/* <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}> */}
-      {/* <Form.Item name="idvehiculo" label="ID Vehículo" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item> */}
-      {/* <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
-        <Select>
-          <Option value="auto">Auto</Option>
-          <Option value="cabezal">Cabezal</Option>
-          <Option value="camion">Camion</Option>
-          <Option value="camioneta">Camioneta</Option>
-          <Option value="casilla">Casilla</Option>
-          <Option value="cisterna">Cisterna</Option>
-          <Option value="cosechadora">Cosechadora</Option>
-          <Option value="elevador">Elevador</Option>
-          <Option value="semirremolque">Semirremolque</Option>
-          <Option value="tolva">Tolva</Option>
-          <Option value="tractor">Tractor</Option>
-          <Option value="trailer">Trailer</Option>
-        </Select>
-      </Form.Item> */}
-
-      {/* <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
-
-      <Form.Item name="modelo" label="Modelo" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item> */}

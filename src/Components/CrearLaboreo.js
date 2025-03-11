@@ -24,7 +24,7 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
+const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
@@ -34,6 +34,8 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
   const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
   const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [campos, setCampos] = useState([]);
+  const [selectedCampos, setSelectedCampos] = useState([]);
 
   useEffect(() => {
     if (laboreoToAdd) {
@@ -47,6 +49,7 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
         tarea: laboreoToAdd.tarea,
         grano: laboreoToAdd.grano,
         cliente: laboreoToAdd.cliente,
+        camposAfectados: laboreoToAdd.camposAfectados,
         fechaInicio: laboreoToAdd.fechaInicio,
       });
     }
@@ -67,6 +70,7 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
         setVehiculos(vehiculosRes.data);
         setClientes(clientesRes.data);
         setEquipos(equiposRes.data);
+        console.log('Campos obtenidos:', clientesRes.data);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }
@@ -76,6 +80,9 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
 
   const onFinish = async (values) => {
     const laboreoData = {
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioCreacion: usuario._id,
       nombre: values.nombre,
       descripcion: values.descripcion,
       resumen: values.resumen,
@@ -85,8 +92,9 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
       tarea: values.tarea,          // Tarea seleccionada
       grano: values.grano,          // Grano seleccionado
       cliente: selectedCliente?._id, // Usar el ID del cliente seleccionado
+      camposAfectados: selectedCampos,
       fechaInicio: values.fechaInicio
-        ? values.fechaInicio.format('YYYY-MM-DD')
+        ? values.fechaInicio.format('DD-MM-YYYY')
         : null,
     };
 
@@ -108,6 +116,7 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
 
       openNotificationWithIcon('success', 'laboreo creado', 'El laboreo se ha creado exitosamente.');
       form.resetFields();
+      setSelectedCampos([]);
     } catch (error) {
       console.error('Error al crear el laboreo:', error);
       openNotificationWithIcon('error', 'Error', 'Hubo un problema al crear el laboreo.');
@@ -119,182 +128,212 @@ const CrearLaboreo = ({ laboreoToAdd }, empresa, usuario) => {
   const handleClienteSelect = (clienteId) => {
     const selected = clientes.find((cliente) => cliente._id === clienteId);
     setSelectedCliente(selected);
+
+    // Cargar los campos de ese cliente
+    if (selected) {
+      setCampos(selected.coordenadas || []);
+    } else {
+      setCampos([]);
+    }
+  };
+  const handleCamposSelect = (selectedCampoIds) => {
+    setSelectedCampos(selectedCampoIds);
   };
 
-
-return (
-  <Form
-    {...layout}
-    form={form}
-    name="crear-laboreo"
-    onFinish={onFinish}
-    style={{ maxWidth: 600 }}
-    validateMessages={validateMessages}
-  >
-    <Form.Item
-      name="nombre"
-      label="Nombre del laboreo"
-      rules={[{ required: true }]}
-      labelAlign="right" // Alineación de la etiqueta
+  return (
+    <Form
+      {...layout}
+      form={form}
+      name="crear-laboreo"
+      onFinish={onFinish}
+      style={{ maxWidth: 600 }}
+      validateMessages={validateMessages}
     >
-      <Input />
-    </Form.Item>
-
-    <Form.Item
-      name="descripcion"
-      label="Descripción del laboreo"
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Input.TextArea />
-    </Form.Item>
-
-    <Form.Item
-      name="resumen"
-      label="Resumen del laboreo"
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Input.TextArea />
-    </Form.Item>
-
-    <Form.Item
-      name="equipos"
-      label="Equipos"
-      rules={[{ required: false }]}
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Select
-        showSearch
-        placeholder="Buscar equipos"
-        mode="multiple"
-        optionFilterProp="children"
-        filterOption={(input, option) =>
-          option.children.toLowerCase().includes(input.toLowerCase())
-        }
-        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      <Form.Item
+        name="nombre"
+        label="Nombre del laboreo"
+        rules={[{ required: true }]}
+        labelAlign="right" // Alineación de la etiqueta
       >
-        {equipos.map((equipo) => (
-          <Option key={equipo._id} value={equipo._id}>
-            Equipo: {equipo.nombre} - Numero: {equipo.numero}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
+        <Input />
+      </Form.Item>
 
-    <Form.Item
-      name="empleados"
-      label="Empleados Adicionales"
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Select
-        mode="multiple"
-        placeholder="Seleccionar empleados"
-        optionLabelProp="children"
-        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      <Form.Item
+        name="descripcion"
+        label="Descripción del laboreo"
+        labelAlign="right" // Alineación de la etiqueta
       >
-        {empleados.map((empleado) => (
-          <Option key={empleado._id} value={empleado._id}>
-            {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
+        <Input.TextArea />
+      </Form.Item>
 
-    <Form.Item
-      name="vehiculos"
-      label="Vehículos Adicionales"
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Select
-        mode="multiple"
-        placeholder="Seleccionar vehículos"
-        optionLabelProp="children"
-        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      <Form.Item
+        name="resumen"
+        label="Resumen del laboreo"
+        labelAlign="right" // Alineación de la etiqueta
       >
-        {vehiculos.map((vehiculo) => (
-          <Option key={vehiculo._id} value={vehiculo._id}>
-            {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
+        <Input.TextArea />
+      </Form.Item>
 
-    {/* Agrupar Tarea y Grano en un Row */}
-    <Row gutter={16}>
-      <Col span={12}>
-        <Form.Item
-          name="tarea"
-          label="Tarea"
-          rules={[{ required: true }]}
-          labelAlign="right" // Alineación de la etiqueta
+      <Form.Item
+        name="equipos"
+        label="Equipos"
+        rules={[{ required: false }]}
+        labelAlign="right" // Alineación de la etiqueta
+      >
+        <Select
+          showSearch
+          placeholder="Buscar equipos"
+          mode="multiple"
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
+          style={{ width: '100%' }} // Ajusta el tamaño del Select
         >
-          <Select placeholder="Seleccionar tarea" style={{ width: '100%' }}>
-            {tareas.map((tarea, index) => (
-              <Option key={index} value={tarea}>
-                {tarea}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
+          {equipos.map((equipo) => (
+            <Option key={equipo._id} value={equipo._id}>
+              Equipo: {equipo.nombre} - Numero: {equipo.numero}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
 
-      <Col span={12}>
-        <Form.Item
-          name="grano"
-          label="Grano"
-          rules={[{ required: true }]}
-          labelAlign="right" // Alineación de la etiqueta
-        >
-          <Select placeholder="Seleccionar tipo de grano" style={{ width: '100%' }}>
-            {granos.map((grano, index) => (
-              <Option key={index} value={grano}>
-                {grano}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Col>
-    </Row>
-
-    <Form.Item
-      name="cliente"
-      label="Cliente Seleccionado"
-      rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <Select
-        showSearch
-        placeholder="Buscar cliente"
-        optionFilterProp="children"
-        onChange={handleClienteSelect}
-        filterOption={(input, option) =>
-          option.children.toLowerCase().includes(input.toLowerCase())
-        }
-        style={{ width: '100%' }} // Ajusta el tamaño del Select
+      <Form.Item
+        name="empleados"
+        label="Empleados Adicionales"
+        labelAlign="right" // Alineación de la etiqueta
       >
-        {clientes.map((cliente) => (
-          <Option key={cliente._id} value={cliente._id}>
-            {cliente.nombre} - {cliente.apellido}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
+        <Select
+          mode="multiple"
+          placeholder="Seleccionar empleados"
+          optionLabelProp="children"
+          style={{ width: '100%' }} // Ajusta el tamaño del Select
+        >
+          {empleados.map((empleado) => (
+            <Option key={empleado._id} value={empleado._id}>
+              {`${empleado.lastname} ${empleado.firstname} - ${empleado.rol}`}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
 
-    <Form.Item
-      name="fechaInicio"
-      label="Fecha de inicio"
-      rules={[{ required: true }]}
-      labelAlign="right" // Alineación de la etiqueta
-    >
-      <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-    </Form.Item>
+      <Form.Item
+        name="vehiculos"
+        label="Vehículos Adicionales"
+        labelAlign="right" // Alineación de la etiqueta
+      >
+        <Select
+          mode="multiple"
+          placeholder="Seleccionar vehículos"
+          optionLabelProp="children"
+          style={{ width: '100%' }} // Ajusta el tamaño del Select
+        >
+          {vehiculos.map((vehiculo) => (
+            <Option key={vehiculo._id} value={vehiculo._id}>
+              {`${vehiculo.tipo} - ${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.numero} - ${vehiculo.alias}`}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
 
-    <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-      <Button type="primary" htmlType="submit" loading={loading}>
-        Crear laboreo
-      </Button>
-    </Form.Item>
-  </Form>
-);
+      {/* Agrupar Tarea y Grano en un Row */}
+      <Row gutter={12}
+      style={{ justifyContent: 'right' }}>
+        <Col span={9}>
+          <Form.Item
+            name="tarea"
+            label="Tarea"
+            rules={[{ required: true }]}
+            labelAlign="right" // Alineación de la etiqueta
+          >
+            <Select placeholder="Seleccionar tarea" style={{ width: '100%' }}>
+              {tareas.map((tarea, index) => (
+                <Option key={index} value={tarea}>
+                  {tarea}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+
+        <Col span={10}>
+          <Form.Item
+            name="grano"
+            label="Grano"
+            rules={[{ required: true }]}
+            labelAlign="right" // Alineación de la etiqueta
+          >
+            <Select placeholder="Seleccionar tipo de grano" style={{ width: '100%' }}>
+              {granos.map((grano, index) => (
+                <Option key={index} value={grano}>
+                  {grano}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Form.Item
+        name="cliente"
+        label="Cliente Seleccionado"
+        rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
+        labelAlign="right" // Alineación de la etiqueta
+      >
+        <Select
+          showSearch
+          placeholder="Buscar cliente"
+          optionFilterProp="children"
+          onChange={handleClienteSelect}
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
+          style={{ width: '100%' }} // Ajusta el tamaño del Select
+        >
+          {clientes.map((cliente) => (
+            <Option key={cliente._id} value={cliente._id}>
+              {cliente.nombre} - {cliente.apellido}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        name="camposAfectados"
+        label="Campos Afectados"
+        labelAlign="right"
+      >
+        <Select
+          mode="multiple"
+          placeholder="Seleccionar campos afectados"
+          onChange={handleCamposSelect}
+          style={{ width: '100%' }}
+          disabled={!selectedCliente}
+        >
+          {campos.map((campo, index) => (
+            <Option key={index} value={campo.nombre}>
+              {campo.nombre}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        name="fechaInicio"
+        label="Fecha de inicio"
+        rules={[{ required: true }]}
+        labelAlign="right" // Alineación de la etiqueta
+      >
+        <DatePicker format="DD-MM-YYYY" style={{ width: '100%' }} />
+      </Form.Item>
+
+      <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+        <Button type="primary" htmlType="submit" loading={loading}>
+          Crear laboreo
+        </Button>
+      </Form.Item>
+    </Form>
+  );
 
 };
 

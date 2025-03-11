@@ -31,6 +31,7 @@ import CrearEmpresa from './CrearEmpresa';
 import TablaUsuarios from './TablaUsuarios';
 import CrearMarcaTipoModelo from './AgregarMarcasModelos';
 import WebView from './webView';
+import TablaEmpresas from './TablaEmpresas';
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -241,7 +242,8 @@ const LeftMenu = () => {
             <Route path="/verEquipos" element={<TablaEquipos usuario={usuario} empresa={empresa} />} />
             <Route path="/verVencimientos" element={<TablasVencimientos usuario={usuario} empresa={empresa} />} />
             <Route path="/agregarEmpresa" element={<CrearEmpresa usuario={usuario} empresa={empresa} />} />
-            <Route path="/verUsuarios" element={<TablaUsuarios usuario={usuario} empresa={empresa} />} />
+            <Route path="/verEmpresas" element={<TablaEmpresas />} />
+            <Route path="/verUsuarios" element={<TablaUsuarios />} />
             <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo usuario={usuario} empresa={empresa} />} />
             <Route path="/verSistemaProveedor" element={<WebView usuario={usuario} empresa={empresa} />} />
           </Routes>

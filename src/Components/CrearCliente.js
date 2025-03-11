@@ -18,7 +18,7 @@ const openNotificationWithIcon = (type, message, description) => {
   notification[type]({ message, description });
 };
 
-const CrearCliente = () => {
+const CrearCliente = ({usuario, empresa}) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -63,6 +63,8 @@ const CrearCliente = () => {
     }
   }, [selectedProvincia, api]);
 
+
+
   const addCampo = () => {
     setCampos([...campos, { nombre: '', latitud: '', longitud: '' }]);
   };
@@ -91,6 +93,9 @@ const CrearCliente = () => {
     const provinciaName = provincias.find(provincia => provincia.code === values.provincia)?.name;
 
     const clienteData = {
+      empresaId: empresa._id,
+      razonSocial: empresa.razonSocial,
+      usuarioCreacion: usuario._id,
       nombre: values.nombre,
       apellido: values.apellido,
       domicilio: values.domicilio,
