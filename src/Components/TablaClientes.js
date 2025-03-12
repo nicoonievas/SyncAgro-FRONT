@@ -3,8 +3,10 @@ import { Space, Table, Modal, Form, Input, Button, notification, Row, Col, Typog
 import { DeleteOutlined, EditOutlined, PushpinOutlined } from "@ant-design/icons";
 import axios from "axios";
 import MapaSelector from "./MapSelector";
+import useAxiosInterceptor from "../utils/axiosConfig";
+
 const { Title } = Typography;
-const TablaClientes = () => {
+const TablaClientes = ({ empresa, usuario }) => {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -16,20 +18,38 @@ const TablaClientes = () => {
   const [form] = Form.useForm();
   const [campos, setCampos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(null);
+  const [empresaId, setEmpresaId] = useState(null);
+
+
+
+  // console.log("empresaId en tabla:", empresa._id);
 
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        const response = await axios.get("http://localhost:6001/api/clientes");
-        setClientes(response.data);
-      } catch (error) {
-        console.error("Error al obtener clientes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClientes();
-  }, []);
+    setEmpresaId(empresa._id);
+  }, [empresa]);
+
+  // Llama a la API solo cuando empresaId esté disponible
+  const api = useAxiosInterceptor(empresaId);
+
+  useEffect(() => {
+    if (empresaId) {
+      fetchClientes();
+    } else {
+      // console.log('Esperando empresaId...');
+    }
+  }, [empresaId]);
+
+  const fetchClientes = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/clientes');
+      setClientes(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+      setLoading(false);
+    }
+  };
 
   const openNotificationWithIcon = (type, message, description) => {
     notification[type]({ message, description });
@@ -163,7 +183,7 @@ const TablaClientes = () => {
 
   return (
     <>
-    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Clientes</Title>
+      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Clientes</Title>
       <Table columns={columns} dataSource={clientes} rowKey="_id" loading={loading} />
 
       {/* Modal para Editar Datos */}
@@ -203,7 +223,7 @@ const TablaClientes = () => {
                 <Form.Item label="Cliente" style={{ marginBottom: 10 }}>
                   <Input
                     placeholder="Nombre"
-                    value={currentCliente.nombre + " " + currentCliente.apellido} 
+                    value={currentCliente.nombre + " " + currentCliente.apellido}
                     disabled
                   />
                 </Form.Item>

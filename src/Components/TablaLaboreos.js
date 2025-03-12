@@ -5,10 +5,12 @@ import { DeleteOutlined, FormOutlined, EditOutlined, CheckCircleOutlined } from 
 import axios from 'axios';
 import dayjs from 'dayjs';
 import FinishModal from './FinishModal';
+import useAxiosInterceptor from '../utils/axiosConfig';
 const { Option } = Select;
 const { Title } = Typography;
 
-const TablaLaboreos = () => {
+
+const TablaLaboreos = ({empresa}) => {
   const [laboreos, setLaboreos] = useState([]);
   const [empleados, setEmpleados] = useState([]); // Agregar estado para empleados
   const [empleadosLibres, setEmpleadosLibres] = useState([]);
@@ -36,12 +38,24 @@ const TablaLaboreos = () => {
   const [record, setRecord] = useState(null);
   const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [empresaId, setEmpresaId] = useState(null);
+
+
+  useEffect(() => {
+    setEmpresaId(empresa._id); // Asegúrate de tener el _id de la empresa
+  }, [empresa]);
+
+  // Usamos el interceptor con la empresaId para hacer las peticiones con los encabezados correctos
+  const api = useAxiosInterceptor(empresaId);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!empresaId) {
+        console.log('Esperando empresaId...');
+        return;
+      }
       setLoading(true);
       const { current, pageSize } = pagination;
-
       try {
         const [
           laboreosResponse,
@@ -53,14 +67,14 @@ const TablaLaboreos = () => {
           vehiculosLibresResponse,
           clientesResponse
         ] = await Promise.all([
-          axios.get("http://localhost:6001/api/laboreos", { params: { page: current, perPage: pageSize } }),
-          axios.get("http://localhost:6001/api/equipos"),
-          axios.get("http://localhost:6001/api/equiposLibres"),
-          axios.get("http://localhost:6001/api/nominas"),
-          axios.get("http://localhost:6001/api/empleadosLibres"),
-          axios.get("http://localhost:6001/api/vehiculos"),
-          axios.get("http://localhost:6001/api/vehiculosLibres"),
-          axios.get("http://localhost:6001/api/clientes")
+          api.get("/laboreos", { params: { page: current, perPage: pageSize } }),
+          api.get("/equipos"),
+          api.get("/equiposLibres"),
+          api.get("/nominas"),
+          api.get("/empleadosLibres"),
+          api.get("/vehiculos"),
+          api.get("/vehiculosLibres"),
+          api.get("/clientes")
         ]);
 
         // Seteamos los estados con los datos recibidos
@@ -82,7 +96,7 @@ const TablaLaboreos = () => {
     };
 
     fetchData();
-  }, [pagination, selectedCliente, selectedEquipo]);
+  }, [empresaId, pagination, selectedCliente, selectedEquipo]);
 
 
   const showDeleteConfirm = (id) => {
@@ -139,7 +153,7 @@ const TablaLaboreos = () => {
         vehiculos: values.vehiculos,
         empleados: values.empleados,
         cliente: values.cliente,
-        fechaInicio: values.fechaInicio ? values.fechaInicio.format('YYYY-MM-DD') : null,
+        fechaInicio: values.fechaInicio ? values.fechaInicio.format('DD-MM-YYYY') : null,
 
       };
       await axios.put(`http://localhost:6001/api/laboreo/${currentLaboreo._id}`, formattedValues);
@@ -422,7 +436,7 @@ const TablaLaboreos = () => {
 
           <Form.Item name="fechaInicio" label="Fecha Inicio"
             rules={[{ required: true, message: 'Por favor ingresa la fecha' }]}>
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
 
           <Form.Item name="estado" label="Estado">

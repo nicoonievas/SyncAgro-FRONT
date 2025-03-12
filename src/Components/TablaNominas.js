@@ -3,16 +3,18 @@ import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Che
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Title } = Typography;
 
-const TablaNominas = () => {
+const TablaNominas = ({empresa}) => {
   const [nominas, setNominas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [nominaIdToDelete, setNominaIdToDelete] = useState(null);
   const [currentNomina, setCurrentNomina] = useState(null);
+  const [empresaId, setEmpresaId] = useState(null);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -22,28 +24,32 @@ const TablaNominas = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const fetchNominas = async () => {
-      const { current, pageSize } = pagination;
-      try {
-        const response = await axios.get("http://localhost:6001/api/nominas", 
-          // {params: { page: current, perPage: pageSize },}
-        );
+    setEmpresaId(empresa._id);
+  }, [empresa]);
 
-        if (response.data && Array.isArray(response.data)) {
-          setNominas(response.data);
-          setTotalNominas(response.data.length);
-        } else {
-          console.error('Data is not in expected format:', response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching nominas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Llama a la API solo cuando empresaId esté disponible
+  const api = useAxiosInterceptor(empresaId);
 
-    fetchNominas();
-  }, [pagination]);
+  useEffect(() => {
+    if (empresaId) {
+      fetchNominas();
+    } else {
+      // console.log('Esperando empresaId...');
+    }
+  }, [empresaId]);
+
+  const fetchNominas = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/nominas');
+      setNominas(response.data);
+      setTotalNominas(response.data.length);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+      setLoading(false);
+    }
+  };
 
   const openNotificationWithIcon = (type, message, description) => {
     notification[type]({

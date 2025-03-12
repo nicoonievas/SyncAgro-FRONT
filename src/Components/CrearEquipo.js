@@ -30,7 +30,41 @@ const CrearEquipo = ({ equipoToAdd, empresa, usuario}) => {
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
-  const api = useAxiosInterceptor();
+  const [empresaId, setEmpresaId] = useState(null);
+
+
+  useEffect(() => {
+    setEmpresaId(empresa._id);
+  }, [empresa]);
+
+  // Llama a la API solo cuando empresaId esté disponible
+  const api = useAxiosInterceptor(empresaId);
+
+ useEffect(() => {
+     if (empresaId) {
+       fetchData();
+     } else {
+       // console.log('Esperando empresaId...');
+     }
+   }, [empresaId]);
+
+
+    const fetchData = async () => {
+      try {
+        const [empleadosRes, vehiculosRes] = await Promise.all([
+          api.get('/empleadosLibres'),
+          api.get('/vehiculosLibres'),
+        ]);
+        setEmpleados(empleadosRes.data);
+        setVehiculos(vehiculosRes.data);
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
+    };
+
+ 
+
+
   useEffect(() => {
     if (equipoToAdd) {
       form.setFieldsValue({
@@ -42,21 +76,6 @@ const CrearEquipo = ({ equipoToAdd, empresa, usuario}) => {
     }
   }, [equipoToAdd, form]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [empleadosRes, vehiculosRes] = await Promise.all([
-          api.get('http://localhost:6001/api/empleadosLibres'),
-          api.get('http://localhost:6001/api/vehiculosLibres'),
-        ]);
-        setEmpleados(empleadosRes.data);
-        setVehiculos(vehiculosRes.data);
-      } catch (error) {
-        console.error('Error al obtener los datos:', error);
-      }
-    };
-    fetchData();
-  }, [api]);
 
   const onFinish = async (values) => {
     const equipoData = {

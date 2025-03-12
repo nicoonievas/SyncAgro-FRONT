@@ -3,10 +3,11 @@ import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Sel
 import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Option } = Select;
 const { Title } = Typography;
-const TablaVehiculos = () => {
+const TablaVehiculos = ({ empresa }) => {
   const [vehiculos, setVehiculos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -19,32 +20,40 @@ const TablaVehiculos = () => {
   const [modelosDisponibles, setModelosDisponibles] = useState([]);
   const [marcaVehiculos, setMarcaVehiculos] = useState([]);
   const [totalVehiculos, setTotalVehiculos] = useState(0);
+  const [empresaId, setEmpresaId] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 6,
+    pageSize: 5,
   });
 
   useEffect(() => {
-    const fetchVehiculos = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("http://localhost:6001/api/vehiculos", 
-          // {params: { page: pagination.current, perPage: pagination.pageSize },}
-        );
+    setEmpresaId(empresa._id);
+  }, [empresa]);
 
-        if (Array.isArray(response.data)) {
-          setVehiculos(response.data);
-          setTotalVehiculos(response.data.length);
-        } else {
-          console.error('Formato de datos inesperado:', response.data);
-        }
-      } catch (error) {
-        console.error('Error al obtener vehículos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Llama a la API solo cuando empresaId esté disponible
+  const api = useAxiosInterceptor(empresaId);
 
+  useEffect(() => {
+    if (empresaId) {
+      fetchVehiculos();
+    } else {
+      // console.log('Esperando empresaId...');
+    }
+  }, [empresaId]);
+
+  const fetchVehiculos = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/vehiculos');
+      setVehiculos(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const fetchMarcaVehiculos = async () => {
       try {
         const response = await axios.get("http://localhost:6001/api/marcasModelos"); // Endpoint de marcas

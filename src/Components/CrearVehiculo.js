@@ -66,8 +66,8 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       numero: values.numero,
       alias: values.alias,
       estado: values.estado,
-      fecha_vencimiento_seguro: values.fecha_vencimiento_seguro.format('YYYY-MM-DD'),
-      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('YYYY-MM-DD'),
+      fecha_vencimiento_seguro: values.fecha_vencimiento_seguro.format('DD-MM-YYYY'),
+      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('DD-MM-YYYY'),
     };
 
     try {
@@ -149,11 +149,11 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       </Form.Item>
 
       <Form.Item name="fecha_vencimiento_seguro" label="Vencimiento Seguro" rules={[{ required: true }]}>
-        <DatePicker format={'YYYY-MM-DD'} />
+        <DatePicker format={'DD-MM-YYYY'} />
       </Form.Item>
 
       <Form.Item name="fecha_vencimiento_vtv" label="Vencimiento VTV" rules={[{ required: true }]}>
-        <DatePicker format={'YYYY-MM-DD'} />
+        <DatePicker format={'DD-MM-YYYY'} />
       </Form.Item>
 
       <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>

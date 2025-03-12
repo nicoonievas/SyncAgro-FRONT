@@ -3,11 +3,12 @@ import { Space, Table, Modal, Form, Input, Button, notification, Select, Typogra
 import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Option } = Select;
 const { Title } = Typography;
 
-const TablaEquipos = () => {
+const TablaEquipos = ({empresa}) => {
   const [equipos, setEquipos] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [equipoActual, setEquipoActual] = useState(null);
@@ -20,6 +21,7 @@ const TablaEquipos = () => {
   const [currentEquipo, setCurrentEquipo] = useState(null);
   const [empleadosLibres, setEmpleadosLibres] = useState([]);
   const [vehiculosLibres, setVehiculosLibres] = useState([]);
+  const [empresaId, setEmpresaId] = useState(null);
 
 
   const [pagination, setPagination] = useState({
@@ -29,10 +31,21 @@ const TablaEquipos = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
+    setEmpresaId(empresa._id); // Asegúrate de tener el _id de la empresa
+  }, [empresa]);
+
+  // Usamos el interceptor con la empresaId para hacer las peticiones con los encabezados correctos
+  const api = useAxiosInterceptor(empresaId);
+
+  useEffect(() => {
     const fetchData = async () => {
+      if (!empresaId) {
+        console.log('Esperando empresaId...');
+        return;
+      }
       setLoading(true);
       const { current, pageSize } = pagination;
-  
+
       try {
         const [
           equiposResponse,
@@ -41,29 +54,28 @@ const TablaEquipos = () => {
           vehiculosResponse,
           vehiculosLibresResponse
         ] = await Promise.all([
-          axios.get("http://localhost:6001/api/equipos", { params: { page: current, perPage: pageSize } }),
-          axios.get("http://localhost:6001/api/nominas"),
-          axios.get("http://localhost:6001/api/empleadosLibres"),
-          axios.get("http://localhost:6001/api/vehiculos"),
-          axios.get("http://localhost:6001/api/vehiculosLibres")
+          api.get("/equipos", { params: { empresaId, page: current, perPage: pageSize } }),
+          api.get("/nominas", { params: { empresaId } }),
+          api.get("/empleadosLibres", { params: { empresaId } }),
+          api.get("/vehiculos", { params: { empresaId } }),
+          api.get("/vehiculosLibres", { params: { empresaId } }),
         ]);
-  
+
         // Seteamos los estados con los datos recibidos
         setEquipos(equiposResponse.data);
         setEmpleados(empleadosResponse.data);
         setEmpleadosLibres(empleadosLibresResponse.data);
         setVehiculos(vehiculosResponse.data);
         setVehiculosLibres(vehiculosLibresResponse.data);
-  
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
-  }, [pagination]);
+  }, [empresaId, pagination]);
   
 
   const verDetalles = (id) => {

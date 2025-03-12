@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, DatePicker, Form, Select, Row, Col } from "antd";
+import { Modal, Button, notification, Input, DatePicker, Form, Select, Row, Col } from "antd";
 import axios from "axios";
 import useAxiosInterceptor from "../utils/axiosConfig";
 import dayjs from "dayjs";
@@ -19,8 +19,10 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
       await api.put(`/laboreos/${idLaboreo}/finish`, values);
       onUpdate();
       onClose();
+      notification.success({ message: 'Laboreo Cerrado', description: 'El laboreo ha sido cerrado exitosamente.' });
     } catch (error) {
       console.error("Error al finalizar el laboreo", error);
+      notification.error({ message: 'Error', description: 'Hubo un problema al finalizar el laboreo.' });
     } finally {
       setLoading(false);
     }

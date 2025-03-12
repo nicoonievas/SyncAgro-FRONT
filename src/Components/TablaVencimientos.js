@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Table, Space, Modal, Input, Button, DatePicker, Form, notification } from 'antd';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
-const TablasVencimientos = () => {
+const TablasVencimientos = ({empresa, usuario}) => {
   const [vehiculos, setVehiculos] = useState([]);
   const [empleados, setEmpleados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,21 +15,32 @@ const TablasVencimientos = () => {
   const [form] = Form.useForm();
   const [totalEmpleados, setTotalEmpleados] = useState(0);
   const [totalVehiculos, setTotalVehiculos] = useState(0);
+    const [empresaId, setEmpresaId] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
   });
 
+  useEffect(() => {
+    setEmpresaId(empresa._id);
+  }, [empresa]);
+
+  // Llama a la API solo cuando empresaId esté disponible
+  const api = useAxiosInterceptor(empresaId);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (empresaId) {
+      fetchData();
+    } else {
+      // console.log('Esperando empresaId...');
+    }
+  }, [empresaId]);
 
   const fetchData = async () => {
     try {
       const [vehiculosResponse, empleadosResponse] = await Promise.all([
-        axios.get('http://localhost:6001/api/vehiculos'),
-        axios.get('http://localhost:6001/api/nominas'),
+        api.get('/vehiculos'),
+        api.get('/nominas'),
       ]);
 
       setVehiculos(vehiculosResponse.data);
@@ -47,8 +59,10 @@ const TablasVencimientos = () => {
   const getDateColor = (date) => {
     if (!date) return 'black'; // Si no hay fecha, color por defecto
 
-    const today = dayjs();
-    const diffDays = dayjs(date).diff(today, 'day');
+    const today = dayjs(); // No formatees aquí, solo usa la fecha actual
+    const formattedDate = dayjs(date, 'DD-MM-YYYY'); // Asegurar formato
+
+    const diffDays = formattedDate.diff(today, 'day'); // Comparación real de fechas
 
     if (diffDays < 15) return 'red'; // Vencido
     if (diffDays <= 30) return 'orange'; // Vence en menos de una semana
@@ -64,18 +78,19 @@ const TablasVencimientos = () => {
     setModalVisible(true);
 
     form.setFieldsValue({
-      fecha_vencimiento: date ? dayjs(date) : null,
+      fecha_vencimiento: date ? dayjs(date, 'DD-MM-YYYY') : null,
     });
   };
 
   //sistema de notificaciones por vencimientos
   const mostrarNotificacion = new Set();
   const validarVencimientos = (vehiculos, empleados) => {
-    const today = dayjs();
+    const today = dayjs().format('DD-MM-YYYY');
 
     vehiculos.forEach((vehiculo) => {
       if (vehiculo.fecha_vencimiento_seguro) {
-        const diffDays = dayjs(vehiculo.fecha_vencimiento_seguro).diff(today, 'day');
+        const fechaSeguro = dayjs(vehiculo.fecha_vencimiento_seguro, 'DD-MM-YYYY');
+        const diffDays = fechaSeguro.diff(today, 'day');
         const key = `seguro-${vehiculo._id}`;
         //pasar logica al back para enviar correo
         if (diffDays === 30) {
@@ -91,7 +106,8 @@ const TablasVencimientos = () => {
         }
       }
       if (vehiculo.fecha_vencimiento_vtv) {
-        const diffDays = dayjs(vehiculo.fecha_vencimiento_vtv).diff(today, 'day');
+        const fechaVtv = dayjs(vehiculo.fecha_vencimiento_vtv, 'DD-MM-YYYY');
+            const diffDays = fechaVtv.diff(today, 'day');
         const key = `vtv-${vehiculo._id}`;
         //pasar logica al back para enviar correo
         if (diffDays === 30) {
@@ -109,7 +125,8 @@ const TablasVencimientos = () => {
 
     empleados.forEach((empleado) => {
       if (empleado.licenciaVencimiento) {
-        const diffDays = dayjs(empleado.licenciaVencimiento).diff(today, 'day');
+        const fechaLicencia = dayjs(empleado.licenciaVencimiento, 'DD-MM-YYYY');
+        const diffDays = fechaLicencia.diff(today, 'day');
         const key = `licencia-${empleado._id}`;
         //pasar logica al back para enviar correo
         if (diffDays === 30) {
@@ -124,7 +141,8 @@ const TablasVencimientos = () => {
         }
       }
       if (empleado.dniVencimiento) {
-        const diffDays = dayjs(empleado.dniVencimiento).diff(today, 'day');
+        const fechaDni = dayjs(empleado.dniVencimiento, 'DD-MM-YYYY');
+        const diffDays = fechaDni.diff(today, 'day');
         const key = `dni-${empleado._id}`;
         //pasar logica al back para enviar correo
         if (diffDays === 30) {
@@ -139,7 +157,8 @@ const TablasVencimientos = () => {
         }
       }
       if (empleado.aptoFisicoVencimiento) {
-        const diffDays = dayjs(empleado.aptoFisicoVencimiento).diff(today, 'day');
+        const fechaAptoFisico = dayjs(empleado.aptoFisicoVencimiento, 'DD-MM-YYYY');
+        const diffDays = fechaAptoFisico.diff(today, 'day');
         const key = `aptoFisico-${empleado._id}`;
         //pasar logica al back para enviar correo
         if (diffDays === 30) {
@@ -163,7 +182,7 @@ const TablasVencimientos = () => {
       const values = form.getFieldsValue();
 
       const formattedValues = {
-        [selectedDate]: values.fecha_vencimiento ? values.fecha_vencimiento.format('YYYY-MM-DD') : null
+        [selectedDate]: values.fecha_vencimiento ? values.fecha_vencimiento.format('DD-MM-YYYY') : null
       };
 
       const url = isVehiculo
@@ -325,7 +344,7 @@ const TablasVencimientos = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Fecha Vencimiento" name="fecha_vencimiento">
-            <DatePicker />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
         </Form>
       </Modal>

@@ -78,6 +78,7 @@ const LeftMenu = () => {
           setEmpresa(usuarioEncontrado.empresa || "No asignado");
           setUsuario(usuarioEncontrado);
           setRazonSocial(usuarioEncontrado.empresa.razonSocial);
+  
         }
       })
       .catch(error => console.error("Error al obtener usuarios:", error));
