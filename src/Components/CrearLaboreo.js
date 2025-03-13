@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Select, notification, DatePicker, Row, Col } from 'antd';
 import axios from 'axios';
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Option } = Select;
+
 
 const layout = {
   labelCol: {
@@ -36,6 +38,44 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [campos, setCampos] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
+  const [empresaId, setEmpresaId] = useState('');
+
+  useEffect(() => {
+    if (empresa) {
+      setEmpresaId(empresa._id);
+    }
+  }, [empresa]);
+
+  // Configuración de la API
+  const api = useAxiosInterceptor(empresaId);
+
+  // Llama a la API solo cuando empresaId esté disponible
+  useEffect(() => {
+    if (empresaId) {
+      fetchData();
+    }
+  }, [empresaId]);
+
+  // Obtener los empleados, vehículos, clientes y equipos
+  const fetchData = async () => {
+    try {
+      const [empleadosRes, vehiculosRes, clientesRes, equiposRes] = await Promise.all([
+        api.get(`/empleadosLibres?empresaId=${empresaId}`),
+        api.get(`/vehiculosLibres?empresaId=${empresaId}`),
+        api.get(`/clientes?empresaId=${empresaId}`),
+        api.get(`/equiposLibres?empresaId=${empresaId}`)
+      ]);
+
+      setEmpleados(empleadosRes.data);
+      setVehiculos(vehiculosRes.data);
+      setClientes(clientesRes.data);
+      setEquipos(equiposRes.data);
+      console.log('Datos obtenidos:', { empleadosRes, vehiculosRes, clientesRes, equiposRes });
+    } catch (error) {
+      console.error('Error al obtener los datos:', error);
+      openNotificationWithIcon('error', 'Error', 'No se pudo cargar los datos.');
+    }
+  };
 
   useEffect(() => {
     if (laboreoToAdd) {
@@ -60,10 +100,10 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
     const fetchData = async () => {
       try {
         const [empleadosRes, vehiculosRes, clientesRes, equiposRes] = await Promise.all([
-          axios.get('http://localhost:6001/api/empleadosLibres'),
-          axios.get('http://localhost:6001/api/vehiculosLibres'),
-          axios.get('http://localhost:6001/api/clientes'),
-          axios.get('http://localhost:6001/api/equiposLibres'),
+          api.get('/empleadosLibres'),
+          api.get('/vehiculosLibres'),
+          api.get('/clientes'),
+          api.get('/equiposLibres'),
         ]);
 
         setEmpleados(empleadosRes.data);
@@ -94,8 +134,7 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
       cliente: selectedCliente?._id, // Usar el ID del cliente seleccionado
       camposAfectados: selectedCampos,
       fechaInicio: values.fechaInicio
-        ? values.fechaInicio.format('DD-MM-YYYY')
-        : null,
+        ? values.fechaInicio.valueOf() : null,
     };
 
     try {

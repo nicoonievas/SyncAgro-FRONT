@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography,
-Row, Col} from 'antd';
+import {
+  Space, Table, Modal, Form, Input, Button, notification, DatePicker, Select, Typography,
+  Row, Col
+} from 'antd';
 import { DeleteOutlined, FormOutlined, EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import FinishModal from './FinishModal';
 import useAxiosInterceptor from '../utils/axiosConfig';
+import DynamicModal from "./ModalDinamica";
 const { Option } = Select;
 const { Title } = Typography;
 
 
-const TablaLaboreos = ({empresa}) => {
+
+const TablaLaboreos = ({ empresa }) => {
   const [laboreos, setLaboreos] = useState([]);
   const [empleados, setEmpleados] = useState([]); // Agregar estado para empleados
   const [empleadosLibres, setEmpleadosLibres] = useState([]);
@@ -39,6 +43,7 @@ const TablaLaboreos = ({empresa}) => {
   const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
+  const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
 
 
   useEffect(() => {
@@ -110,10 +115,17 @@ const TablaLaboreos = ({empresa}) => {
     setIsFinishModalVisible(true);
   };
 
+  const showDynamicModal = (record) => {
+    setSelectedRecord(record);
+    setIsDynamicModalVisible(true);
+    // console.log(record);
+  };
+  const camposPermitidos = ["razonSocial", "nombre", "descripcion", "estado", "equipos.nombre", "fechaInicio", "fechaFin", "tiempoTrabajo", "utilidadNeta", "rentabilidadLaboreo"];
 
   const handleFinishModalClose = () => {
     setIsFinishModalVisible(false);
     setSelectedRecord(null);
+    handleTableChange({ current: pagination.current, pageSize: pagination.pageSize });
   };
 
 
@@ -132,11 +144,7 @@ const TablaLaboreos = ({empresa}) => {
     setIsEditModalVisible(true);
   };
 
-  const showViewModal = (record) => {
-    console.log(record);
-    setRecord(record);
-    setIsViewModalVisible(true); // Abre el modal
-  };
+
 
   const handleCancel = () => {
     setIsDeleteModalVisible(false);
@@ -153,7 +161,7 @@ const TablaLaboreos = ({empresa}) => {
         vehiculos: values.vehiculos,
         empleados: values.empleados,
         cliente: values.cliente,
-        fechaInicio: values.fechaInicio ? values.fechaInicio.format('DD-MM-YYYY') : null,
+        fechaInicio: values.fechaInicio ? values.fechaInicio.valueOf() : null,
 
       };
       await axios.put(`http://localhost:6001/api/laboreo/${currentLaboreo._id}`, formattedValues);
@@ -181,19 +189,14 @@ const TablaLaboreos = ({empresa}) => {
       notification.error({ message: 'Error', description: 'Hubo un problema al eliminar el laboreo.' });
     }
   };
-  const estadoMapping = {
-    0: "Inactivo",
-    1: "Activo",
-    // 2: "Finalizado",
-    3: "Cancelado"
-  };
+
   const columns = [
     {
       title: 'Nombre',
       dataIndex: 'nombre',
       key: 'nombre',
       render: (text, record) => (
-        <a onClick={() => showViewModal(record)}>{text}</a>
+        <a onClick={() => showDynamicModal(record)}>{text}</a>
       ),
 
     },
@@ -213,12 +216,16 @@ const TablaLaboreos = ({empresa}) => {
           ? equipos.map(equipo => `${equipo.nombre} (${equipo.numero})`).join(', ')
           : "Sin equipos"
     },
-    { title: 'Fecha Inicio', dataIndex: 'fechaInicio', key: 'fechaInicio' },
+    { 
+      title: 'Fecha Inicio', 
+      dataIndex: 'fechaInicio', 
+      key: 'fechaInicio',
+      render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '', 
+    },
     {
       title: 'Estado',
       dataIndex: 'estado',
-      key: 'estado',
-      render: (estado) => estadoMapping[estado] || estado,
+      key: 'estado'
     },
     {
       title: 'Acción',
@@ -290,6 +297,8 @@ const TablaLaboreos = ({empresa}) => {
         onChange={handleTableChange}
         loading={loading}
       />
+
+
 
       <Modal title="Confirmar Eliminación" open={isDeleteModalVisible} onOk={handleDelete} onCancel={handleCancel} okText="Eliminar" cancelText="Cancelar">
         <p>¿Estás seguro de que deseas eliminar este laboreo?</p>
@@ -441,9 +450,9 @@ const TablaLaboreos = ({empresa}) => {
 
           <Form.Item name="estado" label="Estado">
             <Select>
-              {Object.entries(estadoMapping).map(([value, label]) => (
-                <Option key={value} value={value}>{label}</Option>
-              ))}
+              <Option value="Activo">Activo</Option>
+              <Option value="Inactivo">Inactivo</Option>
+              <Option value="Cancelado">Cancelado</Option>
             </Select>
           </Form.Item>
 
@@ -453,18 +462,7 @@ const TablaLaboreos = ({empresa}) => {
         </Form>
       </Modal>
 
-      <Modal title="Detalles del Laboreo" open={isViewModalVisible} onCancel={handleCancel} footer={null}>
-        {record && (
-          <div>
-            <p><strong>Nombre:</strong> {record.nombre}</p>
-            <p><strong>Cliente:</strong> {record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente"}</p>
-            <p><strong>Equipos:</strong> {record.equipos?.map(equipo => `${equipo.nombre} (${equipo.numero})`).join(', ') || "Sin equipos"}</p>
-            <p><strong>Fecha Inicio:</strong> {record.fechaInicio ? new Date(record.fechaInicio).toLocaleDateString('es-ES') : "No iniciado"}</p>
-            <p><strong>Fecha Fin:</strong> {record.fechaCierre ? new Date(record.fechaCierre).toLocaleDateString('es-ES') : "No finalizado"}</p>
-            <p><strong>Estado:</strong> {record.estado || "Desconocido"}</p>
-          </div>
-        )}
-      </Modal>
+
 
       <FinishModal
         visible={isFinishModalVisible}
@@ -473,7 +471,12 @@ const TablaLaboreos = ({empresa}) => {
         onUpdate={handleUpdate}
       />
 
-
+      <DynamicModal
+        open={isDynamicModalVisible}
+        onClose={() => setIsDynamicModalVisible(false)}
+        record={selectedRecord}
+        camposPermitidos={camposPermitidos}
+      />
 
 
     </>

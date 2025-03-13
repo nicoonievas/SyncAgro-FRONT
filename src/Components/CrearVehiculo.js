@@ -66,8 +66,8 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       numero: values.numero,
       alias: values.alias,
       estado: values.estado,
-      fecha_vencimiento_seguro: values.fecha_vencimiento_seguro.format('DD-MM-YYYY'),
-      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv.format('DD-MM-YYYY'),
+      fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.valueOf() : null,
+      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.valueOf() : null,
     };
 
     try {

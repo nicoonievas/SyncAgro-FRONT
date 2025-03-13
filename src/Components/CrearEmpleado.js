@@ -25,7 +25,7 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearEmpleado = ({empresa, usuario}) => {
+const CrearEmpleado = ({ empresa, usuario }) => {
   const [loading, setLoading] = useState(false); // Estado para manejar el loading
   const [form] = Form.useForm(); // Inicializar el formulario
 
@@ -47,14 +47,11 @@ const CrearEmpleado = ({empresa, usuario}) => {
       documento: values.documento,
       rol: values.rol,
       licenciaVencimiento: values.licenciaVencimiento
-        ? values.licenciaVencimiento.format('YYYY-MM-DD')
-        : null,
+        ? values.licenciaVencimiento.valueOf() : null,
       dniVencimiento: values.dniVencimiento
-        ? values.dniVencimiento.format('YYYY-MM-DD')
-        : null,
+        ? values.dniVencimiento.valueOf() : null,
       aptoFisicoVencimiento: values.aptoFisicoVencimiento
-        ? values.aptoFisicoVencimiento.format('YYYY-MM-DD')
-        : null,
+        ? values.aptoFisicoVencimiento.valueOf() : null,
     };
 
     try {
@@ -166,7 +163,7 @@ const CrearEmpleado = ({empresa, usuario}) => {
         label="Vencimiento Licencia"
         rules={[{ required: true }]}
       >
-        <DatePicker format="YYYY-MM-DD" />
+        <DatePicker format="DD-MM-YYYY" />
       </Form.Item>
 
       <Form.Item
@@ -174,7 +171,7 @@ const CrearEmpleado = ({empresa, usuario}) => {
         label="Vencimiento DNI"
         rules={[{ required: true }]}
       >
-        <DatePicker format="YYYY-MM-DD" />
+        <DatePicker format="DD-MM-YYYY" />
       </Form.Item>
 
       <Form.Item
@@ -182,7 +179,7 @@ const CrearEmpleado = ({empresa, usuario}) => {
         label="Vencimiento Apto Físico"
         rules={[{ required: true }]}
       >
-        <DatePicker format="YYYY-MM-DD" />
+        <DatePicker format="DD-MM-YYYY" />
       </Form.Item>
 
       <Form.Item

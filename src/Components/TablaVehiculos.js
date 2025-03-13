@@ -3,6 +3,7 @@ import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Sel
 import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
+
 import useAxiosInterceptor from '../utils/axiosConfig';
 
 const { Option } = Select;
@@ -97,9 +98,11 @@ const TablaVehiculos = ({ empresa }) => {
       alias: vehiculo.alias || "",
       numero: vehiculo.numero || "",
       estado: vehiculo.estado || "",
+      // No formatees aquí, pasa directamente el objeto dayjs
       fecha_vencimiento_seguro: vehiculo.fecha_vencimiento_seguro ? dayjs(vehiculo.fecha_vencimiento_seguro) : null,
       fecha_vencimiento_vtv: vehiculo.fecha_vencimiento_vtv ? dayjs(vehiculo.fecha_vencimiento_vtv) : null,
     });
+    
 
     setIsEditModalVisible(true);
   };
@@ -134,9 +137,8 @@ const TablaVehiculos = ({ empresa }) => {
     try {
       const formattedValues = {
         ...values,
-        fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.format('YYYY-MM-DD') : null,
-        fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.format('YYYY-MM-DD') : null,
-        // estado: Number(values.estado), // Asegurar que el estado sea un número
+        fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.valueOf() : null,
+      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.valueOf() : null,
       };
 
       await axios.put(`http://localhost:6001/api/vehiculo/${currentVehiculo._id}`, formattedValues);
@@ -290,11 +292,11 @@ const TablaVehiculos = ({ empresa }) => {
           </Form.Item>
 
           <Form.Item name="fecha_vencimiento_seguro" label="Vencimiento Seguro">
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
 
           <Form.Item name="fecha_vencimiento_vtv" label="Vencimiento VTV">
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format='DD-MM-YYYY' />
           </Form.Item>
 
           <Form.Item name="estado" label="Estado">

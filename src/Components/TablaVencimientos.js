@@ -4,7 +4,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import useAxiosInterceptor from '../utils/axiosConfig';
 
-const TablasVencimientos = ({empresa, usuario}) => {
+const TablasVencimientos = ({ empresa, usuario }) => {
   const [vehiculos, setVehiculos] = useState([]);
   const [empleados, setEmpleados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ const TablasVencimientos = ({empresa, usuario}) => {
   const [form] = Form.useForm();
   const [totalEmpleados, setTotalEmpleados] = useState(0);
   const [totalVehiculos, setTotalVehiculos] = useState(0);
-    const [empresaId, setEmpresaId] = useState(null);
+  const [empresaId, setEmpresaId] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -56,20 +56,6 @@ const TablasVencimientos = ({empresa, usuario}) => {
     }
   };
 
-  const getDateColor = (date) => {
-    if (!date) return 'black'; // Si no hay fecha, color por defecto
-
-    const today = dayjs(); // No formatees aquí, solo usa la fecha actual
-    const formattedDate = dayjs(date, 'DD-MM-YYYY'); // Asegurar formato
-
-    const diffDays = formattedDate.diff(today, 'day'); // Comparación real de fechas
-
-    if (diffDays < 15) return 'red'; // Vencido
-    if (diffDays <= 30) return 'orange'; // Vence en menos de una semana
-    if (diffDays <= 45) return 'blue'; // Vence en menos de un mes
-    return 'green'; // Falta más de un mes
-  };
-
 
   const handleEditClick = (fieldName, date, id, isVehiculo) => {
     setSelectedDate(fieldName); // Guardar el campo específico que se va a editar
@@ -78,103 +64,118 @@ const TablasVencimientos = ({empresa, usuario}) => {
     setModalVisible(true);
 
     form.setFieldsValue({
-      fecha_vencimiento: date ? dayjs(date, 'DD-MM-YYYY') : null,
+      fecha_vencimiento: date ? dayjs(date) : null,
     });
   };
 
-  //sistema de notificaciones por vencimientos
-  const mostrarNotificacion = new Set();
-  const validarVencimientos = (vehiculos, empleados) => {
-    const today = dayjs().format('DD-MM-YYYY');
 
-    vehiculos.forEach((vehiculo) => {
-      if (vehiculo.fecha_vencimiento_seguro) {
-        const fechaSeguro = dayjs(vehiculo.fecha_vencimiento_seguro, 'DD-MM-YYYY');
-        const diffDays = fechaSeguro.diff(today, 'day');
-        const key = `seguro-${vehiculo._id}`;
-        //pasar logica al back para enviar correo
-        if (diffDays === 30) {
-          console.log(`El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
-        }
+ const getDateColor = (date) => {
+  if (!date) return 'black'; // Si no hay fecha, color por defecto
 
-        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-          mostrarNotificacion.add(key);
-          notification.warning({
-            message: 'Vencimiento de Seguro',
-            description: `El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
-          });
-        }
-      }
-      if (vehiculo.fecha_vencimiento_vtv) {
-        const fechaVtv = dayjs(vehiculo.fecha_vencimiento_vtv, 'DD-MM-YYYY');
-            const diffDays = fechaVtv.diff(today, 'day');
-        const key = `vtv-${vehiculo._id}`;
-        //pasar logica al back para enviar correo
-        if (diffDays === 30) {
-          console.log(`El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
-        }
-        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-          mostrarNotificacion.add(key);
-          notification.warning({
-            message: 'Vencimiento de VTV',
-            description: `El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
-          });
-        }
-      }
-    });
+  const today = dayjs(); // Fecha actual
+  const formattedDate = dayjs(date); // `date` ya debería ser un `timestamp` o un objeto `Date`
 
-    empleados.forEach((empleado) => {
-      if (empleado.licenciaVencimiento) {
-        const fechaLicencia = dayjs(empleado.licenciaVencimiento, 'DD-MM-YYYY');
-        const diffDays = fechaLicencia.diff(today, 'day');
-        const key = `licencia-${empleado._id}`;
-        //pasar logica al back para enviar correo
-        if (diffDays === 30) {
-          console.log(`La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-        }
-        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-          mostrarNotificacion.add(key);
-          notification.warning({
-            message: 'Vencimiento de Licencia',
-            description: `La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-          });
-        }
-      }
-      if (empleado.dniVencimiento) {
-        const fechaDni = dayjs(empleado.dniVencimiento, 'DD-MM-YYYY');
-        const diffDays = fechaDni.diff(today, 'day');
-        const key = `dni-${empleado._id}`;
-        //pasar logica al back para enviar correo
-        if (diffDays === 30) {
-          console.log(`El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-        }
-        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-          mostrarNotificacion.add(key);
-          notification.warning({
-            message: 'Vencimiento de DNI',
-            description: `El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-          });
-        }
-      }
-      if (empleado.aptoFisicoVencimiento) {
-        const fechaAptoFisico = dayjs(empleado.aptoFisicoVencimiento, 'DD-MM-YYYY');
-        const diffDays = fechaAptoFisico.diff(today, 'day');
-        const key = `aptoFisico-${empleado._id}`;
-        //pasar logica al back para enviar correo
-        if (diffDays === 30) {
-          console.log(`El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-        }
+  const diffDays = formattedDate.diff(today, 'day'); // Comparación real de fechas
 
-        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-          mostrarNotificacion.add(key);
-          notification.warning({
-            message: 'Vencimiento de Apto Fisico',
-            description: `El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-          });
-        }
+  if (diffDays < 15) return 'red'; // Vencido
+  if (diffDays <= 30) return 'orange'; // Vence en menos de un mes
+  if (diffDays <= 45) return 'blue'; // Vence en menos de un mes
+  return 'green'; // Falta más de un mes
+};
+
+// Sistema de notificaciones por vencimientos
+const mostrarNotificacion = new Set();
+const validarVencimientos = (vehiculos, empleados) => {
+  const today = dayjs(); // Fecha actual
+
+  vehiculos.forEach((vehiculo) => {
+    if (vehiculo.fecha_vencimiento_seguro) {
+      const fechaSeguro = dayjs(vehiculo.fecha_vencimiento_seguro); // Usamos el timestamp
+      const diffDays = fechaSeguro.diff(today, 'day');
+      const key = `seguro-${vehiculo._id}`;
+      // Lógica para enviar correo al backend
+      if (diffDays === 30) {
+        console.log(`El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
       }
-    });
-  };
+
+      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+        mostrarNotificacion.add(key);
+        notification.warning({
+          message: 'Vencimiento de Seguro',
+          description: `El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
+        });
+      }
+    }
+    if (vehiculo.fecha_vencimiento_vtv) {
+      const fechaVtv = dayjs(vehiculo.fecha_vencimiento_vtv); // Usamos el timestamp
+      const diffDays = fechaVtv.diff(today, 'day');
+      const key = `vtv-${vehiculo._id}`;
+      // Lógica para enviar correo al backend
+      if (diffDays === 30) {
+        console.log(`El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
+      }
+      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+        mostrarNotificacion.add(key);
+        notification.warning({
+          message: 'Vencimiento de VTV',
+          description: `El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
+        });
+      }
+    }
+  });
+
+  empleados.forEach((empleado) => {
+    if (empleado.licenciaVencimiento) {
+      const fechaLicencia = dayjs(empleado.licenciaVencimiento); // Usamos el timestamp
+      const diffDays = fechaLicencia.diff(today, 'day');
+      const key = `licencia-${empleado._id}`;
+      // Lógica para enviar correo al backend
+      if (diffDays === 30) {
+        console.log(`La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+      }
+      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+        mostrarNotificacion.add(key);
+        notification.warning({
+          message: 'Vencimiento de Licencia',
+          description: `La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+        });
+      }
+    }
+    if (empleado.dniVencimiento) {
+      const fechaDni = dayjs(empleado.dniVencimiento); // Usamos el timestamp
+      const diffDays = fechaDni.diff(today, 'day');
+      const key = `dni-${empleado._id}`;
+      // Lógica para enviar correo al backend
+      if (diffDays === 30) {
+        console.log(`El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+      }
+      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+        mostrarNotificacion.add(key);
+        notification.warning({
+          message: 'Vencimiento de DNI',
+          description: `El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+        });
+      }
+    }
+    if (empleado.aptoFisicoVencimiento) {
+      const fechaAptoFisico = dayjs(empleado.aptoFisicoVencimiento); // Usamos el timestamp
+      const diffDays = fechaAptoFisico.diff(today, 'day');
+      const key = `aptoFisico-${empleado._id}`;
+      // Lógica para enviar correo al backend
+      if (diffDays === 30) {
+        console.log(`El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+      }
+
+      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+        mostrarNotificacion.add(key);
+        notification.warning({
+          message: 'Vencimiento de Apto Fisico',
+          description: `El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+        });
+      }
+    }
+  });
+};
 
 
   const handleOk = async () => {
@@ -182,7 +183,7 @@ const TablasVencimientos = ({empresa, usuario}) => {
       const values = form.getFieldsValue();
 
       const formattedValues = {
-        [selectedDate]: values.fecha_vencimiento ? values.fecha_vencimiento.format('DD-MM-YYYY') : null
+        [selectedDate]: values.fecha_vencimiento ? values.fecha_vencimiento.valueOf() : null,
       };
 
       const url = isVehiculo
@@ -240,7 +241,8 @@ const TablasVencimientos = ({empresa, usuario}) => {
           onClick={() => handleEditClick('fecha_vencimiento_seguro', text, record._id, true)}
           style={{ color: getDateColor(text) }}
         >
-          {text}
+          {text ? dayjs(text).format('DD-MM-YYYY') : '-'}
+
         </a>
       ),
     },
@@ -250,7 +252,10 @@ const TablasVencimientos = ({empresa, usuario}) => {
       key: 'vtv',
       render: (text, record) => (
         <a onClick={() => handleEditClick('fecha_vencimiento_vtv', text, record._id, true)}
-          style={{ color: getDateColor(text) }}>{text}</a>
+          style={{ color: getDateColor(text) }}>
+          {text ? dayjs(text).format('DD-MM-YYYY') : '-'}
+
+        </a>
       ),
     },
 
@@ -275,7 +280,10 @@ const TablasVencimientos = ({empresa, usuario}) => {
       render: (text, record) => (
         <a onClick={() => handleEditClick('licenciaVencimiento', text, record._id, false)}
           style={{ color: getDateColor(text) }}
-        >{text}</a>
+        >
+          {text ? dayjs(text).format('DD-MM-YYYY') : '-'}
+
+        </a>
       ),
     },
     {
@@ -285,7 +293,10 @@ const TablasVencimientos = ({empresa, usuario}) => {
       render: (text, record) => (
         <a onClick={() => handleEditClick('dniVencimiento', text, record._id, false)}
           style={{ color: getDateColor(text) }}
-        >{text}</a>
+        >
+          {text ? dayjs(text).format('DD-MM-YYYY') : '-'}
+
+        </a>
       ),
     },
     {
@@ -295,7 +306,10 @@ const TablasVencimientos = ({empresa, usuario}) => {
       render: (text, record) => (
         <a onClick={() => handleEditClick('aptoFisicoVencimiento', text, record._id, false)}
           style={{ color: getDateColor(text) }}
-        >{text}</a>
+        >
+          {text ? dayjs(text).format('DD-MM-YYYY') : '-'}
+
+        </a>
       ),
     },
   ];
@@ -344,7 +358,7 @@ const TablasVencimientos = ({empresa, usuario}) => {
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Fecha Vencimiento" name="fecha_vencimiento">
-            <DatePicker format="DD-MM-YYYY" />
+            <DatePicker format='DD-MM-YYYY' />
           </Form.Item>
         </Form>
       </Modal>

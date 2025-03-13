@@ -14,6 +14,17 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
   const handleFinish = async (values) => {
     console.log("Finalizando laboreo:", values);
     const idLaboreo = laboreo._id;  // Usamos el ID del `record` completo
+
+    // Convertir las fechas a formato timestamp (en milisegundos)
+    if (values.fechaInicio) {
+      values.fechaInicio = dayjs(values.fechaInicio).valueOf();  // Convirtiendo a timestamp
+    }
+    if (values.fechaFin) {
+      values.fechaFin = dayjs(values.fechaFin).valueOf();  // Convirtiendo a timestamp
+    }
+    if (values.fechaCierre) {
+      values.fechaCierre = dayjs(values.fechaCierre).valueOf();  // Convirtiendo a timestamp
+    }
     setLoading(true);
     try {
       await api.put(`/laboreos/${idLaboreo}/finish`, values);
@@ -36,13 +47,14 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
 
   return (
     <Modal title="Finalizar Laboreo" open={visible} onCancel={onClose} footer={null}>
-      {/* <p>Finalizar Laboreo de {laboreo.nombre}</p> */}
       <Form form={form} onFinish={handleFinish} layout="vertical"
-    initialValues={{
-      fechaInicio: laboreo?.fechaInicio ? dayjs(laboreo.fechaInicio) : null
-    }}
+        initialValues={{
+          fechaInicio: laboreo?.fechaInicio ? dayjs(laboreo.fechaInicio) : null,
+          fechaFin: laboreo?.fechaFin ? dayjs(laboreo.fechaFin) : null,
+          fechaCierre: laboreo?.fechaCierre ? dayjs(laboreo.fechaCierre) : null
+        }}
       >
-        {/* Fecha de cierre */}
+        {/* Fecha de inicio, fin y cierre */}
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item name="fechaInicio" label="Fecha de Inicio" rules={[{ required: true, message: "Seleccione una fecha" }]}>
@@ -62,7 +74,6 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
         </Row>
 
         {/* Sueldos de empleados */}
-
         <Form.List name="sueldos">
           {(fields, { add, remove }) => (
             <>
@@ -137,6 +148,5 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
     </Modal>
   );
 };
-
 
 export default FinishModal;

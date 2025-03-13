@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox, Typography } from 'antd';
-import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
+import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Checkbox, Typography, Select } from 'antd';
+import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import useAxiosInterceptor from '../utils/axiosConfig';
 
-const { Title } = Typography;
 
-const TablaNominas = ({empresa}) => {
+const { Title } = Typography;
+const { Option } = Select;
+
+const TablaNominas = ({ empresa }) => {
   const [nominas, setNominas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -62,11 +64,17 @@ const TablaNominas = ({empresa}) => {
     setNominaIdToDelete(id);
     setIsDeleteModalVisible(true);
   };
+  const handleCancel = () => {
+    setIsDeleteModalVisible(false);
+    setIsEditModalVisible(false);
+    form.resetFields();
+  };
 
   const showEditModal = (nomina) => {
     setCurrentNomina(nomina);
-    form.setFieldsValue({ 
+    form.setFieldsValue({
       ...nomina,
+      // Convirtiendo las fechas a dayjs para su visualización en formato 'DD-MM-YYYY'
       licenciaVencimiento: nomina.licenciaVencimiento ? dayjs(nomina.licenciaVencimiento) : null,
       aptoFisicoVencimiento: nomina.aptoFisicoVencimiento ? dayjs(nomina.aptoFisicoVencimiento) : null,
       dniVencimiento: nomina.dniVencimiento ? dayjs(nomina.dniVencimiento) : null,
@@ -75,34 +83,33 @@ const TablaNominas = ({empresa}) => {
     setIsEditModalVisible(true);
   };
 
-  const handleCancel = () => {
-    setIsDeleteModalVisible(false);
-    setIsEditModalVisible(false);
-    form.resetFields();
-  };
-
   const handleEdit = async (values) => {
     try {
+      // Formateando las fechas en formato 'YYYY-MM-DD' (timestamp) antes de enviarlas
       const formattedValues = {
         ...values,
-        licenciaVencimiento: values.licenciaVencimiento ? values.licenciaVencimiento.format('YYYY-MM-DD') : null,
-        aptoFisicoVencimiento: values.aptoFisicoVencimiento ? values.aptoFisicoVencimiento.format('YYYY-MM-DD') : null,
-        dniVencimiento: values.dniVencimiento ? values.dniVencimiento.format('YYYY-MM-DD') : null,
-        estado: values.estado ? 1 : 0
+        licenciaVencimiento: values.licenciaVencimiento ? values.licenciaVencimiento.valueOf() : null,
+        aptoFisicoVencimiento: values.aptoFisicoVencimiento ? values.aptoFisicoVencimiento.valueOf() : null,
+        dniVencimiento: values.dniVencimiento ? values.dniVencimiento.valueOf() : null,
+        estado: values.estado
       };
 
+      // Enviando los datos al backend
       await axios.put(`http://localhost:6001/api/nomina/${currentNomina._id}`, formattedValues);
 
+      // Actualizando la lista de nóminas con la nueva información
       setNominas((prevNominas) =>
         prevNominas.map((nomina) =>
           nomina._id === currentNomina._id ? { ...nomina, ...formattedValues } : nomina
         )
       );
 
+      // Cerrando el modal y mostrando notificación
       setIsEditModalVisible(false);
       openNotificationWithIcon('success', 'Nómina Editada', 'La nómina ha sido editada exitosamente.');
     } catch (error) {
       console.error('Error editing nomina:', error);
+      openNotificationWithIcon('error', 'Error', 'Hubo un error al editar la nómina.');
     }
   };
 
@@ -167,7 +174,7 @@ const TablaNominas = ({empresa}) => {
 
   return (
     <>
-    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empleados</Title>
+      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empleados</Title>
       <Table
         columns={columns}
         dataSource={nominas}
@@ -242,21 +249,24 @@ const TablaNominas = ({empresa}) => {
 
           <Form.Item label="Vencimiento de Licencia" name="licenciaVencimiento"
             rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
 
           <Form.Item label="Vencimiento de Apto Físico" name="aptoFisicoVencimiento"
             rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
 
           <Form.Item label="Vencimiento DNI" name="dniVencimiento"
             rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>
-            <DatePicker format="YYYY-MM-DD" />
+            <DatePicker format="DD-MM-YYYY" />
           </Form.Item>
 
-          <Form.Item name="estado" valuePropName="checked">
-            <Checkbox>Empleado Activo</Checkbox>
+          <Form.Item name="estado" label="Estado">
+            <Select>
+              <Option value="Activo">Activo</Option>
+              <Option value="Inactivo">Inactivo</Option>
+            </Select>
           </Form.Item>
 
           <Form.Item>
