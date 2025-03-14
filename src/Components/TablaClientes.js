@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Space, Table, Modal, Form, Input, Button, notification, Row, Col, Typography } from "antd";
-import { DeleteOutlined, EditOutlined, PushpinOutlined } from "@ant-design/icons";
+import { Space, Table, Modal, Form, Input, Button, notification, Row, Col, Typography, Select } from "antd";
+import { DeleteOutlined, EditOutlined, PushpinOutlined, PlusOutlined, VerticalAlignBottomOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import axios from "axios";
 import MapaSelector from "./MapSelector";
 import useAxiosInterceptor from "../utils/axiosConfig";
 
+const { Option } = Select;
 const { Title } = Typography;
 const TablaClientes = ({ empresa, usuario }) => {
   const [clientes, setClientes] = useState([]);
@@ -15,10 +16,15 @@ const TablaClientes = ({ empresa, usuario }) => {
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
   const [clienteIdToDelete, setClienteIdToDelete] = useState(null);
   const [currentCliente, setCurrentCliente] = useState(null);
+  const [provincias, setProvincias] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
+  const [selectedProvincia, setSelectedProvincia] = useState(null);
+  const [selectedLocalidad, setSelectedLocalidad] = useState(null);
   const [form] = Form.useForm();
   const [campos, setCampos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
+  const [selectedCoords, setSelectedCoords] = useState(null);
 
 
 
@@ -50,6 +56,39 @@ const TablaClientes = ({ empresa, usuario }) => {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => {
+    const fetchProvincias = async () => {
+      try {
+        const response = await api.get('/provincias');
+        setProvincias(response.data);
+      } catch (error) {
+        console.error('Error al cargar provincias:', error);
+        openNotificationWithIcon('error', 'Error', 'No se pudieron cargar las provincias.');
+      }
+    };
+
+    fetchProvincias();
+  }, [api]);
+
+  useEffect(() => {
+    // Si hay provincia seleccionada, cargar las localidades
+    if (selectedProvincia) {
+      const fetchLocalidades = async () => {
+        try {
+          const response = await api.get(`/localidades/${selectedProvincia}`);
+          setLocalidades(response.data);
+        } catch (error) {
+          console.error('Error al cargar localidades:', error);
+          openNotificationWithIcon('error', 'Error', 'No se pudieron cargar las localidades.');
+        }
+      };
+
+      fetchLocalidades();
+    }
+  }, [selectedProvincia, api]);
+
 
   const openNotificationWithIcon = (type, message, description) => {
     notification[type]({ message, description });
@@ -143,7 +182,12 @@ const TablaClientes = ({ empresa, usuario }) => {
 
   const showMapModal = (index) => {
     console.log("Abriendo modal de mapa para el índice:", index); // Agregar log para depurar
+    const coordenadasIniciales = campos[index]?.latitud && campos[index]?.longitud
+      ? { lat: campos[index].latitud, lng: campos[index].longitud }
+      : null; // Si no hay coordenadas, dejarlo en null
+
     setCurrentIndex(index);
+    setSelectedCoords(coordenadasIniciales); // Guardar las coordenadas en el estado
     setIsMapModalVisible(true);
   };
 
@@ -151,7 +195,11 @@ const TablaClientes = ({ empresa, usuario }) => {
     if (latlng) {
       setCampos((prev) => {
         const updatedCampos = [...prev];
-        updatedCampos[currentIndex] = { ...updatedCampos[currentIndex], latitud: latlng.lat, longitud: latlng.lng };
+        updatedCampos[currentIndex] = {
+          ...updatedCampos[currentIndex],
+          latitud: latlng.lat,
+          longitud: latlng.lng
+        };
         return updatedCampos;
       });
     }
@@ -172,7 +220,7 @@ const TablaClientes = ({ empresa, usuario }) => {
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showEditModal(record)}><EditOutlined /></a>
-          <a onClick={() => showEditCamposModal(record)}><PushpinOutlined /></a>
+          <a onClick={() => showEditCamposModal(record)}><EnvironmentOutlined /></a>
           <a onClick={() => showDeleteConfirm(record._id)}><DeleteOutlined /></a>
           {/* <Button icon={<EditOutlined />} onClick={() => showEditCamposModal(record)}> </Button>
           <Button icon={<DeleteOutlined />} danger onClick={() => showDeleteConfirm(record._id)}></Button> */}
@@ -189,11 +237,55 @@ const TablaClientes = ({ empresa, usuario }) => {
       {/* Modal para Editar Datos */}
       <Modal title="Editar Cliente" open={isEditModalVisible} onCancel={handleCancel} footer={null}>
         <Form form={form} onFinish={handleEdit}>
-          {["nombre", "apellido", "domicilio", "localidad", "provincia", "telefono", "mail"].map((field) => (
-            <Form.Item key={field} name={field} label={field.charAt(0).toUpperCase() + field.slice(1)} rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-          ))}
+          <Form.Item name="nombre" label="Nombre" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="apellido" label="Apellido" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+
+
+
+          <Form.Item name="provincia" label="Provincia" rules={[{ required: true }]}>
+            <Select
+              value={selectedProvincia}
+              onChange={value => {
+                setSelectedProvincia(value);  // Aquí 'value' es el código de la provincia
+                form.setFieldsValue({ provincia: value });  // Esto actualizará el formulario con el código
+              }}
+              placeholder="Selecciona una provincia"
+            >
+              {provincias.map((provincia) => (
+                <Option key={provincia.code} value={provincia.code}>
+                  {provincia.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+
+          <Form.Item name="localidad" label="Localidad" rules={[{ required: true }]}>
+            <Select
+              value={selectedLocalidad}
+              onChange={value => {
+                setSelectedLocalidad(value);
+                form.setFieldsValue({ localidad: value }); // Actualizar el valor en el formulario
+              }}
+              placeholder="Selecciona una localidad"
+              showSearch
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {localidades.map((localidad) => (
+                <Option key={localidad.name} value={localidad.name}>
+                  {localidad.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit">Guardar Cambios</Button>
           </Form.Item>
@@ -237,6 +329,7 @@ const TablaClientes = ({ empresa, usuario }) => {
                   <Input
                     placeholder="Latitud"
                     value={campo.latitud}
+                    disabled
                     onChange={(e) => updateCampo(index, "latitud", e.target.value)}
                   />
                 </Form.Item>
@@ -247,19 +340,31 @@ const TablaClientes = ({ empresa, usuario }) => {
                   <Input
                     placeholder="Longitud"
                     value={campo.longitud}
+                    disabled
                     onChange={(e) => updateCampo(index, "longitud", e.target.value)}
                   />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Button onClick={() => showMapModal(index)}>Seleccionar en Mapa</Button>
-            <Button danger onClick={() => removeCampo(index)}>Eliminar</Button>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Button block onClick={() => showMapModal(index)}> <EnvironmentOutlined /> Seleccionar en Mapa</Button>
+              </Col>
+              <Col span={12}>
+                <Button danger block onClick={() => removeCampo(index)}>Eliminar</Button>
+              </Col>
+            </Row>
           </div>
         ))}
-
-        <Button onClick={addCampo}>Agregar Campo</Button>
-        <Button type="primary" onClick={handleEditCampos}>Guardar</Button>
+        <Row gutter={8}>
+          <Col span={12}>
+            <Button block onClick={addCampo}> <PlusOutlined /> Agregar Campo</Button>
+          </Col>
+          <Col span={12}>
+            <Button block type="primary" onClick={handleEditCampos}>Guardar</Button>
+          </Col>
+        </Row>
       </Modal>
 
       <Modal
@@ -269,7 +374,9 @@ const TablaClientes = ({ empresa, usuario }) => {
         footer={null} >
         <MapaSelector
           onChange={handleMapSelect}
-          isModalVisible={isMapModalVisible} />
+          isModalVisible={isMapModalVisible}
+          coordenadasIniciales={selectedCoords}
+        />
       </Modal>
 
     </>

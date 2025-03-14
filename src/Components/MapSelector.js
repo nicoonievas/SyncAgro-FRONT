@@ -10,7 +10,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Corrige el icono por defecto de Leaflet en React
+// Configurar ícono de Leaflet en React
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -20,21 +20,20 @@ L.Icon.Default.mergeOptions({
 
 const { BaseLayer, Overlay } = LayersControl;
 
-// Componente encargado de manejar los eventos del mapa y de llamar a invalidateSize()
-const MapEventsHandler = ({ onChange, isModalVisible }) => {
-  const [position, setPosition] = useState(null);
+// Componente que maneja eventos del mapa
+const MapEventsHandler = ({ onChange, isModalVisible, position, setPosition }) => {
   const map = useMap();
 
-  // Invalidamos el tamaño del mapa cuando el modal se abra
+  // Ajustar tamaño cuando el modal se abre
   useEffect(() => {
     if (isModalVisible) {
       setTimeout(() => {
         map.invalidateSize();
-      }, 200); // Puedes ajustar el delay según la animación del modal
+      }, 200);
     }
   }, [isModalVisible, map]);
 
-  // Capturamos clics en el mapa
+  // Capturar clic en el mapa para actualizar la posición del marcador
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
@@ -42,15 +41,24 @@ const MapEventsHandler = ({ onChange, isModalVisible }) => {
     },
   });
 
-  return position ? <Marker position={position} /> : null;
+  return null; // No renderiza nada
 };
 
-export default function MapSelector({ onChange, isModalVisible }) {
+export default function MapSelector({ onChange, isModalVisible, coordenadasIniciales }) {
+  // Estado para la posición del marcador
+  const [position, setPosition] = useState(coordenadasIniciales || { lat: -32.101680, lng: -63.029615 });
+
+  useEffect(() => {
+    if (coordenadasIniciales) {
+      setPosition(coordenadasIniciales);
+    }
+  }, [coordenadasIniciales]);
+
   return (
     <MapContainer
-      center={[-32.101680, -63.029615]}
+      center={position}
       zoom={13}
-      style={{ height: "400px", width: "100%" }} // Aseguramos que el contenedor tenga ancho y alto definidos
+      style={{ height: "400px", width: "100%" }}
     >
       <LayersControl position="topright">
         <BaseLayer checked name="OpenStreetMap">
@@ -67,12 +75,6 @@ export default function MapSelector({ onChange, isModalVisible }) {
           />
         </BaseLayer>
 
-        {/* <Overlay name="Etiquetas (ArcGIS)" checked>
-          <TileLayer
-            url="https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Reference_Overlay/MapServer/tile/{z}/{y}/{x}"
-            attribution="&copy; Esri"
-          />
-        </Overlay> */}
         <Overlay name="Etiquetas Claras (ArcGIS)" checked>
           <TileLayer
             url="https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
@@ -82,9 +84,28 @@ export default function MapSelector({ onChange, isModalVisible }) {
         </Overlay>
       </LayersControl>
 
-      {/* Incluir el componente que maneja los eventos e invalida el tamaño */}
-      <MapEventsHandler onChange={onChange} isModalVisible={isModalVisible} />
-    </MapContainer>
+      {/* Manejo de eventos */}
+      <MapEventsHandler 
+        onChange={onChange} 
+        isModalVisible={isModalVisible} 
+        position={position} 
+        setPosition={setPosition} 
+      />
 
+      {/* Marcador con opción de arrastre */}
+      {position && (
+        <Marker
+          position={position}
+          draggable
+          eventHandlers={{
+            dragend: (e) => {
+              const newPos = e.target.getLatLng();
+              setPosition(newPos);
+              onChange(newPos);
+            },
+          }}
+        />
+      )}
+    </MapContainer>
   );
 }

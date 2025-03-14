@@ -476,6 +476,8 @@ const TablaLaboreos = ({ empresa }) => {
         onClose={() => setIsDynamicModalVisible(false)}
         record={selectedRecord}
         camposPermitidos={camposPermitidos}
+        empresa={empresaId}
+        procedencia="laboreos"
       />
 
 

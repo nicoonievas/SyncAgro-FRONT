@@ -10,7 +10,8 @@ import {
   SolutionOutlined,
   CarryOutOutlined,
   TeamOutlined,
-  ExportOutlined
+  ExportOutlined,
+  LineChartOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
@@ -32,6 +33,7 @@ import TablaUsuarios from './TablaUsuarios';
 import CrearMarcaTipoModelo from './AgregarMarcasModelos';
 import WebView from './webView';
 import TablaEmpresas from './TablaEmpresas';
+import Dashboard from './Dashborard';
 
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -155,6 +157,9 @@ const LeftMenu = () => {
             <Link to="/verVencimientos">Ver Vencimientos</Link>
           </Menu.Item>
 
+          <Menu.Item key="verDashboard" icon={<LineChartOutlined />}>
+            <Link to="/verEstadisticas">Ver Estadisticas</Link>
+          </Menu.Item>
 
           <Menu.Item key="verSistemaProveedor" icon={<ExportOutlined />} onClick={handleOpenPopup}>
             Ver Sistema Proveedor
@@ -246,6 +251,7 @@ const LeftMenu = () => {
             <Route path="/verEmpresas" element={<TablaEmpresas />} />
             <Route path="/verUsuarios" element={<TablaUsuarios />} />
             <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo usuario={usuario} empresa={empresa} />} />
+            <Route path="/verEstadisticas" element={<Dashboard usuario={usuario} empresa={empresa} />} />
             <Route path="/verSistemaProveedor" element={<WebView usuario={usuario} empresa={empresa} />} />
           </Routes>
         </Content>

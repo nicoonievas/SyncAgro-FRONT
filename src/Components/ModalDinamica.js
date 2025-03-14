@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { Modal, Button, Descriptions } from "antd";
+import useAxiosInterceptor from '../utils/axiosConfig';
 
 // Función para convertir una cadena en formato camelCase
 const toCamelCase = (str) => {
@@ -16,18 +18,46 @@ const formatDate = (timestamp) => {
   return `${day}-${month}-${year}`;
 };
 
-const DynamicModal = ({ open, onClose, record, camposPermitidos }) => {
-  if (!record) return null;
+const DynamicModal = ({ open, onClose, record, camposPermitidos, empresa, procedencia }) => {
+  const api = useAxiosInterceptor(empresa);
+  const [recordData, setRecordData] = useState(record);
+
+  useEffect(() => {
+    if (!record || !procedencia) return;
+
+    const fetchRecordData = async () => {
+      const endpoints = {
+        empleados: `/empleado/${record._id}`,
+        vehiculos: `/vehiculo/${record._id}`,
+        equipos: `/equipo/${record._id}`,
+        clientes: `/cliente/${record._id}`,
+        laboreos: `/laboreo/${record._id}`,
+      };
+  
+      if (!endpoints[procedencia]) {
+        console.error("Procedencia no válida:", procedencia);
+        return;
+      }
+
+      try {
+        const response = await api.get(endpoints[procedencia]);
+        console.log(`Datos obtenidos de ${procedencia}:`, response.data);
+        setRecordData(response.data);
+      } catch (error) {
+        console.error(`Error al obtener datos de ${procedencia}:`, error);
+
+      }
+    };
+
+    fetchRecordData();
+  }, [record, procedencia, api]); // Se ejecuta cuando cambian estos valores
+
+  if (!recordData) return null;
 
   const renderValue = (key, value) => {
-    if (value === null) {
-      return "Sin información";
-    }
-    if (value.length < 1) {
-      return "Sin equipos";
-    }
+    if (value === null) return "Sin información";
+    if (Array.isArray(value) && value.length === 0) return "Sin equipos";
     if (Array.isArray(value)) {
-      // Si es un array, mostramos una lista con los valores clave permitidos
       return value.map((item, index) => (
         <div key={index}>
           {typeof item === "object"
@@ -35,29 +65,22 @@ const DynamicModal = ({ open, onClose, record, camposPermitidos }) => {
               .filter((campo) => campo.startsWith(`${key}.`))
               .map((campo) => {
                 const subKey = campo.split(".")[1]; // Extrae la clave después del punto
-                return (
-                  <div key={subKey}>
-                    {item[subKey]}
-                  </div>
-                );
+                return <div key={subKey}>{item[subKey]}</div>;
               })
             : item}
         </div>
       ));
     }
-
-    // Si el valor es un número y tiene 13 caracteres (es un timestamp)
     if (typeof value === "number" && value.toString().length === 13) {
-      return formatDate(value); // Convertimos el timestamp a DD-MM-YYYY
+      return formatDate(value);
     }
-
     return typeof value === "object" ? JSON.stringify(value) : value;
   };
 
   return (
     <Modal open={open} onCancel={onClose} footer={null} title="Detalle">
       <Descriptions bordered column={1}>
-        {Object.entries(record)
+        {Object.entries(recordData)
           .filter(([key]) => camposPermitidos.some((campo) => campo.startsWith(key)))
           .map(([key, value]) => (
             <Descriptions.Item key={key} label={toCamelCase(key)}>

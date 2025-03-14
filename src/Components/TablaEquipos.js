@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table, Modal, Form, Input, Button, notification, Select, Typography } from 'antd';
-import {DeleteOutlined, FormOutlined, EditOutlined} from '@ant-design/icons';
+import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import useAxiosInterceptor from '../utils/axiosConfig';
+import DynamicModal from "./ModalDinamica";
 
 const { Option } = Select;
 const { Title } = Typography;
 
-const TablaEquipos = ({empresa}) => {
+const TablaEquipos = ({ empresa }) => {
   const [equipos, setEquipos] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [equipoActual, setEquipoActual] = useState(null);
@@ -22,6 +23,8 @@ const TablaEquipos = ({empresa}) => {
   const [empleadosLibres, setEmpleadosLibres] = useState([]);
   const [vehiculosLibres, setVehiculosLibres] = useState([]);
   const [empresaId, setEmpresaId] = useState(null);
+  const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
 
   const [pagination, setPagination] = useState({
@@ -76,7 +79,7 @@ const TablaEquipos = ({empresa}) => {
 
     fetchData();
   }, [empresaId, pagination]);
-  
+
 
   const verDetalles = (id) => {
     console.log("Ver detalles del equipo:", id);
@@ -86,6 +89,13 @@ const TablaEquipos = ({empresa}) => {
     setEquipoIdToDelete(id);
     setIsDeleteModalVisible(true);
   };
+
+  const showDynamicModal = (record) => {
+    setSelectedRecord(record);
+    setIsDynamicModalVisible(true);
+    // console.log(record);
+  };
+  const camposPermitidos = ["nombre", "numero", "estado", "empleados.nombre", "vehiculos.dominio"];
 
   const showEditModal = (equipo) => {
     setCurrentEquipo(equipo);
@@ -143,20 +153,17 @@ const TablaEquipos = ({empresa}) => {
       notification.error({ message: 'Error', description: 'Hubo un problema al eliminar el Equipo.' });
     }
   };
-  const estadoMapping = {
-    0: "Inactivo",
-    1: "Activo",
-    // 2: "Finalizado",
-    // 3: "Cancelado",
-    5: "Asignado",
-    6: "Libre",
-    // 7: "En reparación"
-  };
+
   const columns = [
     {
       title: "Nombre del Equipo",
       dataIndex: "nombre",
-      key: "nombre"
+      key: "nombre",
+
+      render: (text, record) => (
+        <a onClick={() => showDynamicModal(record)}>{text}</a>
+      ),
+
     },
     // {
     //   title: "Numero del Equipo",
@@ -214,7 +221,7 @@ const TablaEquipos = ({empresa}) => {
 
   return (
     <>
-    <Title level={5} style={{ marginTop: '0px' }}>Gestión de Equipos</Title>
+      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Equipos</Title>
       <Table dataSource={equipos}
         columns={columns}
         rowKey="id"
@@ -292,9 +299,9 @@ const TablaEquipos = ({empresa}) => {
 
           <Form.Item name="estado" label="Estado">
             <Select>
-              {Object.entries(estadoMapping).map(([value, label]) => (
-                <Option key={value} value={value}>{label}</Option>
-              ))}
+              <Option value="Activo">Activo</Option>
+              <Option value="Inactivo">Inactivo</Option>
+              <Option value="Cancelado">Cancelado</Option>
             </Select>
           </Form.Item>
 
@@ -304,6 +311,15 @@ const TablaEquipos = ({empresa}) => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <DynamicModal
+        open={isDynamicModalVisible}
+        onClose={() => setIsDynamicModalVisible(false)}
+        record={selectedRecord}
+        camposPermitidos={camposPermitidos}
+        empresa={empresaId}
+        procedencia="equipos"
+      />
     </>
   );
 };
