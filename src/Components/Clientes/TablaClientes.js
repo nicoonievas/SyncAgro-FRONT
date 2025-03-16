@@ -25,6 +25,8 @@ const TablaClientes = ({ empresa, usuario }) => {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
   const [selectedCoords, setSelectedCoords] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Estado para almacenar el término de búsqueda
+  const [filteredClientes, setFilteredClientes] = useState([]);
 
 
 
@@ -89,6 +91,19 @@ const TablaClientes = ({ empresa, usuario }) => {
     }
   }, [selectedProvincia, api]);
 
+  const handleSearch = (c) => {
+    const term = c.target.value;
+    setSearchTerm(term);
+
+    // Filtrar las empresas por razón social o CUIT
+    const filtered = clientes.filter(cliente =>
+      cliente.apellido.toLowerCase().includes(term) || 
+      cliente.nombre.toLowerCase().includes(term) || 
+      cliente.localidad.toLowerCase().includes(term) 
+    );
+
+    setFilteredClientes(filtered);
+  };
 
   const openNotificationWithIcon = (type, message, description) => {
     notification[type]({ message, description });
@@ -231,8 +246,18 @@ const TablaClientes = ({ empresa, usuario }) => {
 
   return (
     <>
-      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Clientes</Title>
-      <Table columns={columns} dataSource={clientes} rowKey="_id" loading={loading} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Gestión de Clientes</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Apellido o Nombre"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </div>
+
+
+      <Table columns={columns} dataSource={filteredClientes} rowKey="_id" loading={loading} />
 
       {/* Modal para Editar Datos */}
       <Modal title="Editar Cliente" open={isEditModalVisible} onCancel={handleCancel} footer={null}>

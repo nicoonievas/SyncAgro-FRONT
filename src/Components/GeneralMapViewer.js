@@ -27,7 +27,7 @@ const icons = {
 const tooltipColors = {
   Activo: "rgba(76, 127, 175, 0.8)", // Verde
   Finalizado: "rgba(76, 175, 80, 0.8)", // Rojo
-  Pendiente: "rgba(240, 202, 90, 0.8)", // Amarillo
+  Pendiente: "rgba(235, 178, 7, 0.8)", // Amarillo
 };
 
 const FitBounds = ({ locations }) => {

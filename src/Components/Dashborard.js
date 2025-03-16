@@ -364,33 +364,40 @@ const Dashboard = ({ empresa }) => {
                             Rentabilidad Promedio Mensual
                         </h3>
                         <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={rentabilidadMensual()}>
-                                <XAxis dataKey="mes" label={{ value: 'Mes', position: 'insideBottom', dy: 10 }} />
-                                <YAxis label={{ value: 'Rentabilidad Promedio', angle: -90, position: 'insideLeft', dy: 60 }} />
-                                <Bar
-                                    dataKey="rentabilidadPromedio"
-                                    fill="rgba(8, 134, 86, 0.8)"
-                                    label={{
-                                        position: 'inside',
-                                        fontSize: 12,
-                                        fill: '#fff',
-                                        content: ({ value, x, y, width, height }) => (
-                                            <text
-                                                x={x + width / 2}
-                                                y={y + height / 2}
-                                                fill="#fff"
-                                                fontSize={12}
-                                                textAnchor="middle"
-                                                alignmentBaseline="middle"
-                                            >
-                                                {Math.trunc(value)}%
-                                            </text>
-                                        ),
-                                    }}
-                                />
-                                <Tooltip />
-                            </BarChart>
+                            {rentabilidadMensual().length > 0 ? (
+                                <BarChart data={rentabilidadMensual()}>
+                                    <XAxis dataKey="mes" label={{ value: 'Mes', position: 'insideBottom', dy: 10 }} />
+                                    <YAxis label={{ value: 'Rentabilidad Promedio', angle: -90, position: 'insideLeft', dy: 60 }} />
+                                    <Bar
+                                        dataKey="rentabilidadPromedio"
+                                        fill="rgba(8, 134, 86, 0.8)"
+                                        label={{
+                                            position: 'inside',
+                                            fontSize: 12,
+                                            fill: '#fff',
+                                            content: ({ value, x, y, width, height }) => (
+                                                <text
+                                                    x={x + width / 2}
+                                                    y={y + height / 2}
+                                                    fill="#fff"
+                                                    fontSize={12}
+                                                    textAnchor="middle"
+                                                    alignmentBaseline="middle"
+                                                >
+                                                    {Math.trunc(value)}%
+                                                </text>
+                                            ),
+                                        }}
+                                    />
+                                    <Tooltip />
+                                </BarChart>
+                            ) : (
+                                <div style={{ textAlign: "center", paddingTop: "100px", fontSize: "16px", color: "#888" }}>
+                                    No hay datos para el filtro establecido
+                                </div>
+                            )}
                         </ResponsiveContainer>
+
                     </Col>
 
                     {/* Rentabilidad Promedio Total a la Derecha */}
@@ -493,53 +500,68 @@ const Dashboard = ({ empresa }) => {
                     {/* Gráfico de Tareas */}
                     <Col span={12}>
                         <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            Distribución de Tareas</h3>
+                            Distribución de Tareas
+                        </h3>
                         <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie
-                                    data={Object.entries(tareasDiscriminadas()).map(([key, value]) => ({ name: key, value }))}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    outerRadius={80}
-                                    innerRadius={50}
-                                    fill="#82ca9d"
-                                    label={({ value }) => `${value}`}
-                                >
-                                    {Object.keys(tareasDiscriminadas()).map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend layout="horizontal" align="center" verticalAlign="bottom" />
-                            </PieChart>
+                            {Object.keys(tareasDiscriminadas()).length > 0 ? (
+                                <PieChart>
+                                    <Pie
+                                        data={Object.entries(tareasDiscriminadas()).map(([key, value]) => ({ name: key, value }))}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        outerRadius={80}
+                                        innerRadius={50}
+                                        fill="#82ca9d"
+                                        label={({ value }) => `${value}`}
+                                    >
+                                        {Object.keys(tareasDiscriminadas()).map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend layout="horizontal" align="center" verticalAlign="bottom" />
+                                </PieChart>
+                            ) : (
+                                <div style={{ textAlign: "center", paddingTop: "100px", fontSize: "16px", color: "#888" }}>
+                                    No hay datos para el filtro establecido
+                                </div>
+                            )}
                         </ResponsiveContainer>
                     </Col>
 
                     {/* Gráfico de Granos */}
                     <Col span={12}>
                         <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            Distribución de Granos</h3>
+                            Distribución de Granos
+                        </h3>
                         <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie
-                                    data={Object.entries(granosDiscriminados()).map(([key, value]) => ({ name: key, value }))}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    outerRadius={80}
-                                    innerRadius={50}
-                                    fill="#8884d8"
-                                    label={({ value }) => `${value}`}
-                                >
-                                    {Object.keys(granosDiscriminados()).map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend layout="horizontal" align="center" verticalAlign="bottom" />
-                            </PieChart>
+                            {Object.keys(granosDiscriminados()).length > 0 ? (
+                                <PieChart>
+                                    <Pie
+                                        data={Object.entries(granosDiscriminados()).map(([key, value]) => ({ name: key, value }))}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        outerRadius={80}
+                                        innerRadius={50}
+                                        fill="#8884d8"
+                                        label={({ value }) => `${value}`}
+                                    >
+                                        {Object.keys(granosDiscriminados()).map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend layout="horizontal" align="center" verticalAlign="bottom" />
+                                </PieChart>
+                            ) : (
+                                <div style={{ textAlign: "center", paddingTop: "100px", fontSize: "16px", color: "#888" }}>
+                                    No hay datos para el filtro establecido
+                                </div>
+                            )}
                         </ResponsiveContainer>
                     </Col>
                 </Row>
+
             </div>
 
 
