@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Select, notification, DatePicker, Row, Col } from 'antd';
 import axios from 'axios';
-import useAxiosInterceptor from '../utils/axiosConfig';
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 const { Option } = Select;
 
@@ -26,15 +26,53 @@ const openNotificationWithIcon = (type, message, description) => {
   });
 };
 
-const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
+const CrearLaboreo = ({ laboreoToAdd, empresa, usuario }) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [empleados, setEmpleados] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
-  const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
-  const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
+  const [tareas, setTareas] = useState([
+    "Cosechar",
+    "Sembrar",
+    "Riego",
+    "Fumigar",
+    "Arar",
+    "Embolsar",
+    "Fertilizar",
+    "Desmalezar",
+    "Labrar",
+    "Aplicar herbicida",
+    "Aplicar insecticida",
+    "Aplicar fungicida",
+    "Secado",
+    "Almacenamiento",
+    "Transporte",
+    "Siembra directa",
+    "Laboreo mínimo"
+  ]);
+
+  const [granos, setGranos] = useState([
+    "Soja",
+    "Maíz",
+    "Trigo",
+    "Arroz",
+    "Girasol",
+    "Cebada",
+    "Sorgo",
+    "Avena",
+    "Centeno",
+    "Lentejas",
+    "Poroto",
+    "Maní",
+    "Algodón",
+    "Quinoa",
+    "Mijo",
+    "Chía",
+    "Cártamo"
+  ]);
+
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [campos, setCampos] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
@@ -277,7 +315,7 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario}) => {
 
       {/* Agrupar Tarea y Grano en un Row */}
       <Row gutter={12}
-      style={{ justifyContent: 'right' }}>
+        style={{ justifyContent: 'right' }}>
         <Col span={9}>
           <Form.Item
             name="tarea"

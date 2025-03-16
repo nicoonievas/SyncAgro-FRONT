@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Select, Modal, notification } from 'antd';
-import MapaSelector from "./MapSelector";
-import useAxiosInterceptor from '../utils/axiosConfig';
+import MapaSelector from "../MapSelector";
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 const { Option } = Select;
 

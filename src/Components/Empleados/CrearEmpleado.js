@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, notification, DatePicker } from 'antd';
-import useAxiosInterceptor from '../utils/axiosConfig';
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 const layout = {
   labelCol: {

@@ -3,7 +3,7 @@ import { Space, Table, Modal, Form, Input, Button, notification, DatePicker, Che
 import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import useAxiosInterceptor from '../utils/axiosConfig';
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 
 const { Title } = Typography;

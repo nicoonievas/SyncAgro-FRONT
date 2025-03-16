@@ -3,8 +3,8 @@ import { Space, Table, Modal, Form, Input, Button, notification, Select, Typogra
 import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import useAxiosInterceptor from '../utils/axiosConfig';
-import DynamicModal from "./ModalDinamica";
+import useAxiosInterceptor from '../../utils/axiosConfig';
+import DynamicModal from "../ModalDinamica";
 
 const { Option } = Select;
 const { Title } = Typography;

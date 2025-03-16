@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Select, notification } from 'antd';
 import axios from 'axios';
-import useAxiosInterceptor from '../utils/axiosConfig';
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 const { Option } = Select;
 

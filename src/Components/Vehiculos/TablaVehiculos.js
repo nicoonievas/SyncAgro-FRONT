@@ -4,7 +4,7 @@ import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
-import useAxiosInterceptor from '../utils/axiosConfig';
+import useAxiosInterceptor from '../../utils/axiosConfig';
 
 const { Option } = Select;
 const { Title } = Typography;

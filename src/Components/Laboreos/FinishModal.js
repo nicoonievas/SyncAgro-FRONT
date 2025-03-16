@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, notification, Input, DatePicker, Form, Select, Row, Col } from "antd";
 import axios from "axios";
-import useAxiosInterceptor from "../utils/axiosConfig";
+import useAxiosInterceptor from "../../utils/axiosConfig";
 import dayjs from "dayjs";
 
 const { Option } = Select;

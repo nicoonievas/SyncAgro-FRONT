@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Select, message, Input, Button, Statistic, Card, Row, Col } from 'antd';
+import { Select, message, Input, Button, Statistic, Card, Row, Col, Table, Typography } from 'antd';
 import useAxiosInterceptor from '../utils/axiosConfig';
+import dayjs from 'dayjs';
 import { ArrowDownOutlined, DollarOutlined, ArrowUpOutlined, ToolOutlined, CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import MapComponent from './GeneralMapViewer';
 
 const { Option } = Select;
+const { Title } = Typography
 
 const Dashboard = ({ empresa }) => {
     const [laboreos, setLaboreos] = useState([]);
@@ -40,12 +42,12 @@ const Dashboard = ({ empresa }) => {
         try {
             const { data } = await api.get("/laboreos");
             setLaboreos(data);
-    
+
             // Extraer coordenadas de los campos afectados
             const coordenadasAfectadas = data.map(laboreo => {
                 // Verificar si el laboreo tiene cliente y camposAfectados
                 if (!laboreo.cliente || !laboreo.camposAfectados || !Array.isArray(laboreo.cliente.coordenadas)) return [];
-    
+
                 return laboreo.cliente.coordenadas
                     .filter(campo => {
                         // Asegurarse de que el nombre del campo está incluido en los camposAfectados
@@ -53,27 +55,31 @@ const Dashboard = ({ empresa }) => {
                     })
                     .map(campo => ({
                         nombre: campo.nombre,
+
                         latitud: campo.latitud,
                         longitud: campo.longitud,
                         cliente: laboreo.cliente.nombre, // Opcional, para identificar al cliente
+                        apellido: laboreo.cliente.apellido,
                         grano: laboreo.grano, // Opcional, para identificar el grano
+                        tarea: laboreo.tarea, // Opcional, para identificar la tarea
+                        estado: laboreo.estado, // Opcional, para identificar el estado
                     }));
             }).flat(); // Aplana el arreglo resultante para obtener una lista simple de coordenadas
-    
+
             setLocations(coordenadasAfectadas); // Guardamos en el estado
-    
+
             const estados = calcularEstados(data);
             setEstadoContadores(estados);
-    
+
         } catch (error) {
             // Manejar errores si es necesario
         } finally {
             setLoading(false);
         }
     };
-    
 
-        const aplicarFiltros = () => {
+
+    const aplicarFiltros = () => {
         const { mes, grano, tarea } = filtros;
         let filteredData = [...laboreos];
 
@@ -95,7 +101,7 @@ const Dashboard = ({ empresa }) => {
                     const coordenadasAfectadas = data.map(laboreo => {
                         // Verificar si el laboreo tiene cliente y camposAfectados
                         if (!laboreo.cliente || !laboreo.camposAfectados || !Array.isArray(laboreo.cliente.coordenadas)) return [];
-            
+
                         return laboreo.cliente.coordenadas
                             .filter(campo => {
                                 // Asegurarse de que el nombre del campo está incluido en los camposAfectados
@@ -103,13 +109,17 @@ const Dashboard = ({ empresa }) => {
                             })
                             .map(campo => ({
                                 nombre: campo.nombre,
+
                                 latitud: campo.latitud,
                                 longitud: campo.longitud,
                                 cliente: laboreo.cliente.nombre, // Opcional, para identificar al cliente
+                                apellido: laboreo.cliente.apellido,
                                 grano: laboreo.grano, // Opcional, para identificar el grano
+                                tarea: laboreo.tarea, // Opcional, para identificar la tarea
+                                estado: laboreo.estado
                             }));
                     }).flat(); // Aplana el arreglo resultante para obtener una lista simple de coordenadas
-            
+
                     setLocations(coordenadasAfectadas); // Guardamos en el estado
                 })
                 .catch((error) => {
@@ -152,28 +162,28 @@ const Dashboard = ({ empresa }) => {
     const calcularRentabilidadTotal = () => {
         const datos = rentabilidadMensual();
         if (datos.length === 0) return 0; // Evitar división por cero
-    
+
         // Sumar las rentabilidades promedio de cada mes y calcular el promedio total
         const totalRentabilidad = datos.reduce((acc, item) => acc + item.rentabilidadPromedio, 0);
         return (totalRentabilidad / datos.length).toFixed(2); // Formato a 2 decimales
     };
-    
+
     const rentabilidadMensual = () => {
         // Filtrar los laboreos con estado "Finalizado"
         const laboreosFinalizados = laboreos.filter(laboreo => laboreo.estado === "Finalizado");
-    
+
         // Calcular la rentabilidad solo para los laboreos finalizados
         const rentabilidad = laboreosFinalizados.reduce((acc, laboreo) => {
             const mes = new Date(laboreo.fechaFin).getMonth() + 1;
             acc[mes] = acc[mes] || { mes, rentabilidadTotal: 0, count: 0 };
-            
+
             // Sumar la rentabilidadLaboreo directamente
             acc[mes].rentabilidadTotal += laboreo.rentabilidadLaboreo;
             acc[mes].count += 1;
-    
+
             return acc;
         }, {});
-    
+
         // Retornar los promedios de rentabilidad por mes
         return Object.values(rentabilidad).map(item => ({
             mes: item.mes,
@@ -183,13 +193,13 @@ const Dashboard = ({ empresa }) => {
     const sumarUtilidadesNetasFinalizados = () => {
         // Filtrar los laboreos con estado "Finalizado"
         const laboreosFinalizados = laboreos.filter(laboreo => laboreo.estado === "Finalizado");
-    
+
         // Sumar las utilidades netas de los laboreos finalizados
         const totalUtilidadNeta = laboreosFinalizados.reduce((acc, laboreo) => {
             // Sumar la utilidad neta de cada laboreo finalizado
             return acc + (laboreo.utilidadNeta || 0); // Asegurarse de que no sea undefined o null
         }, 0);
-    
+
         return totalUtilidadNeta; // Retorna la suma total de las utilidades netas
     };
     // const totalUtilidad = sumarUtilidadesNetasFinalizados();
@@ -211,9 +221,60 @@ const Dashboard = ({ empresa }) => {
         }, {});
     };
     const colores = ['#ff8042', '#00C49F', '#FFBB28'];
+
+    const columns = [
+        {
+            title: 'Nombre',
+            dataIndex: 'nombre',
+            key: 'nombre',
+        },
+        {
+            title: 'Cliente',
+            dataIndex: ['cliente', 'nombre'],
+            key: 'cliente',
+            render: (_, record) =>
+                record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente",
+        },
+        {
+            title: 'Fecha Inicio',
+            dataIndex: 'fechaInicio',
+            key: 'fechaInicio',
+            render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
+        },
+        {
+            title: 'Fecha Fin',
+            dataIndex: 'fechaFin',
+            key: 'fechaFin',
+            render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
+        },
+        {
+            title: 'Dias Trabajados',
+            dataIndex: 'tiempoTrabajo',
+            key: 'tiempoTrabajo',
+        },
+        {
+            title: 'Utilidad Neta',
+            dataIndex: 'utilidadNeta',
+            key: 'utilidadNeta',
+        },
+        {
+            title: 'Rentabilidad',
+            dataIndex: 'rentabilidadLaboreo',
+            key: 'rentabilidadLaboreo',
+        },
+        {
+            title: 'Estado',
+            dataIndex: 'estado',
+            key: 'estado'
+        }
+    ];
+
+
+
+
     return (
         <div>
-            <h2>Dashboard de Rentabilidad</h2>
+            <h2>Dashboard </h2>
 
             {/* Filtros */}
             <Select
@@ -243,12 +304,25 @@ const Dashboard = ({ empresa }) => {
                 style={{ width: 200, margin: '0 10px' }}
                 onChange={(value) => setFiltros((prev) => ({ ...prev, grano: value }))}
             >
-                <Option value="">Seleccionar Grano</Option>
+
                 <Option value="Soja">Soja</Option>
                 <Option value="Maiz">Maíz</Option>
                 <Option value="Trigo">Trigo</Option>
                 <Option value="Arroz">Arroz</Option>
                 <Option value="Girasol">Girasol</Option>
+                <Option value="Cebada">Cebada</Option>
+                <Option value="Sorgo">Sorgo</Option>
+                <Option value="Avena">Avena</Option>
+                <Option value="Centeno">Centeno</Option>
+                <Option value="Lentejas">Lentejas</Option>
+                <Option value="Poroto">Poroto</Option>
+                <Option value="Maní">Maní</Option>
+                <Option value="Algodón">Algodón</Option>
+                <Option value="Quinoa">Quinoa</Option>
+                <Option value="Mijo">Mijo</Option>
+                <Option value="Chía">Chía</Option>
+                <Option value="Cártamo">Cártamo</Option>
+
             </Select>
 
             <Select
@@ -257,147 +331,162 @@ const Dashboard = ({ empresa }) => {
                 style={{ width: 200, margin: '0 10px' }}
                 onChange={(value) => setFiltros((prev) => ({ ...prev, tarea: value }))}
             >
-                <Option value="">Seleccionar Tarea</Option>
+
                 <Option value="Cosechar">Cosechar</Option>
                 <Option value="Sembrar">Sembrar</Option>
                 <Option value="Riego">Riego</Option>
+                <Option value="Fumigar">Fumigar</Option>
+                <Option value="Arar">Arar</Option>
+                <Option value="Embolsar">Embolsar</Option>
+                <Option value="Fertilizar">Fertilizar</Option>
+                <Option value="Desmalezar">Desmalezar</Option>
+                <Option value="Labrar">Labrar</Option>
+                <Option value="Aplicar herbicida">Aplicar herbicida</Option>
+                <Option value="Aplicar insecticida">Aplicar insecticida</Option>
+                <Option value="Aplicar fungicida">Aplicar fungicida</Option>
+                <Option value="Secado">Secado</Option>
+                <Option value="Almacenamiento">Almacenamiento</Option>
+                <Option value="Transporte">Transporte</Option>
+                <Option value="Siembra directa">Siembra directa</Option>
+                <Option value="Laboreo mínimo">Laboreo mínimo</Option>
+
             </Select>
             {/* Botón para limpiar filtros */}
             <Button onClick={limpiarFiltros} style={{ marginLeft: '10px' }}>Limpiar Filtros</Button>
 
 
             <div style={{ padding: '20px' }}>
-            {/* Primera fila: Gráfico de barras y Rentabilidad Promedio Total */}
-            <Row gutter={20}>
-                {/* Gráfico de Barras a la Izquierda */}
-                <Col span={12}>
-                    <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        Rentabilidad Promedio Mensual
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={rentabilidadMensual()}>
-                            <XAxis dataKey="mes" label={{ value: 'Mes', position: 'insideBottom', dy: 10 }} />
-                            <YAxis label={{ value: 'Rentabilidad Promedio', angle: -90, position: 'insideLeft', dy: 60 }} />
-                            <Bar
-                                dataKey="rentabilidadPromedio"
-                                fill="#8884d8"
-                                label={{
-                                    position: 'inside',
-                                    fontSize: 12,
-                                    fill: '#fff',
-                                    content: ({ value, x, y, width, height }) => (
-                                        <text
-                                            x={x + width / 2}
-                                            y={y + height / 2}
-                                            fill="#fff"
-                                            fontSize={12}
-                                            textAnchor="middle"
-                                            alignmentBaseline="middle"
-                                        >
-                                            {value}%
-                                        </text>
-                                    ),
-                                }}
-                            />
-                            <Tooltip />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Col>
-
-                {/* Rentabilidad Promedio Total a la Derecha */}
-                <Col span={12}>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                Rentabilidad Promedio Total
-                            </h3>
-                            <Card
-                                variant="borderless"
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    margin: '0 auto',
-                                }}
-                            >
-                                <Statistic
-                                    value={calcularRentabilidadTotal()}
-                                    precision={0} // Sin decimales
-                                    valueStyle={{ color: '#3f8600' }}
-                                    prefix={<ArrowUpOutlined />}
-                                    suffix="%"
+                {/* Primera fila: Gráfico de barras y Rentabilidad Promedio Total */}
+                <Row gutter={20}>
+                    {/* Gráfico de Barras a la Izquierda */}
+                    <Col span={12}>
+                        <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            Rentabilidad Promedio Mensual
+                        </h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={rentabilidadMensual()}>
+                                <XAxis dataKey="mes" label={{ value: 'Mes', position: 'insideBottom', dy: 10 }} />
+                                <YAxis label={{ value: 'Rentabilidad Promedio', angle: -90, position: 'insideLeft', dy: 60 }} />
+                                <Bar
+                                    dataKey="rentabilidadPromedio"
+                                    fill="rgba(8, 134, 86, 0.8)"
+                                    label={{
+                                        position: 'inside',
+                                        fontSize: 12,
+                                        fill: '#fff',
+                                        content: ({ value, x, y, width, height }) => (
+                                            <text
+                                                x={x + width / 2}
+                                                y={y + height / 2}
+                                                fill="#fff"
+                                                fontSize={12}
+                                                textAnchor="middle"
+                                                alignmentBaseline="middle"
+                                            >
+                                                {Math.trunc(value)}%
+                                            </text>
+                                        ),
+                                    }}
                                 />
-                            </Card>
-                        </Col>
+                                <Tooltip />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Col>
 
-                        <Col span={12}>
-                            <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                Utilidad Total
-                            </h3>
-                            <Card
-                                variant="borderless"
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    margin: '0 auto',
-                                }}
-                            >
-                                <Statistic
-                                    value={sumarUtilidadesNetasFinalizados()}
-                                    precision={0} // Sin decimales
-                                    valueStyle={{ color: '#3f8600' }}
-                                    prefix={<DollarOutlined /> }
-                                    
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
+                    {/* Rentabilidad Promedio Total a la Derecha */}
+                    <Col span={12}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    Rentabilidad Promedio Total
+                                </h3>
+                                <Card
+                                    variant="borderless"
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        margin: '0 auto',
+                                    }}
+                                >
+                                    <Statistic
+                                        value={calcularRentabilidadTotal()}
+                                        precision={0} // Sin decimales
+                                        valueStyle={{ color: '#3f8600' }}
+                                        prefix={<ArrowUpOutlined />}
+                                        suffix="%"
+                                    />
+                                </Card>
+                            </Col>
 
-                    {/* Fila de contadores de laboreos debajo de las cards */}
-                    <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        Estados de Laboreos
-                    </h3>
-                    <Row gutter={16} style={{ marginTop: '20px' }}>
-                        {/* Laboreos Finalizados */}
-                        <Col span={8}>
-                            <Card variant="borderless">
-                                <Statistic
-                                    title="Finalizados"
-                                    value={estadoContadores.finalizados}
-                                    valueStyle={{ color: '#3f8600' }} // Verde para finalizados
-                                    prefix={<CheckOutlined />}
-                                />
-                            </Card>
-                        </Col>
+                            <Col span={12}>
+                                <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    Utilidad Total
+                                </h3>
+                                <Card
+                                    variant="borderless"
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        margin: '0 auto',
+                                    }}
+                                >
+                                    <Statistic
+                                        value={sumarUtilidadesNetasFinalizados()}
+                                        precision={0} // Sin decimales
+                                        valueStyle={{ color: '#3f8600' }}
+                                        prefix={<DollarOutlined />}
 
-                        {/* Laboreos Activos */}
-                        <Col span={8}>
-                            <Card variant="borderless">
-                                <Statistic
-                                    title="Activos"
-                                    value={estadoContadores.activos}
-                                    valueStyle={{ color: '#1890ff' }} // Azul para activos
-                                    prefix={<ToolOutlined />}
-                                />
-                            </Card>
-                        </Col>
+                                    />
+                                </Card>
+                            </Col>
+                        </Row>
 
-                        {/* Laboreos Pendientes */}
-                        <Col span={8}>
-                            <Card variant="borderless">
-                                <Statistic
-                                    title="Pendientes"
-                                    value={estadoContadores.pendientes}
-                                    valueStyle={{ color: '#cf1322' }} // Rojo para pendientes
-                                    prefix={<ClockCircleOutlined />}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-   
+                        {/* Fila de contadores de laboreos debajo de las cards */}
+                        <h3 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            Estados de Laboreos
+                        </h3>
+                        <Row gutter={16} style={{ marginTop: '20px' }}>
+                            {/* Laboreos Finalizados */}
+                            <Col span={8}>
+                                <Card variant="borderless">
+                                    <Statistic
+                                        title="Finalizados"
+                                        value={estadoContadores.finalizados}
+                                        valueStyle={{ color: '#3f8600' }} // Verde para finalizados
+                                        prefix={<CheckOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+
+                            {/* Laboreos Activos */}
+                            <Col span={8}>
+                                <Card variant="borderless">
+                                    <Statistic
+                                        title="Activos"
+                                        value={estadoContadores.activos}
+                                        valueStyle={{ color: '#1890ff' }} // Azul para activos
+                                        prefix={<ToolOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+
+                            {/* Laboreos Pendientes */}
+                            <Col span={8}>
+                                <Card variant="borderless">
+                                    <Statistic
+                                        title="Pendientes"
+                                        value={estadoContadores.pendientes}
+                                        valueStyle={{ color: "rgba(228, 167, 0, 0.98)" }} // Rojo para pendientes
+                                        prefix={<ClockCircleOutlined />}
+                                    />
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+
 
                 {/* Segunda fila: Gráficos de Dona */}
                 <Row gutter={20} style={{ marginTop: '20px' }}>
@@ -454,41 +543,25 @@ const Dashboard = ({ empresa }) => {
             </div>
 
 
-
+            <hr />
 
             <div>
                 <h2>Mapa de Ubicaciones</h2>
                 <MapComponent
                     locations={locations}
-                    
+
                 />
             </div>
+            <hr />
 
+            <h2>Campañas</h2>
 
-
-
-
-
-
-
-
-
-            {/* Mostrar la información de cada laboreo */}
-            <div>
-                {laboreos.length > 0 ? (
-                    laboreos.map((laboreo) => (
-                        <div key={laboreo._id} style={{ marginBottom: '20px' }}>
-                            <h3>{laboreo.nombre}</h3>
-                            <p><strong>Grano:</strong> {laboreo.grano}</p>
-                            <p><strong>Tarea:</strong> {laboreo.tarea}</p>
-                            <p><strong>Fecha:</strong> {formatDate(laboreo.fechaFin)}</p>
-                            <p><strong>Rentabilidad:</strong> {laboreo.rentabilidadLaboreo}%</p>
-                        </div>
-                    ))
-                ) : (
-                    <p>No se encontraron laboreos.</p>
-                )}
-            </div>
+            <Table
+                columns={columns}
+                dataSource={laboreos}
+                rowKey="_id"
+                loading={loading}
+            />
 
             {/* Mensaje de error */}
             {error && message.error(error)}

@@ -7,8 +7,8 @@ import { DeleteOutlined, FormOutlined, EditOutlined, CheckCircleOutlined } from 
 import axios from 'axios';
 import dayjs from 'dayjs';
 import FinishModal from './FinishModal';
-import useAxiosInterceptor from '../utils/axiosConfig';
-import DynamicModal from "./ModalDinamica";
+import useAxiosInterceptor from '../../utils/axiosConfig';
+import DynamicModal from "../ModalDinamica";
 const { Option } = Select;
 const { Title } = Typography;
 
@@ -35,8 +35,46 @@ const TablaLaboreos = ({ empresa }) => {
     current: 1,
     pageSize: 10,
   });
-  const [tareas, setTareas] = useState(['Sembrar', 'Cosechar', 'Fumigar', 'Picar', 'Embolsar']);
-  const [granos, setGranos] = useState(['Soja', 'Sorgo', 'Trigo', 'Girasol']);
+  const [tareas, setTareas] = useState([
+    "Cosechar",
+    "Sembrar",
+    "Riego",
+    "Fumigar",
+    "Arar",
+    "Embolsar",
+    "Fertilizar",
+    "Desmalezar",
+    "Labrar",
+    "Aplicar herbicida",
+    "Aplicar insecticida",
+    "Aplicar fungicida",
+    "Secado",
+    "Almacenamiento",
+    "Transporte",
+    "Siembra directa",
+    "Laboreo mínimo"
+  ]);
+  
+  const [granos, setGranos] = useState([
+    "Soja",
+    "Maíz",
+    "Trigo",
+    "Arroz",
+    "Girasol",
+    "Cebada",
+    "Sorgo",
+    "Avena",
+    "Centeno",
+    "Lentejas",
+    "Poroto",
+    "Maní",
+    "Algodón",
+    "Quinoa",
+    "Mijo",
+    "Chía",
+    "Cártamo"
+  ]);
+  
   const [totalLaboreos, setTotalLaboreos] = useState(0);
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);

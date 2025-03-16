@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Space, Table, Modal, Form, Input, Button, notification, Row, Col, Typography, Select } from "antd";
 import { DeleteOutlined, EditOutlined, PushpinOutlined, PlusOutlined, VerticalAlignBottomOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import axios from "axios";
-import MapaSelector from "./MapSelector";
-import useAxiosInterceptor from "../utils/axiosConfig";
+import MapaSelector from "../MapSelector";
+import useAxiosInterceptor from "../../utils/axiosConfig";
 
 const { Option } = Select;
 const { Title } = Typography;
