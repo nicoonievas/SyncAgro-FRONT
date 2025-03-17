@@ -150,7 +150,6 @@ const TablaEquipos = ({ empresa }) => {
         ...values,
         vehiculos: values.vehiculos,
         empleados: values.empleados,
-        fechaInicio: values.fechaInicio ? values.fechaInicio.format('YYYY-MM-DD') : null,
 
       };
       await axios.put(`http://localhost:6001/api/equipo/${currentEquipo._id}`, formattedValues);
@@ -335,9 +334,10 @@ const TablaEquipos = ({ empresa }) => {
 
           <Form.Item name="estado" label="Estado">
             <Select>
-              <Option value="Activo">Activo</Option>
+              {/* <Option value="Activo">Activo</Option> */}
               <Option value="Inactivo">Inactivo</Option>
-              <Option value="Cancelado">Cancelado</Option>
+              <Option value="Asignado">Asignado</Option>
+              <Option value="Libre">Libre</Option>
             </Select>
           </Form.Item>
 

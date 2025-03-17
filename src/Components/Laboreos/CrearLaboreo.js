@@ -192,6 +192,24 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario }) => {
       }
 
       openNotificationWithIcon('success', 'laboreo creado', 'El laboreo se ha creado exitosamente.');
+
+
+      //Actualizar estado de Equipos
+      if (values.equipos && values.equipos.length > 0) {
+        await Promise.all(
+          values.equipos.map(async (equipoId) => {
+            try {
+              await axios.put(`http://localhost:6001/api/equipo/${equipoId}/estado`, {
+                estado: "Asignado",
+              });
+            } catch (error) {
+              console.error(`Error al actualizar el equipo ${equipoId}:`, error);
+            }
+          })
+        );
+      }
+
+
       form.resetFields();
       setSelectedCampos([]);
     } catch (error) {

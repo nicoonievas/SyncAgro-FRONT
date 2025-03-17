@@ -236,6 +236,22 @@ const TablaLaboreos = ({ empresa }) => {
       handleTableChange({ current: pagination.current, pageSize: pagination.pageSize });
       setIsEditModalVisible(false);
       notification.success({ message: 'Laboreo Editado', description: 'El laboreo ha sido editado exitosamente.' });
+
+      //Actualizar estado de Equipos
+      if (values.equipos && values.equipos.length > 0) {
+        await Promise.all(
+          values.equipos.map(async (equipoId) => {
+            try {
+              await axios.put(`http://localhost:6001/api/equipo/${equipoId}/estado`, {
+                estado: "Asignado",
+              });
+            } catch (error) {
+              console.error(`Error al actualizar el equipo ${equipoId}:`, error);
+            }
+          })
+        );
+      }
+
     } catch (error) {
       console.error('Error editing laboreo:', error);
       notification.error({ message: 'Error', description: 'Hubo un problema al editar el laboreo.' });
@@ -522,6 +538,7 @@ const TablaLaboreos = ({ empresa }) => {
 
           <Form.Item name="estado" label="Estado">
             <Select>
+              <Option value="Pendiente">Pendiente</Option>
               <Option value="Activo">Activo</Option>
               <Option value="Inactivo">Inactivo</Option>
               <Option value="Cancelado">Cancelado</Option>

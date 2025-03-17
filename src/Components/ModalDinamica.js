@@ -27,7 +27,7 @@ const DynamicModal = ({ open, onClose, record, camposPermitidos, empresa, proced
 
     const fetchRecordData = async () => {
       const endpoints = {
-        empleados: `/empleado/${record._id}`,
+        empleados: `/nomina/${record._id}`,
         vehiculos: `/vehiculo/${record._id}`,
         equipos: `/equipo/${record._id}`,
         clientes: `/cliente/${record._id}`,
@@ -56,7 +56,7 @@ const DynamicModal = ({ open, onClose, record, camposPermitidos, empresa, proced
 
   const renderValue = (key, value) => {
     if (value === null) return "Sin información";
-    if (Array.isArray(value) && value.length === 0) return "Sin equipos";
+    if (Array.isArray(value) && value.length === 0) return "Sin Campos";
     if (Array.isArray(value)) {
       return value.map((item, index) => (
         <div key={index}>

@@ -149,10 +149,12 @@ const TablaClientes = ({ empresa, usuario }) => {
   };
 
   const handleEdit = async (values) => {
+    const provinciaName = provincias.find(provincia => provincia.code === values.provincia)?.name;
+    const valuesWithProvincia = { ...values, provincia: provinciaName };
     try {
-      await axios.put(`http://localhost:6001/api/cliente/${currentCliente._id}`, values);
+      await axios.put(`http://localhost:6001/api/cliente/${currentCliente._id}`, valuesWithProvincia);
       setClientes((prev) =>
-        prev.map((cliente) => (cliente._id === currentCliente._id ? { ...cliente, ...values } : cliente))
+        prev.map((cliente) => (cliente._id === currentCliente._id ? { ...cliente, ...valuesWithProvincia } : cliente))
       );
       setIsEditModalVisible(false);
       openNotificationWithIcon("success", "Cliente Editado", "Los datos del cliente han sido actualizados.");
@@ -318,6 +320,14 @@ const TablaClientes = ({ empresa, usuario }) => {
               ))}
             </Select>
           </Form.Item>
+
+        <Form.Item name="estado" label="Estado">
+                 <Select>
+                   <Option value="Activo">Activo</Option>
+                   <Option value="Inactivo">Inactivo</Option>
+                   <Option value="Suspendido">Suspendido</Option>
+                 </Select>
+               </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit">Guardar Cambios</Button>
