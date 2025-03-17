@@ -54,7 +54,7 @@ const TablaLaboreos = ({ empresa }) => {
     "Siembra directa",
     "Laboreo mínimo"
   ]);
-  
+
   const [granos, setGranos] = useState([
     "Soja",
     "Maíz",
@@ -74,7 +74,7 @@ const TablaLaboreos = ({ empresa }) => {
     "Chía",
     "Cártamo"
   ]);
-  
+
   const [totalLaboreos, setTotalLaboreos] = useState(0);
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);
@@ -82,6 +82,8 @@ const TablaLaboreos = ({ empresa }) => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
   const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredLaboreos, setFilteredLaboreos] = useState([]);
 
 
   useEffect(() => {
@@ -140,6 +142,30 @@ const TablaLaboreos = ({ empresa }) => {
 
     fetchData();
   }, [empresaId, pagination, selectedCliente, selectedEquipo]);
+
+  useEffect(() => {
+    setFilteredLaboreos(laboreos);
+  }, [laboreos]);
+
+  const handleSearch = (l) => {
+    const term = l.target.value;
+    setSearchTerm(term);
+
+    if (!term) {
+      setFilteredLaboreos(laboreos); // Mostrar todos los datos cuando el input está vacío
+      return;
+    }
+
+    // Filtrar los laboreos por cliente, tarea, grano, estado, nombre o equipo
+    const filtered = laboreos.filter(laboreo =>
+      laboreo.nombre.toLowerCase().includes(term) ||
+      laboreo.grano.toLowerCase().includes(term) ||
+      laboreo.estado.toLowerCase().includes(term) ||
+      laboreo.tarea.toLowerCase().includes(term)
+    );
+
+    setFilteredLaboreos(filtered);
+  };
 
 
   const showDeleteConfirm = (id) => {
@@ -254,11 +280,11 @@ const TablaLaboreos = ({ empresa }) => {
           ? equipos.map(equipo => `${equipo.nombre} (${equipo.numero})`).join(', ')
           : "Sin equipos"
     },
-    { 
-      title: 'Fecha Inicio', 
-      dataIndex: 'fechaInicio', 
+    {
+      title: 'Fecha Inicio',
+      dataIndex: 'fechaInicio',
       key: 'fechaInicio',
-      render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '', 
+      render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
     },
     {
       title: 'Estado',
@@ -320,10 +346,18 @@ const TablaLaboreos = ({ empresa }) => {
   return (
 
     <>
-      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Campañas</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Gestión de Campañas</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Apellido o Nombre"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </div>
       <Table
         columns={columns}
-        dataSource={laboreos}
+        dataSource={filteredLaboreos}
         rowKey="_id"
         // pagination={{
         //   current: pagination.current,

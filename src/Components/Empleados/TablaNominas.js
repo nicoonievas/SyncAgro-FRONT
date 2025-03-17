@@ -17,6 +17,8 @@ const TablaNominas = ({ empresa }) => {
   const [nominaIdToDelete, setNominaIdToDelete] = useState(null);
   const [currentNomina, setCurrentNomina] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredNominas, setFilteredNominas] = useState([]);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -40,6 +42,10 @@ const TablaNominas = ({ empresa }) => {
     }
   }, [empresaId]);
 
+  useEffect(() => {
+    setFilteredNominas(nominas);
+  }, [nominas]);
+  
   const fetchNominas = async () => {
     setLoading(true);
     try {
@@ -51,6 +57,25 @@ const TablaNominas = ({ empresa }) => {
       console.error("Error al obtener clientes:", error);
       setLoading(false);
     }
+  };
+
+  const handleSearch = (n) => {
+    const term = n.target.value;
+    setSearchTerm(term);
+
+    if (!term) {
+      setFilteredNominas(nominas); // Mostrar todos los datos cuando el input está vacío
+      return;
+    }
+
+    // Filtrar las empresas por razón social o CUIT
+    const filtered = nominas.filter(nomina =>
+      nomina.lastname.toLowerCase().includes(term) || 
+      nomina.firstname.toLowerCase().includes(term) || 
+      nomina.documento.includes(term) 
+    );
+
+    setFilteredNominas(filtered);
   };
 
   const openNotificationWithIcon = (type, message, description) => {
@@ -174,10 +199,18 @@ const TablaNominas = ({ empresa }) => {
 
   return (
     <>
-      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empleados</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empleados</Title>
+              <Input
+                style={{ width: 200 }}
+                placeholder="Buscar por Apellido o Nombre"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>
       <Table
         columns={columns}
-        dataSource={nominas}
+        dataSource={filteredNominas}
         rowKey="_id"
         pagination={{
           current: pagination.current,

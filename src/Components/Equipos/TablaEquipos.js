@@ -25,6 +25,8 @@ const TablaEquipos = ({ empresa }) => {
   const [empresaId, setEmpresaId] = useState(null);
   const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredEquipos, setFilteredEquipos] = useState([]);
 
 
   const [pagination, setPagination] = useState({
@@ -78,8 +80,31 @@ const TablaEquipos = ({ empresa }) => {
     };
 
     fetchData();
-  }, [empresaId, pagination]);
+  }, [empresaId, pagination, api]);
 
+
+ useEffect(() => {
+    setFilteredEquipos(equipos);
+  }, [equipos]);
+
+
+  const handleSearch = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+
+    if (!term) {
+      setFilteredEquipos(equipos); // Mostrar todos los datos cuando el input está vacío
+      return;
+    }
+
+    // Filtrar las empresas por razón social o CUIT
+    const filtered = equipos.filter(equipo =>
+      equipo.nombre.toLowerCase().includes(term) ||
+      equipo.numero.includes(term)
+    );
+
+    setFilteredEquipos(filtered);
+  };
 
   const verDetalles = (id) => {
     console.log("Ver detalles del equipo:", id);
@@ -219,10 +244,21 @@ const TablaEquipos = ({ empresa }) => {
     setPagination(pagination);
   };
 
+
+
+
   return (
     <>
-      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Equipos</Title>
-      <Table dataSource={equipos}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Gestión de Equipos</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Nombre o Numero"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </div>
+      <Table dataSource={filteredEquipos}
         columns={columns}
         rowKey="id"
         loading={loading}

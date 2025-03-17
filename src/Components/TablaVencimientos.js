@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Space, Modal, Input, Button, DatePicker, Form, notification } from 'antd';
+import { Table, Space, Modal, Input, Button, DatePicker, Form, notification, Typography } from 'antd';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import useAxiosInterceptor from '../utils/axiosConfig';
+
+const { Title } = Typography;
 
 const TablasVencimientos = ({ empresa, usuario }) => {
   const [vehiculos, setVehiculos] = useState([]);
@@ -16,6 +18,10 @@ const TablasVencimientos = ({ empresa, usuario }) => {
   const [totalEmpleados, setTotalEmpleados] = useState(0);
   const [totalVehiculos, setTotalVehiculos] = useState(0);
   const [empresaId, setEmpresaId] = useState(null);
+  const [searchTermVehiculos, setSearchTermVehiculos] = useState('');
+  const [searchTermEmpleados, setSearchTermEmpleados] = useState('');
+  const [filteredVehiculos, setFilteredVehiculos] = useState(vehiculos);
+  const [filteredEmpleados, setFilteredEmpleados] = useState(empleados);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -35,6 +41,11 @@ const TablasVencimientos = ({ empresa, usuario }) => {
       // console.log('Esperando empresaId...');
     }
   }, [empresaId]);
+
+  useEffect(() => {
+    setFilteredVehiculos(vehiculos);
+    setFilteredEmpleados(empleados);
+  }, [vehiculos, empleados]);
 
   const fetchData = async () => {
     try {
@@ -68,114 +79,150 @@ const TablasVencimientos = ({ empresa, usuario }) => {
     });
   };
 
-
- const getDateColor = (date) => {
-  if (!date) return 'black'; // Si no hay fecha, color por defecto
-
-  const today = dayjs(); // Fecha actual
-  const formattedDate = dayjs(date); // `date` ya debería ser un `timestamp` o un objeto `Date`
-
-  const diffDays = formattedDate.diff(today, 'day'); // Comparación real de fechas
-
-  if (diffDays < 15) return 'red'; // Vencido
-  if (diffDays <= 30) return 'orange'; // Vence en menos de un mes
-  if (diffDays <= 45) return 'blue'; // Vence en menos de un mes
-  return 'green'; // Falta más de un mes
-};
-
-// Sistema de notificaciones por vencimientos
-const mostrarNotificacion = new Set();
-const validarVencimientos = (vehiculos, empleados) => {
-  const today = dayjs(); // Fecha actual
-
-  vehiculos.forEach((vehiculo) => {
-    if (vehiculo.fecha_vencimiento_seguro) {
-      const fechaSeguro = dayjs(vehiculo.fecha_vencimiento_seguro); // Usamos el timestamp
-      const diffDays = fechaSeguro.diff(today, 'day');
-      const key = `seguro-${vehiculo._id}`;
-      // Lógica para enviar correo al backend
-      if (diffDays === 30) {
-        console.log(`El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
-      }
-
-      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-        mostrarNotificacion.add(key);
-        notification.warning({
-          message: 'Vencimiento de Seguro',
-          description: `El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
-        });
-      }
+  const handleSearchVehiculos = (e) => {
+    const value = e.target.value;
+    setSearchTermVehiculos(value);
+  
+    if (!value) {
+      setFilteredVehiculos(vehiculos);
+      return;
     }
-    if (vehiculo.fecha_vencimiento_vtv) {
-      const fechaVtv = dayjs(vehiculo.fecha_vencimiento_vtv); // Usamos el timestamp
-      const diffDays = fechaVtv.diff(today, 'day');
-      const key = `vtv-${vehiculo._id}`;
-      // Lógica para enviar correo al backend
-      if (diffDays === 30) {
-        console.log(`El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
-      }
-      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-        mostrarNotificacion.add(key);
-        notification.warning({
-          message: 'Vencimiento de VTV',
-          description: `El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
-        });
-      }
+  
+    const filtered = vehiculos.filter((vehiculo) =>
+      vehiculo.alias.toLowerCase().includes(value.toLowerCase()) ||
+      vehiculo.marca.toLowerCase().includes(value.toLowerCase()) ||
+      vehiculo.modelo.toLowerCase().includes(value.toLowerCase()) ||
+      vehiculo.dominio.toLowerCase().includes(value.toLowerCase())
+    );
+  
+    setFilteredVehiculos(filtered);
+  };
+  
+  const handleSearchEmpleados = (e) => {
+    const value = e.target.value;
+    setSearchTermEmpleados(value);
+  
+    if (!value) {
+      setFilteredEmpleados(empleados);
+      return;
     }
-  });
+  
+    const filtered = empleados.filter((empleado) =>
+      empleado.firstname.toLowerCase().includes(value.toLowerCase()) ||
+      empleado.lastname.toLowerCase().includes(value.toLowerCase()) ||
+      empleado.documento.includes(value)
+    );
+  
+    setFilteredEmpleados(filtered);
+  };
 
-  empleados.forEach((empleado) => {
-    if (empleado.licenciaVencimiento) {
-      const fechaLicencia = dayjs(empleado.licenciaVencimiento); // Usamos el timestamp
-      const diffDays = fechaLicencia.diff(today, 'day');
-      const key = `licencia-${empleado._id}`;
-      // Lógica para enviar correo al backend
-      if (diffDays === 30) {
-        console.log(`La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-      }
-      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-        mostrarNotificacion.add(key);
-        notification.warning({
-          message: 'Vencimiento de Licencia',
-          description: `La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-        });
-      }
-    }
-    if (empleado.dniVencimiento) {
-      const fechaDni = dayjs(empleado.dniVencimiento); // Usamos el timestamp
-      const diffDays = fechaDni.diff(today, 'day');
-      const key = `dni-${empleado._id}`;
-      // Lógica para enviar correo al backend
-      if (diffDays === 30) {
-        console.log(`El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-      }
-      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-        mostrarNotificacion.add(key);
-        notification.warning({
-          message: 'Vencimiento de DNI',
-          description: `El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-        });
-      }
-    }
-    if (empleado.aptoFisicoVencimiento) {
-      const fechaAptoFisico = dayjs(empleado.aptoFisicoVencimiento); // Usamos el timestamp
-      const diffDays = fechaAptoFisico.diff(today, 'day');
-      const key = `aptoFisico-${empleado._id}`;
-      // Lógica para enviar correo al backend
-      if (diffDays === 30) {
-        console.log(`El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
-      }
+  const getDateColor = (date) => {
+    if (!date) return 'black'; // Si no hay fecha, color por defecto
 
-      if (diffDays < 15 && !mostrarNotificacion.has(key)) {
-        mostrarNotificacion.add(key);
-        notification.warning({
-          message: 'Vencimiento de Apto Fisico',
-          description: `El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
-        });
+    const today = dayjs(); // Fecha actual
+    const formattedDate = dayjs(date); // `date` ya debería ser un `timestamp` o un objeto `Date`
+
+    const diffDays = formattedDate.diff(today, 'day'); // Comparación real de fechas
+
+    if (diffDays < 15) return 'red'; // Vencido
+    if (diffDays <= 30) return 'orange'; // Vence en menos de un mes
+    if (diffDays <= 45) return 'blue'; // Vence en menos de un mes
+    return 'green'; // Falta más de un mes
+  };
+
+  // Sistema de notificaciones por vencimientos
+  const mostrarNotificacion = new Set();
+  const validarVencimientos = (vehiculos, empleados) => {
+    const today = dayjs(); // Fecha actual
+
+    vehiculos.forEach((vehiculo) => {
+      if (vehiculo.fecha_vencimiento_seguro) {
+        const fechaSeguro = dayjs(vehiculo.fecha_vencimiento_seguro); // Usamos el timestamp
+        const diffDays = fechaSeguro.diff(today, 'day');
+        const key = `seguro-${vehiculo._id}`;
+        // Lógica para enviar correo al backend
+        if (diffDays === 30) {
+          console.log(`El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
+        }
+
+        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+          mostrarNotificacion.add(key);
+          notification.warning({
+            message: 'Vencimiento de Seguro',
+            description: `El seguro del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
+          });
+        }
       }
-    }
-  });
-};
+      if (vehiculo.fecha_vencimiento_vtv) {
+        const fechaVtv = dayjs(vehiculo.fecha_vencimiento_vtv); // Usamos el timestamp
+        const diffDays = fechaVtv.diff(today, 'day');
+        const key = `vtv-${vehiculo._id}`;
+        // Lógica para enviar correo al backend
+        if (diffDays === 30) {
+          console.log(`El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en un mes.`);
+        }
+        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+          mostrarNotificacion.add(key);
+          notification.warning({
+            message: 'Vencimiento de VTV',
+            description: `El VTV del vehículo ${vehiculo.marca} ${vehiculo.modelo} vence en menos de 15 días.`,
+          });
+        }
+      }
+    });
+
+    empleados.forEach((empleado) => {
+      if (empleado.licenciaVencimiento) {
+        const fechaLicencia = dayjs(empleado.licenciaVencimiento); // Usamos el timestamp
+        const diffDays = fechaLicencia.diff(today, 'day');
+        const key = `licencia-${empleado._id}`;
+        // Lógica para enviar correo al backend
+        if (diffDays === 30) {
+          console.log(`La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+        }
+        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+          mostrarNotificacion.add(key);
+          notification.warning({
+            message: 'Vencimiento de Licencia',
+            description: `La licencia del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+          });
+        }
+      }
+      if (empleado.dniVencimiento) {
+        const fechaDni = dayjs(empleado.dniVencimiento); // Usamos el timestamp
+        const diffDays = fechaDni.diff(today, 'day');
+        const key = `dni-${empleado._id}`;
+        // Lógica para enviar correo al backend
+        if (diffDays === 30) {
+          console.log(`El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+        }
+        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+          mostrarNotificacion.add(key);
+          notification.warning({
+            message: 'Vencimiento de DNI',
+            description: `El DNI del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+          });
+        }
+      }
+      if (empleado.aptoFisicoVencimiento) {
+        const fechaAptoFisico = dayjs(empleado.aptoFisicoVencimiento); // Usamos el timestamp
+        const diffDays = fechaAptoFisico.diff(today, 'day');
+        const key = `aptoFisico-${empleado._id}`;
+        // Lógica para enviar correo al backend
+        if (diffDays === 30) {
+          console.log(`El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en un mes.`);
+        }
+
+        if (diffDays < 15 && !mostrarNotificacion.has(key)) {
+          mostrarNotificacion.add(key);
+          notification.warning({
+            message: 'Vencimiento de Apto Fisico',
+            description: `El Apto Fisico del empleado ${empleado.firstname} ${empleado.lastname} vence en menos de 15 días.`,
+          });
+        }
+      }
+    });
+  };
 
 
   const handleOk = async () => {
@@ -316,10 +363,18 @@ const validarVencimientos = (vehiculos, empleados) => {
 
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <h3>Documentacion de Vehículos</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Documentacion de Vehiculos</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Apellido o Nombre"
+          value={searchTermVehiculos}
+          onChange={handleSearchVehiculos}
+        />
+      </div>
       <Table
         columns={vehiculosColumns}
-        dataSource={vehiculos}
+        dataSource={filteredVehiculos}
         rowKey="_id"
         loading={loading}
         pagination={{
@@ -333,10 +388,18 @@ const validarVencimientos = (vehiculos, empleados) => {
 
       />
 
-      <h3>Documentacion de Empleados</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Documentacion de Empleados</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Apellido o Nombre"
+          value={searchTermEmpleados}
+          onChange={handleSearchEmpleados}
+        />
+      </div>
       <Table
         columns={empleadosColumns}
-        dataSource={empleados}
+        dataSource={filteredEmpleados}
         rowKey="_id"
         loading={loading}
         pagination={{

@@ -47,6 +47,10 @@ const TablaClientes = ({ empresa, usuario }) => {
     }
   }, [empresaId]);
 
+  useEffect(() => {
+    setFilteredClientes(clientes);
+  }, [clientes]);
+
   const fetchClientes = async () => {
     setLoading(true);
     try {
@@ -95,11 +99,15 @@ const TablaClientes = ({ empresa, usuario }) => {
     const term = c.target.value;
     setSearchTerm(term);
 
+    if (!term) {
+      setFilteredClientes(clientes); // Mostrar todos los datos cuando el input está vacío
+      return;
+    }
     // Filtrar las empresas por razón social o CUIT
     const filtered = clientes.filter(cliente =>
-      cliente.apellido.toLowerCase().includes(term) || 
-      cliente.nombre.toLowerCase().includes(term) || 
-      cliente.localidad.toLowerCase().includes(term) 
+      cliente.apellido.toLowerCase().includes(term) ||
+      cliente.nombre.toLowerCase().includes(term) ||
+      cliente.localidad.toLowerCase().includes(term)
     );
 
     setFilteredClientes(filtered);

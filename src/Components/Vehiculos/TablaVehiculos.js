@@ -22,6 +22,8 @@ const TablaVehiculos = ({ empresa }) => {
   const [marcaVehiculos, setMarcaVehiculos] = useState([]);
   const [totalVehiculos, setTotalVehiculos] = useState(0);
   const [empresaId, setEmpresaId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredVehiculos, setFilteredVehiculos] = useState([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -53,6 +55,10 @@ const TablaVehiculos = ({ empresa }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setFilteredVehiculos(vehiculos);
+  }, [vehiculos]);
 
   useEffect(() => {
     const fetchMarcaVehiculos = async () => {
@@ -106,6 +112,30 @@ const TablaVehiculos = ({ empresa }) => {
 
     setIsEditModalVisible(true);
   };
+
+const handleSearch = (v) => {
+  const term = v.target.value;
+  setSearchTerm(term);
+
+  if (!term) {
+    setFilteredVehiculos(vehiculos); // Mostrar todos los datos cuando el input está vacío
+    return;
+  }
+
+  // Filtrar las vehiculos por nombre, marca, modelo o dominio
+  
+  const filtered = vehiculos.filter(vehiculo =>
+    vehiculo.alias.toLowerCase().includes(term) ||
+    vehiculo.marca.toLowerCase().includes(term) ||
+    vehiculo.modelo.toLowerCase().includes(term) ||
+    vehiculo.dominio.toLowerCase().includes(term)
+  );
+
+  setFilteredVehiculos(filtered);
+
+}
+
+
 
   const handleCancel = () => {
     setIsDeleteModalVisible(false);
@@ -220,10 +250,17 @@ const TablaVehiculos = ({ empresa }) => {
   return (
     <>
       {/* Título de la tabla */}
-      <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehículos</Title>
-      <Table
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehiculos</Title>
+              <Input
+                style={{ width: 200 }}
+                placeholder="Buscar por Apellido o Nombre"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>      <Table
         columns={columns}
-        dataSource={vehiculos}
+        dataSource={filteredVehiculos}
         rowKey="_id"
         pagination={{
           current: pagination.current,
