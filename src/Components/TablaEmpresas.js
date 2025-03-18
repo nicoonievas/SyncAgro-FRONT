@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Table, Modal, Form, Input, Button, notification, Space, Select, Typography } from "antd";
-import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FormOutlined, EditOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from "axios";
 import CrearEmpresa from './CrearEmpresa';
+import ModalConfiguracionEmpresa from "./ModalConfiguracionEmpresa";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -16,6 +17,7 @@ const TablaEmpresas = () => {
   const [empresaIdToDelete, setEmpresaIdToDelete] = useState(null);
   const [currentEmpresa, setCurrentEmpresa] = useState(null);
   const [mostrarCrearEmpresas, setMostrarCrearEmpresas] = useState(false);
+  const [isConfiguracionModalVisible, setIsConfiguracionModalVisible] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -42,7 +44,7 @@ const TablaEmpresas = () => {
       setLoading(false);
     }
   };
-
+  console.log("Empresa Seleccionada:", currentEmpresa);
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -80,9 +82,15 @@ const TablaEmpresas = () => {
     setIsEditModalVisible(true);
   };
 
+  const showConfiguracionModal = (empresa) => {
+    setCurrentEmpresa(empresa);
+    setIsConfiguracionModalVisible(true);
+  };
+
   const handleCancel = () => {
     setIsDeleteModalVisible(false);
     setIsEditModalVisible(false);
+    setIsConfiguracionModalVisible(false);
     form.resetFields();
   };
 
@@ -154,7 +162,9 @@ const TablaEmpresas = () => {
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showEditModal(record)}><EditOutlined /></a>
+          <a onClick={() => showConfiguracionModal(record)}><SettingOutlined /></a>
           <a onClick={() => showDeleteConfirm(record._id)}><DeleteOutlined /></a>
+
         </Space>
       ),
     },
@@ -164,8 +174,8 @@ const TablaEmpresas = () => {
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={5} style={{ marginTop: '0px' }}>Gestión de Empresas</Title>
-        <Input 
-          style={{ width: 200 }} 
+        <Input
+          style={{ width: 200 }}
           placeholder="Buscar por Razón Social o CUIT"
           value={searchTerm}
           onChange={handleSearch}
@@ -260,6 +270,13 @@ const TablaEmpresas = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Modal de Configuración */}
+
+      <ModalConfiguracionEmpresa
+        empresa={currentEmpresa}
+        onClose={() => setIsConfiguracionModalVisible(false)}
+        visible={isConfiguracionModalVisible} />
     </>
   );
 };

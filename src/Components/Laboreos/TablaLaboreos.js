@@ -260,7 +260,8 @@ const TablaLaboreos = ({ empresa }) => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:6001/api/laboreo/${laboreoIdToDelete}`);
+      // await axios.delete(`http://localhost:6001/api/laboreo/${laboreoIdToDelete}`);
+      await axios.put(`http://localhost:6001/api/laboreo/${laboreoIdToDelete}/delete`);
       setLaboreos(prevLaboreos => prevLaboreos.filter(laboreo => laboreo._id !== laboreoIdToDelete));
       setIsDeleteModalVisible(false);
       notification.success({ message: 'Laboreo Eliminado', description: 'El laboreo ha sido eliminado exitosamente.' });

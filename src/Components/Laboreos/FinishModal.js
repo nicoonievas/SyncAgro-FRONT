@@ -28,6 +28,8 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
     setLoading(true);
     try {
       await api.put(`/laboreos/${idLaboreo}/finish`, values);
+
+      
       onUpdate();
       onClose();
       notification.success({ message: 'Laboreo Cerrado', description: 'El laboreo ha sido cerrado exitosamente.' });

@@ -161,35 +161,48 @@ const Dashboard = ({ empresa }) => {
     // Función para calcular rentabilidad mensual
     const calcularRentabilidadTotal = () => {
         const datos = rentabilidadMensual();
-        if (datos.length === 0) return 0; // Evitar división por cero
-
-        // Sumar las rentabilidades promedio de cada mes y calcular el promedio total
-        const totalRentabilidad = datos.reduce((acc, item) => acc + item.rentabilidadPromedio, 0);
-        return (totalRentabilidad / datos.length).toFixed(2); // Formato a 2 decimales
+        
+        if (!Array.isArray(datos) || datos.length === 0) return 0; // Verificar que haya datos válidos
+    
+        // Sumar las rentabilidades promedio de cada mes y evitar valores inválidos
+        const totalRentabilidad = datos.reduce((acc, item) => {
+            const rentabilidad = parseFloat(item.rentabilidadPromedio); // Asegurar que es numérico
+            return acc + (isNaN(rentabilidad) ? 0 : rentabilidad);
+        }, 0);
+    
+        return (datos.length > 0 ? (totalRentabilidad / datos.length).toFixed(2) : 0); // Evitar división por cero
     };
-
+    
+    
     const rentabilidadMensual = () => {
         // Filtrar los laboreos con estado "Finalizado"
         const laboreosFinalizados = laboreos.filter(laboreo => laboreo.estado === "Finalizado");
-
+    
         // Calcular la rentabilidad solo para los laboreos finalizados
         const rentabilidad = laboreosFinalizados.reduce((acc, laboreo) => {
             const mes = new Date(laboreo.fechaFin).getMonth() + 1;
-            acc[mes] = acc[mes] || { mes, rentabilidadTotal: 0, count: 0 };
-
-            // Sumar la rentabilidadLaboreo directamente
-            acc[mes].rentabilidadTotal += laboreo.rentabilidadLaboreo;
-            acc[mes].count += 1;
-
+            const rentabilidadLaboreo = parseFloat(laboreo.rentabilidadLaboreo) || 0; // Asegurar que es un número
+    
+            if (!acc[mes]) {
+                acc[mes] = { mes, rentabilidadTotal: 0, count: 0 };
+            }
+    
+            // Sumar la rentabilidad solo si es un número válido
+            if (!isNaN(rentabilidadLaboreo)) {
+                acc[mes].rentabilidadTotal += rentabilidadLaboreo;
+                acc[mes].count += 1;
+            }
+    
             return acc;
         }, {});
-
+    
         // Retornar los promedios de rentabilidad por mes
         return Object.values(rentabilidad).map(item => ({
             mes: item.mes,
-            rentabilidadPromedio: item.rentabilidadTotal / item.count // Promedio de la rentabilidad en porcentaje
+            rentabilidadPromedio: item.count > 0 ? (item.rentabilidadTotal / item.count).toFixed(2) : 0 // Evitar división por 0
         }));
     };
+    
     const sumarUtilidadesNetasFinalizados = () => {
         // Filtrar los laboreos con estado "Finalizado"
         const laboreosFinalizados = laboreos.filter(laboreo => laboreo.estado === "Finalizado");
@@ -420,7 +433,7 @@ const Dashboard = ({ empresa }) => {
                                         value={calcularRentabilidadTotal()}
                                         precision={0} // Sin decimales
                                         valueStyle={{ color: '#3f8600' }}
-                                        prefix={<ArrowUpOutlined />}
+                                     
                                         suffix="%"
                                     />
                                 </Card>
