@@ -32,6 +32,9 @@ const CrearEmpleado = ({ empresa, usuario }) => {
   const [localidades, setLocalidades] = useState([]);
   const [selectedProvincia, setSelectedProvincia] = useState(null);
   const [selectedLocalidad, setSelectedLocalidad] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+
 
   const api = useAxiosInterceptor();
 
@@ -68,6 +71,11 @@ const CrearEmpleado = ({ empresa, usuario }) => {
   }, [selectedProvincia, api]);
 
 
+  useEffect(() => {
+    if (empresa?.roles) {
+      setRoles(empresa.roles);
+    }
+  }, [empresa]);
 
 
   const onFinish = async (values) => {
@@ -114,6 +122,8 @@ const CrearEmpleado = ({ empresa, usuario }) => {
       setLoading(false); // Detener loading
     }
   };
+
+
 
   return (
     <Form
@@ -226,7 +236,16 @@ const CrearEmpleado = ({ empresa, usuario }) => {
         label="Rol / Cargo"
         rules={[{ required: true }]}
       >
-        <Input />
+        <Select
+          placeholder="Selecciona un rol"
+          onChange={value => setSelectedRoles(value)}
+        >
+          {roles.map((rol, index) => (
+            <Option key={index} value={rol}>
+              {rol}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
 
       {/* <Form.Item

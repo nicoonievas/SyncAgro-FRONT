@@ -26,7 +26,8 @@ const TablaNominas = ({ empresa }) => {
   const [filteredNominas, setFilteredNominas] = useState([]);
   const [isModalEmpleadoVisible, setIsModalEmpleadoVisible] = useState(false);
   const [selectedNomina, setSelectedNomina] = useState(null);
-
+  const [roles, setRoles] = useState([]);
+  const [selectedRoles, setSelectedRoles] = useState([]);
 
 
   const [pagination, setPagination] = useState({
@@ -38,6 +39,9 @@ const TablaNominas = ({ empresa }) => {
 
   useEffect(() => {
     setEmpresaId(empresa._id);
+    if (empresa?.roles) {
+      setRoles(empresa.roles);
+    }
   }, [empresa]);
 
   // Llama a la API solo cuando empresaId esté disponible
@@ -54,6 +58,7 @@ const TablaNominas = ({ empresa }) => {
   useEffect(() => {
     setFilteredNominas(nominas);
   }, [nominas]);
+  
 
   const fetchNominas = async () => {
     setLoading(true);
@@ -145,7 +150,7 @@ const TablaNominas = ({ empresa }) => {
       licenciaVencimiento: nomina.licenciaVencimiento ? dayjs(nomina.licenciaVencimiento) : null,
       aptoFisicoVencimiento: nomina.aptoFisicoVencimiento ? dayjs(nomina.aptoFisicoVencimiento) : null,
       dniVencimiento: nomina.dniVencimiento ? dayjs(nomina.dniVencimiento) : null,
-      estado: nomina.estado === 1
+
     });
     setIsEditModalVisible(true);
   };
@@ -162,7 +167,7 @@ const TablaNominas = ({ empresa }) => {
         licenciaVencimiento: values.licenciaVencimiento ? values.licenciaVencimiento.valueOf() : null,
         aptoFisicoVencimiento: values.aptoFisicoVencimiento ? values.aptoFisicoVencimiento.valueOf() : null,
         dniVencimiento: values.dniVencimiento ? values.dniVencimiento.valueOf() : null,
-        estado: values.estado,
+
       };
   
       // Enviando los datos al backend
@@ -362,13 +367,26 @@ const TablaNominas = ({ empresa }) => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="rol" label="Rol / Cargo" rules={[{ required: true, message: 'Por favor ingresa el rol del empleado' }]}>
-            <Input />
-          </Form.Item>
+         <Form.Item
+                 name="rol"
+                 label="Rol / Cargo"
+                 rules={[{ required: true }]}
+               >
+                 <Select
+                   placeholder="Selecciona un rol"
+                   onChange={value => setSelectedRoles(value)}
+                 >
+                   {roles.map((rol, index) => (
+                     <Option key={index} value={rol}>
+                       {rol}
+                     </Option>
+                   ))}
+                 </Select>
+               </Form.Item>
 
-          <Form.Item name="area" label="Área">
+          {/* <Form.Item name="area" label="Área">
             <Input />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item label="Vencimiento de Licencia" name="licenciaVencimiento"
             rules={[{ required: true, message: 'Ingresa la fecha de vencimiento' }]}>

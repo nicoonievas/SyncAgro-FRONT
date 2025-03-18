@@ -1,31 +1,56 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, Button, TimePicker, notification, Checkbox } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Modal, Form, Input, Button, TimePicker, notification } from 'antd';
 import axios from 'axios';
+import moment from 'moment';
 
 const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
-  const [form] = Form.useForm();  // Creamos el formulario
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // Cargar datos cuando cambia la empresa seleccionada
+  useEffect(() => {
+    if (empresa) {
+      form.setFieldsValue({
+        roles: empresa.roles ? empresa.roles.join(', ') : '',
+        correosRecepcionNotificacion: empresa.correosRecepcionNotificacion
+          ? empresa.correosRecepcionNotificacion.join(', ')
+          : '',
+        horarioNotificacion: empresa.horarioNotificacion
+          ? moment(empresa.horarioNotificacion)
+          : null,
+        diasAlertaVencimientos: empresa.diasAlertaVencimientos || '',
+        diasRecordatorioVencimientos: empresa.diasRecordatorioVencimientos || '',
+        correoEnvioNotificacion: empresa.correoEnvioNotificacion || '',
+        contrasenaCorreoEnvioNotificacion: empresa.contrasenaCorreoEnvioNotificacion || '',
+        urlSistemaProveedor: empresa.urlSistemaProveedor || ''
+      });
+    }
+  }, [empresa, form]);
 
   const handleSave = async (values) => {
     const empresaId = empresa._id;
     setLoading(true);
     try {
-      // Se divide los correos en un array antes de enviar
       const correctedValues = {
         ...values,
+        horarioNotificacion: values.horarioNotificacion
+          ? values.horarioNotificacion.toISOString()
+          : null,
         correosRecepcionNotificacion: values.correosRecepcionNotificacion.split(',').map(email => email.trim()),
         roles: values.roles.split(',').map(role => role.trim())
       };
 
-      // Enviar datos del formulario al backend
-      const response = await axios.put(`http://localhost:6001/api/empresa/configuracion/${empresaId}`, correctedValues);
+      const response = await axios.put(
+        `http://localhost:6001/api/empresa/configuracion/${empresaId}`,
+        correctedValues
+      );
+
       if (response.status === 200) {
         notification.success({
           message: 'Configuraciones actualizadas',
           description: 'Las configuraciones de la empresa se actualizaron correctamente.'
         });
-        onClose();  // Cerrar la modal después de guardar
+        onClose();
       }
     } catch (error) {
       notification.error({
@@ -40,16 +65,17 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
   return (
     <Modal
       visible={visible}
-      title="Configuraciones de Empresass"
       onCancel={onClose}
       footer={null}
       width={600}
     >
       <Form
         form={form}
-        onFinish={handleSave}  // Llamada a la función de guardado
+        onFinish={handleSave}
         layout="vertical"
       >
+        <h3 style={{ textAlign: 'center' }}>Configuraciones de {empresa?.razonSocial}</h3>
+
         <Form.Item
           name="roles"
           label="Roles"
@@ -74,40 +100,45 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
           <TimePicker format="HH:mm" />
         </Form.Item>
 
-        <Form.Item
-  name="diasAlertaVencimientos"
-  label="Cantidad de Dias para Alerta"
-  rules={[{ required: true, message: 'Por favor, selecciona la cantidad de días.' }]}
-  style={{ width: '50%' }}  // Limita el ancho
->
-  <Input type="number" placeholder="Cantidad de días" />
-</Form.Item>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <Form.Item
+            name="diasAlertaVencimientos"
+            label="Cantidad de Días para Alerta"
+            rules={[{ required: true, message: 'Por favor, ingresa la cantidad de días.' }]}
+            style={{ flex: 1 }} // Permite que los elementos se ajusten al espacio disponible
+          >
+            <Input type="number" placeholder="Cantidad de días" />
+          </Form.Item>
 
-<Form.Item
-  name="diasRecordatorioVencimientos"
-  label="Cantidad de Dias para Recordatorio"
-  rules={[{ required: true, message: 'Por favor, selecciona la cantidad de días.' }]}
-  style={{ width: '50%' }}  // Limita el ancho
->
-  <Input type="number" placeholder="Cantidad de días" />
-</Form.Item>
+          <Form.Item
+            name="diasRecordatorioVencimientos"
+            label="Cantidad de Días para Recordatorio"
+            rules={[{ required: true, message: 'Por favor, ingresa la cantidad de días.' }]}
+            style={{ flex: 1 }}
+          >
+            <Input type="number" placeholder="Cantidad de días" />
+          </Form.Item>
+        </div>
 
-
+        <div style={{ display: 'flex', gap: '16px' }}>
         <Form.Item
           name="correoEnvioNotificacion"
           label="Correo de Envío de Notificación"
           rules={[{ required: true, message: 'Por favor, ingresa el correo de envío de notificaciones.' }]}
+          style={{ flex: 1 }}
         >
           <Input type="email" placeholder="Correo de envío de notificación" />
         </Form.Item>
 
         <Form.Item
           name="contrasenaCorreoEnvioNotificacion"
-          label="Contraseña de Correo de Envío"
+          label="Contraseña de Aplicación"
           rules={[{ required: true, message: 'Por favor, ingresa la contraseña del correo de envío.' }]}
+          style={{ flex: 1 }}
         >
-          <Input.Password placeholder="Contraseña de correo" />
+          <Input.Password placeholder="Contraseña de Aplicación" />
         </Form.Item>
+        </div>
 
         <Form.Item
           name="urlSistemaProveedor"
