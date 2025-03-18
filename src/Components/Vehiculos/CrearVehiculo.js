@@ -97,6 +97,7 @@ const CrearVehiculo = ({ usuario, empresa }) => {
   return (
 
     <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
+      <h3 style={{ marginTop: '0px'}}>Agregar Vehiculos</h3>
       <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
         <Select onChange={handleMarcaChange} placeholder="Selecciona una marca">
           {marcasModelos.map((marca) => (

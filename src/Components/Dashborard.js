@@ -235,59 +235,87 @@ const Dashboard = ({ empresa }) => {
     };
     const colores = ['#ff8042', '#00C49F', '#FFBB28'];
 
+    const colors = {
+        Activo: "rgba(76, 127, 175, 0.8)", // Verde
+        Finalizado: "rgba(76, 175, 80, 0.8)", // Rojo
+        Pendiente: "rgba(235, 178, 7, 0.8)", // Amarillo
+    };
+
     const columns = [
-        {
-            title: 'Nombre',
-            dataIndex: 'nombre',
-            key: 'nombre',
-        },
-        {
-            title: 'Cliente',
-            dataIndex: ['cliente', 'nombre'],
-            key: 'cliente',
-            render: (_, record) =>
-                record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente",
-        },
-        {
-            title: 'Fecha Inicio',
-            dataIndex: 'fechaInicio',
-            key: 'fechaInicio',
-            render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
-        },
-        {
-            title: 'Fecha Fin',
-            dataIndex: 'fechaFin',
-            key: 'fechaFin',
-            render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
-        },
-        {
-            title: 'Dias Trabajados',
-            dataIndex: 'tiempoTrabajo',
-            key: 'tiempoTrabajo',
-        },
-        {
-            title: 'Utilidad Neta',
-            dataIndex: 'utilidadNeta',
-            key: 'utilidadNeta',
-        },
-        {
-            title: 'Rentabilidad',
-            dataIndex: 'rentabilidadLaboreo',
-            key: 'rentabilidadLaboreo',
-        },
-        {
-            title: 'Estado',
-            dataIndex: 'estado',
-            key: 'estado'
-        }
-    ];
+    {
+        title: 'Nombre',
+        dataIndex: 'nombre',
+        key: 'nombre',
+    },
+    {
+        title: 'Cliente',
+        dataIndex: ['cliente', 'nombre'],
+        key: 'cliente',
+        render: (_, record) =>
+            record.cliente ? `${record.cliente.nombre} ${record.cliente.apellido}` : "Sin cliente",
+    },
+    {
+        title: 'Fecha Inicio',
+        dataIndex: 'fechaInicio',
+        key: 'fechaInicio',
+        render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
+    },
+    {
+        title: 'Fecha Fin',
+        dataIndex: 'fechaFin',
+        key: 'fechaFin',
+        render: (text) => text ? dayjs(text).format('DD-MM-YYYY') : '',
+    },
+    {
+        title: 'Dias Trabajados',
+        dataIndex: 'tiempoTrabajo',
+        key: 'tiempoTrabajo',
+        render: (text) => text ? `${text} Dias` : '',
+        align: 'center',
+    },
+    {
+        title: 'Utilidad Neta',
+        dataIndex: 'utilidadNeta',
+        key: 'utilidadNeta',
+        render: (text) =>
+            text ? `$${text.toLocaleString()}` : '',
+        align: 'center',
+    },
+    {
+        title: 'Rentabilidad',
+        dataIndex: 'rentabilidadLaboreo',
+        key: 'rentabilidadLaboreo',
+        render: (text) =>
+            text ? `${Math.round(text)}%` : '',
+        align: 'center',
+    },
+    {
+        title: 'Estado',
+        dataIndex: 'estado',
+        key: 'estado',
+        align: 'center',
+        render: (text) => (
+            <span
+                style={{
+                    backgroundColor: colors[text] || 'transparent',
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    color: '#fff',
+                }}
+            >
+                {text}
+            </span>
+        ),
+    },
+];
 
 
 
 
     return (
         <div>
-            <h2>Dashboard </h2>
+            <h3
+            style={{ marginTop: '0px' }}>Panel de Estadisticas</h3>
 
             {/* Filtros */}
             <Select
@@ -402,7 +430,7 @@ const Dashboard = ({ empresa }) => {
                                             ),
                                         }}
                                     />
-                                    <Tooltip />
+                                    {/* <Tooltip /> */}
                                 </BarChart>
                             ) : (
                                 <div style={{ textAlign: "center", paddingTop: "100px", fontSize: "16px", color: "#888" }}>
@@ -584,13 +612,11 @@ const Dashboard = ({ empresa }) => {
                 <h2>Mapa de Ubicaciones</h2>
                 <MapComponent
                     locations={locations}
-
                 />
             </div>
             <hr />
 
             <h2>Campañas</h2>
-
             <Table
                 columns={columns}
                 dataSource={laboreos}

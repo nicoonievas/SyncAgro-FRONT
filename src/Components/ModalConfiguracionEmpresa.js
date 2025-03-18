@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, TimePicker, notification } from 'antd';
 import axios from 'axios';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
   const [form] = Form.useForm();
@@ -16,7 +16,7 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
           ? empresa.correosRecepcionNotificacion.join(', ')
           : '',
         horarioNotificacion: empresa.horarioNotificacion
-          ? moment(empresa.horarioNotificacion)
+          ? dayjs(empresa.horarioNotificacion, "HH:mm")
           : null,
         diasAlertaVencimientos: empresa.diasAlertaVencimientos || '',
         diasRecordatorioVencimientos: empresa.diasRecordatorioVencimientos || '',
@@ -34,8 +34,9 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
       const correctedValues = {
         ...values,
         horarioNotificacion: values.horarioNotificacion
-          ? values.horarioNotificacion.toISOString()
+          ? dayjs(values.horarioNotificacion).format('HH:mm')
           : null,
+
         correosRecepcionNotificacion: values.correosRecepcionNotificacion.split(',').map(email => email.trim()),
         roles: values.roles.split(',').map(role => role.trim())
       };
@@ -97,8 +98,12 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
           label="Horario de Notificación"
           rules={[{ required: true, message: 'Por favor, selecciona el horario de notificación.' }]}
         >
-          <TimePicker format="HH:mm" />
+          <TimePicker
+            format="HH:mm"
+            onChange={(time) => form.setFieldsValue({ horarioNotificacion: time })}
+          />
         </Form.Item>
+
 
         <div style={{ display: 'flex', gap: '16px' }}>
           <Form.Item
@@ -121,23 +126,23 @@ const ModalConfiguracionEmpresa = ({ visible, onClose, empresa }) => {
         </div>
 
         <div style={{ display: 'flex', gap: '16px' }}>
-        <Form.Item
-          name="correoEnvioNotificacion"
-          label="Correo de Envío de Notificación"
-          rules={[{ required: true, message: 'Por favor, ingresa el correo de envío de notificaciones.' }]}
-          style={{ flex: 1 }}
-        >
-          <Input type="email" placeholder="Correo de envío de notificación" />
-        </Form.Item>
+          <Form.Item
+            name="correoEnvioNotificacion"
+            label="Correo de Envío de Notificación"
+            rules={[{ required: true, message: 'Por favor, ingresa el correo de envío de notificaciones.' }]}
+            style={{ flex: 1 }}
+          >
+            <Input type="email" placeholder="Correo de envío de notificación" />
+          </Form.Item>
 
-        <Form.Item
-          name="contrasenaCorreoEnvioNotificacion"
-          label="Contraseña de Aplicación"
-          rules={[{ required: true, message: 'Por favor, ingresa la contraseña del correo de envío.' }]}
-          style={{ flex: 1 }}
-        >
-          <Input.Password placeholder="Contraseña de Aplicación" />
-        </Form.Item>
+          <Form.Item
+            name="contrasenaCorreoEnvioNotificacion"
+            label="Contraseña de Aplicación"
+            rules={[{ required: true, message: 'Por favor, ingresa la contraseña del correo de envío.' }]}
+            style={{ flex: 1 }}
+          >
+            <Input.Password placeholder="Contraseña de Aplicación" />
+          </Form.Item>
         </div>
 
         <Form.Item

@@ -109,7 +109,8 @@ const CrearEmpresa = () => {
         validateMessages={validateMessages}
       >
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-          <h2>Crear Empresa </h2>
+          <h3
+          style={{ marginTop: '0px' }}>Crear Empresa </h3>
         </Form.Item>
 
         <Form.Item name="razonSocial" label="Razón Social" rules={[{ required: true }]}>

@@ -124,6 +124,7 @@ const CrearEquipo = ({ equipoToAdd, empresa, usuario}) => {
       style={{ maxWidth: 600 }}
       validateMessages={validateMessages}
     >
+      <h3 style={{ marginTop: '0px'}}>Crear Equipos</h3>
       <Form.Item
         name="nombre"
         label="Nombre del equipo"

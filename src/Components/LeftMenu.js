@@ -11,7 +11,8 @@ import {
   CarryOutOutlined,
   TeamOutlined,
   ExportOutlined,
-  LineChartOutlined
+  LineChartOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
@@ -40,9 +41,8 @@ const { SubMenu } = Menu;
 
 
 
-const handleOpenPopup = () => {
-  window.open('https://map.deere.com/', 'MapaDeere', 'width=800,height=600');
-};
+
+
 
 const LeftMenu = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -52,8 +52,8 @@ const LeftMenu = () => {
   const [empresa, setEmpresa] = useState("");
   const [razonSocial, setRazonSocial] = useState("");
   const { user, isAuthenticated, logout,
- 
-  
+
+
     // claim, getIdTokenClaims 
   } = useAuth0();
   // const [token, setToken] = useState("");
@@ -80,11 +80,24 @@ const LeftMenu = () => {
           setEmpresa(usuarioEncontrado.empresa || "No asignado");
           setUsuario(usuarioEncontrado);
           setRazonSocial(usuarioEncontrado.empresa.razonSocial);
-  
+
         }
       })
       .catch(error => console.error("Error al obtener usuarios:", error));
   }, [user]);
+
+  const handleOpenPopup = (empresa) => {
+    const empresaUrl = empresa?.urlSistemaProveedor;
+
+    if (!empresaUrl) {
+      alert("No hay URL configurada para esta empresa.");
+      return;
+    }
+
+    window.open(empresaUrl, 'Sistema Proveedor', 'width=800,height=600');
+  };
+
+  const administrador = "nicolasnievas1@gmail.com"
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -160,10 +173,22 @@ const LeftMenu = () => {
           <Menu.Item key="verDashboard" icon={<LineChartOutlined />}>
             <Link to="/verEstadisticas">Ver Estadisticas</Link>
           </Menu.Item>
-
-          <Menu.Item key="verSistemaProveedor" icon={<ExportOutlined />} onClick={handleOpenPopup}>
+          <Menu.Item key="verSistemaProveedor" icon={<ExportOutlined />} onClick={() => handleOpenPopup(empresa)}>
             Ver Sistema Proveedor
           </Menu.Item>
+
+
+          {usuario.email === administrador && (
+            <SubMenu key="configuracion" icon={<SettingOutlined />} title="Configuracion">
+              <Menu.Item key="verUsuarios"><Link to="/verUsuarios">Ver Usuarios</Link></Menu.Item>
+              <Menu.Item key="verEmpresas"><Link to="/verEmpresas">Ver Empresas</Link></Menu.Item>
+              <Menu.Item key="agregarEmpresa"><Link to="/agregarEmpresa">Agregar Empresa</Link></Menu.Item>
+              <Menu.Item key="agregarMarcasModelos"><Link to="/agregarMarcasModelos">Agregar Marcas y Modelos</Link></Menu.Item>
+
+            </SubMenu>
+          )}
+
+
         </Menu>
       </Sider>
 
@@ -247,12 +272,12 @@ const LeftMenu = () => {
             <Route path="/verLaboreos" element={<TablaLaboreos usuario={usuario} empresa={empresa} />} />
             <Route path="/verEquipos" element={<TablaEquipos usuario={usuario} empresa={empresa} />} />
             <Route path="/verVencimientos" element={<TablasVencimientos usuario={usuario} empresa={empresa} />} />
-            <Route path="/agregarEmpresa" element={<CrearEmpresa usuario={usuario} empresa={empresa} />} />
-            <Route path="/verEmpresas" element={<TablaEmpresas />} />
-            <Route path="/verUsuarios" element={<TablaUsuarios />} />
-            <Route path="/agregarMarcasModelos" element={<CrearMarcaTipoModelo usuario={usuario} empresa={empresa} />} />
+            <Route path="/agregarEmpresa" element={usuario.email == administrador ? <CrearEmpresa usuario={usuario} empresa={empresa} /> : <div>No tienes permisos para ver esta página.</div>} />
+            <Route path="/verEmpresas" element={usuario.email == administrador ? <TablaEmpresas /> : <div>No tienes permisos para ver esta página.</div>} />
+            <Route path="/verUsuarios" element={usuario.email == administrador ? <TablaUsuarios /> : <div>No tienes permisos para ver esta página.</div>} />
+            <Route path="/agregarMarcasModelos" element={usuario.email == administrador ? <CrearMarcaTipoModelo usuario={usuario} empresa={empresa} /> : <div>No tienes permisos para ver esta página.</div>} />
             <Route path="/verEstadisticas" element={<Dashboard usuario={usuario} empresa={empresa} />} />
-            <Route path="/verSistemaProveedor" element={<WebView usuario={usuario} empresa={empresa} />} />
+            <Route path="/verSistemaProveedor" element={<WebView empresa={empresa} />} />
           </Routes>
         </Content>
       </Layout>

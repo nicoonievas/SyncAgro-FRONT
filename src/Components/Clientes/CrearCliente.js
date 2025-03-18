@@ -141,8 +141,10 @@ const CrearCliente = ({usuario, empresa}) => {
 
   return (
     <>
-      <Form {...layout} form={form} name="crear-cliente" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
-        <Form.Item name="nombre" label="Nombre" rules={[{ required: true }]}>
+      <Form {...layout} form={form} name="crear-cliente" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages} >
+     
+      <h3 style={{ marginTop: '0px'}}>Agregar Clientes</h3>
+       <Form.Item name="nombre" label="Nombre" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 

@@ -244,6 +244,7 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario }) => {
       style={{ maxWidth: 600 }}
       validateMessages={validateMessages}
     >
+      <h3 style={{ marginTop: '0px'}}>Crear Laboreo / Campaña</h3>
       <Form.Item
         name="nombre"
         label="Nombre del laboreo"

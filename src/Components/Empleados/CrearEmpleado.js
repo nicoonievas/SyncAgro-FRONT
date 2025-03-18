@@ -136,6 +136,7 @@ const CrearEmpleado = ({ empresa, usuario }) => {
       }}
       validateMessages={validateMessages}
     >
+      <h3 style={{ marginTop: '0px'}}>Agregar Nominas de Empleados</h3>
       <Form.Item
         name="firstname"
         label="Nombre"
