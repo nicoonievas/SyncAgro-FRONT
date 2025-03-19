@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, DatePicker, Select, notification } from 'antd';
+import { Button, Form, Input, DatePicker, Select, notification, Row, Col } from 'antd';
 
 const { Option } = Select;
 
@@ -65,7 +65,7 @@ const CrearVehiculo = ({ usuario, empresa }) => {
       dominio: values.dominio,
       numero: values.numero,
       alias: values.alias,
-      estado: values.estado,
+      // estado: values.estado,
       fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.valueOf() : null,
       fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.valueOf() : null,
     };
@@ -95,69 +95,75 @@ const CrearVehiculo = ({ usuario, empresa }) => {
   };
 
   return (
-
-    <Form {...layout} form={form} name="crear-vehiculo" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages}>
-      <h3 style={{ marginTop: '0px'}}>Agregar Vehiculos</h3>
-      <Form.Item name="marca" label="Marca" rules={[{ required: true }]}>
-        <Select onChange={handleMarcaChange} placeholder="Selecciona una marca">
-          {marcasModelos.map((marca) => (
-            <Option key={marca.marca} value={marca.marca}>
-              {marca.marca}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
-        <Select onChange={handleTipoChange} placeholder="Selecciona un tipo" disabled={tipos.length === 0}>
-          {tipos.map((tipo) => (
-            <Option key={tipo.tipo} value={tipo.tipo}>
-              {tipo.tipo}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="modelo" label="Modelo" rules={[{ required: true }]}>
-        <Select placeholder="Selecciona un modelo" disabled={modelos.length === 0}>
-          {modelos.map((modelo) => (
-            <Option key={modelo} value={modelo}>
-              {modelo}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-    
-      <Form.Item name="dominio" label="Dominio" rules={[{ required: true }]}>
-        <Input />
-      </Form.Item>
-
-      <Form.Item name="numero" label="Número" rules={[{ required: false }]}>
-        <Input />
-      </Form.Item>
-
-      <Form.Item name="alias" label="Alias" rules={[{ required: false }]}>
-        <Input />
-      </Form.Item>
-
-      <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
-        <Select>
-          <Option value="Activo">Activo</Option>
-          <Option value="Inctivo">Inactivo</Option>
-          <Option value="En Reparación">En reparación</Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="fecha_vencimiento_seguro" label="Vencimiento Seguro" rules={[{ required: true }]}>
-        <DatePicker format={'DD-MM-YYYY'} />
-      </Form.Item>
-
-      <Form.Item name="fecha_vencimiento_vtv" label="Vencimiento VTV" rules={[{ required: true }]}>
-        <DatePicker format={'DD-MM-YYYY'} />
-      </Form.Item>
-
-      <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+    <Form
+      layout="vertical"
+      form={form}
+      name="crear-vehiculo"
+      onFinish={onFinish}
+      style={{ maxWidth: 400, marginLeft: '10%' }}
+      validateMessages={validateMessages}
+    >
+      <h3 style={{ marginTop: '0px' }}>Agregar Vehículos</h3>
+  
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <Form.Item name="marca" label="Marca" rules={[{ required: true }]} style={{ marginBottom: 8 }}>
+          <Select onChange={handleMarcaChange} placeholder="Selecciona una marca">
+            {marcasModelos.map((marca) => (
+              <Option key={marca.marca} value={marca.marca}>
+                {marca.marca}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="tipo" label="Tipo" style={{ flex: 1, marginBottom: 8 }} rules={[{ required: true }]}>
+            <Select onChange={handleTipoChange} placeholder="Selecciona un tipo" disabled={tipos.length === 0}>
+              {tipos.map((tipo) => (
+                <Option key={tipo.tipo} value={tipo.tipo}>
+                  {tipo.tipo}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+  
+          <Form.Item name="modelo" label="Modelo" style={{ flex: 1, marginBottom: 8 }} rules={[{ required: true }]}>
+            <Select placeholder="Selecciona un modelo" disabled={modelos.length === 0}>
+              {modelos.map((modelo) => (
+                <Option key={modelo} value={modelo}>
+                  {modelo}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </div>
+  
+        <Form.Item name="dominio" label="Dominio" rules={[{ required: true }]} style={{ marginBottom: 8 }}>
+          <Input />
+        </Form.Item>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="numero" label="Número" style={{ flex: 1, marginBottom: 8 }}>
+            <Input />
+          </Form.Item>
+  
+          <Form.Item name="alias" label="Alias" style={{ flex: 1, marginBottom: 8 }}>
+            <Input />
+          </Form.Item>
+        </div>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="fecha_vencimiento_seguro" label="Venc. Seguro" style={{ flex: 1, marginBottom: 8 }} rules={[{ required: true }]}>
+            <DatePicker format={'DD-MM-YYYY'} style={{ width: '100%' }} />
+          </Form.Item>
+  
+          <Form.Item name="fecha_vencimiento_vtv" label="Venc. VTV" style={{ flex: 1, marginBottom: 8 }} rules={[{ required: true }]}>
+            <DatePicker format={'DD-MM-YYYY'} style={{ width: '100%' }} />
+          </Form.Item>
+        </div>
+      </div>
+  
+      <Form.Item style={{ textAlign: 'center', marginTop: '8px' }}>
         <Button type="primary" htmlType="submit" loading={loading}>
           Crear Vehículo
         </Button>

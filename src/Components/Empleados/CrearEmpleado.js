@@ -127,173 +127,131 @@ const CrearEmpleado = ({ empresa, usuario }) => {
 
   return (
     <Form
-      {...layout}
-      form={form} // Asociar el formulario
+      layout="vertical"
+      form={form}
       name="nest-messages"
       onFinish={onFinish}
-      style={{
-        maxWidth: 600,
-      }}
+      style={{ maxWidth: 500, marginLeft: '10%' }}
       validateMessages={validateMessages}
+
     >
-      <h3 style={{ marginTop: '0px'}}>Agregar Nominas de Empleados</h3>
-      <Form.Item
-        name="firstname"
-        label="Nombre"
-        rules={[{ required: true }]}
-      >
+      <h3 style={{ marginTop: '0px' }}>Agregar Nómina de Empleados</h3>
+  
+      {/* Nombre y Apellido */}
+      <div style={{ display: 'flex',  gap: '8px' }}>
+        <Form.Item name="firstname" label="Nombre" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+  
+        <Form.Item name="lastname" label="Apellido" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+      </div>
+  
+      {/* Correo Electrónico */}
+      <Form.Item name="email" label="Correo Electrónico" rules={[{ type: 'email', required: true }]}>
         <Input />
       </Form.Item>
-
-      <Form.Item
-        name="lastname"
-        label="Apellido"
-        rules={[{ required: true }]}
-      >
+  
+      {/* Provincia y Localidad */}
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Form.Item name="provincia" label="Provincia" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Select
+            value={selectedProvincia}
+            onChange={value => {
+              setSelectedProvincia(value);
+              form.setFieldsValue({ provincia: value });
+            }}
+            placeholder="Selecciona una provincia"
+          >
+            {provincias.map(provincia => (
+              <Option key={provincia.code} value={provincia.code}>
+                {provincia.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+  
+        <Form.Item name="localidad" label="Localidad" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Select
+            value={selectedLocalidad}
+            onChange={value => {
+              setSelectedLocalidad(value);
+              form.setFieldsValue({ localidad: value });
+            }}
+            placeholder="Selecciona una localidad"
+            showSearch
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {localidades.map(localidad => (
+              <Option key={localidad.name} value={localidad.name}>
+                {localidad.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </div>
+  
+      {/* Domicilio */}
+      <Form.Item name="domicilio" label="Domicilio" rules={[{ required: true }]}>
         <Input />
       </Form.Item>
-
-      <Form.Item
-        name="email"
-        label="Correo Electrónico"
-        rules={[{ type: 'email', required: true }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item name="provincia" label="Provincia" rules={[{ required: true }]}>
-        <Select
-          value={selectedProvincia}
-          onChange={value => {
-            setSelectedProvincia(value);  // Aquí 'value' es el código de la provincia
-            form.setFieldsValue({ provincia: value });  // Esto actualizará el formulario con el código
-          }}
-          placeholder="Selecciona una provincia"
-        >
-          {provincias.map((provincia) => (
-            <Option key={provincia.code} value={provincia.code}>
-              {provincia.name}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-
-      <Form.Item name="localidad" label="Localidad" rules={[{ required: true }]}>
-        <Select
-          value={selectedLocalidad}
-          onChange={value => {
-            setSelectedLocalidad(value);
-            form.setFieldsValue({ localidad: value }); // Actualizar el valor en el formulario
-          }}
-          placeholder="Selecciona una localidad"
-          showSearch
-          filterOption={(input, option) =>
-            option.children.toLowerCase().includes(input.toLowerCase())
-          }
-        >
-          {localidades.map((localidad) => (
-            <Option key={localidad.name} value={localidad.name}>
-              {localidad.name}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        name="domicilio"
-        label="Domicilio"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="celular"
-        label="Celular"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="telefonoEmergencia"
-        label="Telefono Emergencia"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="documento"
-        label="Documento"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="rol"
-        label="Rol / Cargo"
-        rules={[{ required: true }]}
-      >
-        <Select
-          placeholder="Selecciona un rol"
-          onChange={value => setSelectedRoles(value)}
-        >
-          {roles.map((rol, index) => (
-            <Option key={index} value={rol}>
-              {rol}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      {/* <Form.Item
-        name="area"
-        label="Área"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item> */}
-
-      {/* Nuevos campos de fecha */}
-      <Form.Item
-        name="licenciaVencimiento"
-        label="Vencimiento Licencia"
-        rules={[{ required: true }]}
-      >
-        <DatePicker format="DD-MM-YYYY" />
-      </Form.Item>
-
-      <Form.Item
-        name="dniVencimiento"
-        label="Vencimiento DNI"
-        rules={[{ required: true }]}
-      >
-        <DatePicker format="DD-MM-YYYY" />
-      </Form.Item>
-
-      <Form.Item
-        name="aptoFisicoVencimiento"
-        label="Vencimiento Apto Físico"
-        rules={[{ required: true }]}
-      >
-        <DatePicker format="DD-MM-YYYY" />
-      </Form.Item>
-
-      <Form.Item
-        wrapperCol={{
-          ...layout.wrapperCol,
-          offset: 8,
-        }}
-      >
+  
+      {/* Celular y Teléfono de Emergencia */}
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Form.Item name="celular" label="Celular" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+  
+        <Form.Item name="telefonoEmergencia" label="Teléfono de Emergencia" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+      </div>
+  
+      {/* Documento y Rol/Cargo */}
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Form.Item name="documento" label="Documento" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+  
+        <Form.Item name="rol" label="Rol / Cargo" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <Select placeholder="Selecciona un rol" onChange={value => setSelectedRoles(value)}>
+            {roles.map((rol, index) => (
+              <Option key={index} value={rol}>
+                {rol}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </div>
+  
+      {/* Fechas de Vencimiento */}
+      <h3 style={{ marginTop: '16px' }}>Fechas de Vencimiento</h3>
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Form.Item name="licenciaVencimiento" label="Licencia Conducir" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <DatePicker format="DD-MM-YYYY" />
+        </Form.Item>
+  
+        <Form.Item name="dniVencimiento" label="DNI" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <DatePicker format="DD-MM-YYYY" />
+        </Form.Item>
+  
+        <Form.Item name="aptoFisicoVencimiento" label="Apto Físico" style={{ flex: 1 }} rules={[{ required: true }]}>
+          <DatePicker format="DD-MM-YYYY" />
+        </Form.Item>
+      </div>
+  
+      {/* Botón de Envío */}
+      <Form.Item style={{ textAlign: 'center', marginTop: '16px' }}>
         <Button type="primary" htmlType="submit" loading={loading}>
           Crear Empleado
         </Button>
       </Form.Item>
     </Form>
   );
+  
 };
 
 export default CrearEmpleado;

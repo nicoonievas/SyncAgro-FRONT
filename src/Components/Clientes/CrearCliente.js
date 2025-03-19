@@ -141,69 +141,80 @@ const CrearCliente = ({usuario, empresa}) => {
 
   return (
     <>
-      <Form {...layout} form={form} name="crear-cliente" onFinish={onFinish} style={{ maxWidth: 600 }} validateMessages={validateMessages} >
+      <Form
+        layout="vertical"
+        form={form}
+        name="crear-cliente"
+        onFinish={onFinish}
+        style={{ maxWidth: 500, marginLeft: '10%' }}
+        validateMessages={validateMessages}
      
-      <h3 style={{ marginTop: '0px'}}>Agregar Clientes</h3>
-       <Form.Item name="nombre" label="Nombre" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-
-        <Form.Item name="apellido" label="Apellido" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-
-
-
-        <Form.Item name="provincia" label="Provincia" rules={[{ required: true }]}>
-          <Select
-            value={selectedProvincia}
-            onChange={value => {
-              setSelectedProvincia(value);  // Aquí 'value' es el código de la provincia
-              form.setFieldsValue({ provincia: value });  // Esto actualizará el formulario con el código
-            }}
-            placeholder="Selecciona una provincia"
-          >
-            {provincias.map((provincia) => (
-              <Option key={provincia.code} value={provincia.code}>
-                {provincia.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-
-        <Form.Item name="localidad" label="Localidad" rules={[{ required: true }]}>
-          <Select
-            value={selectedLocalidad}
-            onChange={value => {
-              setSelectedLocalidad(value);
-              form.setFieldsValue({ localidad: value }); // Actualizar el valor en el formulario
-            }}
-            placeholder="Selecciona una localidad"
-            showSearch
-            filterOption={(input, option) =>
-              option.children.toLowerCase().includes(input.toLowerCase())
-            }
-          >
-            {localidades.map((localidad) => (
-              <Option key={localidad.name} value={localidad.name}>
-                {localidad.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-
+      >
+        <h3 style={{ marginTop: '0px' }}>Agregar Clientes</h3>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="nombre" label="Nombre" style={{ flex: 1 }} rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+  
+          <Form.Item name="apellido" label="Apellido" style={{ flex: 1 }} rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+        </div>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="provincia" label="Provincia" style={{ flex: 1 }} rules={[{ required: true }]}>
+            <Select
+              value={selectedProvincia}
+              onChange={value => {
+                setSelectedProvincia(value);
+                form.setFieldsValue({ provincia: value });
+              }}
+              placeholder="Selecciona una provincia"
+            >
+              {provincias.map(provincia => (
+                <Option key={provincia.code} value={provincia.code}>
+                  {provincia.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+  
+          <Form.Item name="localidad" label="Localidad" style={{ flex: 1 }} rules={[{ required: true }]}>
+            <Select
+              value={selectedLocalidad}
+              onChange={value => {
+                setSelectedLocalidad(value);
+                form.setFieldsValue({ localidad: value });
+              }}
+              placeholder="Selecciona una localidad"
+              showSearch
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {localidades.map(localidad => (
+                <Option key={localidad.name} value={localidad.name}>
+                  {localidad.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </div>
+  
         <Form.Item name="domicilio" label="Domicilio" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-
-        <Form.Item name="telefono" label="Teléfono" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-
-        <Form.Item name="mail" label="Mail" rules={[{ required: false, type: 'email' }]}>
-          <Input />
-        </Form.Item>
+  
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Form.Item name="telefono" label="Teléfono" style={{ flex: 1 }} rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+  
+          <Form.Item name="mail" label="Mail" style={{ flex: 1 }} rules={[{ type: 'email' }]}>
+            <Input />
+          </Form.Item>
+        </div>
 
         <Form.Item name="campos" label="Campos" rules={[{ required: false }]}>
         {campos.map((campo, index) => (

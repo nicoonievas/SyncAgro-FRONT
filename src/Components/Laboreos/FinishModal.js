@@ -27,8 +27,8 @@ const FinishModal = ({ visible, onClose, onUpdate, laboreo }) => {
     }
     setLoading(true);
     try {
-      await api.put(`/laboreos/${idLaboreo}/finish`, values);
-
+      // await api.put(`/laboreos/${idLaboreo}/finish`, values);
+      await api.patch(`/laboreo/${idLaboreo}/close`, values);
       
       onUpdate();
       onClose();

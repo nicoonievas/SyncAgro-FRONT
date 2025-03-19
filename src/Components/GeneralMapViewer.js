@@ -2,23 +2,27 @@ import React, { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, LayersControl, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import greenPointer from "./pointers/greenPointer.png";
+import redPointer from "./pointers/redPointer.png";
+import yellowPointer from "./pointers/yellowPointer.png";
+import bluePointer from "./pointers/bluePointer.png";
 
 const { BaseLayer } = LayersControl;
 
 const icons = {
   Activo: new L.Icon({
-    iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-    iconSize: [25, 25],
+    iconUrl: bluePointer,
+    iconSize: [35, 35],
     iconAnchor: [12, 41],
   }),
   Finalizado: new L.Icon({
-    iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-    iconSize: [25, 25],
+    iconUrl: greenPointer,
+    iconSize: [35, 35],
     iconAnchor: [12, 41],
   }),
   Pendiente: new L.Icon({
-    iconUrl: "https://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
-    iconSize: [25, 25],
+    iconUrl: yellowPointer,
+    iconSize: [35, 35],
     iconAnchor: [12, 41],
   }),
 };
