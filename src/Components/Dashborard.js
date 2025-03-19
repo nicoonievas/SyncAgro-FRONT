@@ -233,7 +233,20 @@ const Dashboard = ({ empresa }) => {
             return acc;
         }, {});
     };
-    const colores = ['#ff8042', '#00C49F', '#FFBB28'];
+    const colores = [
+        '#FF5733', // Rojo cálido vibrante
+        '#FFBF00', // Amarillo brillante
+        '#33FF57', // Verde brillante
+        '#33A1FF', // Azul claro
+        // '#FF33A1', // Rosa fuerte
+        '#8033FF', // Morado vibrante
+        '#FFD700', // Amarillo dorado
+        '#FF8C00', // Naranja fuerte
+        '#00FFEF', // Cian brillante
+        '#A52A2A'  // Marrón, para contraste
+      ];
+      
+      
 
     const colors = {
         Activo: "rgba(76, 127, 175, 0.8)", // Verde

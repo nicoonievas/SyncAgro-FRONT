@@ -7,7 +7,7 @@ import redPointer from "./pointers/redPointer.png";
 import yellowPointer from "./pointers/yellowPointer.png";
 import bluePointer from "./pointers/bluePointer.png";
 
-const { BaseLayer } = LayersControl;
+const { BaseLayer, Overlay } = LayersControl;
 
 const icons = {
   Activo: new L.Icon({
@@ -71,6 +71,14 @@ export default function MapComponent({ locations }) {
             attribution="&copy; Esri"
           />
         </BaseLayer>
+
+        <Overlay name="Etiquetas Claras (ArcGIS)">
+                  <TileLayer
+                    url="https://services.arcgisonline.com/arcgis/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                    attribution="&copy; Esri"
+                    opacity={1}
+                  />
+                </Overlay>
       </LayersControl>
 
       {/* Ajustar vista a los marcadores */}

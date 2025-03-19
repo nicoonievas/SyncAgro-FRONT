@@ -164,9 +164,9 @@ const CrearLaboreo = ({ laboreoToAdd, empresa, usuario }) => {
       nombre: values.nombre,
       descripcion: values.descripcion,
       resumen: values.resumen,
-      equipos: values.equipos,
-      empleados: values.empleados,  // Array de empleados seleccionados
-      vehiculos: values.vehiculos,  // Array de vehículos seleccionados
+      equipos: values.equipos ? values.equipos : [],  // Array de equipos seleccionados
+      empleados: values.empleados ? values.empleados : [],  // Array de empleados seleccionados
+      vehiculos: values.vehiculos ? values.vehiculos : [],  // Array de vehículos seleccionados
       tarea: values.tarea,          // Tarea seleccionada
       grano: values.grano,          // Grano seleccionado
       cliente: selectedCliente?._id, // Usar el ID del cliente seleccionado
