@@ -101,8 +101,10 @@ const LeftMenu = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null}
-        collapsible collapsed={collapsed}
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
         style={{
           position: 'fixed',
           height: '100vh',
@@ -112,7 +114,7 @@ const LeftMenu = () => {
           overflow: 'auto',
         }}>
         <div className="demo-logo-vertical" />
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+        <Menu theme="dark" mode="inline" >
           {/* Logo */}
           <Menu.Item key="logo"
             style={{
@@ -174,7 +176,7 @@ const LeftMenu = () => {
             <Link to="/verEstadisticas">Ver Estadisticas</Link>
           </Menu.Item>
           <Menu.Item key="verSistemaProveedor" icon={<ExportOutlined />} onClick={() => handleOpenPopup(empresa)}>
-            Ver Sistema Proveedor
+            Sistema Proveedor
           </Menu.Item>
 
 
@@ -190,6 +192,19 @@ const LeftMenu = () => {
 
 
         </Menu>
+        {/* <Layout.Footer 
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+        textAlign: 'center',
+        padding: '10px 0',
+        backgroundColor: '#001529',
+        color: '#fff',
+      }}
+    >
+      <span>Nievas Nicolas</span>
+    </Layout.Footer> */}
       </Sider>
 
       <Layout

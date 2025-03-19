@@ -165,7 +165,8 @@ const TablaClientes = ({ empresa, usuario }) => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:6001/api/cliente/${clienteIdToDelete}`);
+      // await axios.delete(`http://localhost:6001/api/cliente/${clienteIdToDelete}`);
+      await axios.put(`http://localhost:6001/api/cliente/${clienteIdToDelete}/delete`);
       setClientes((prev) => prev.filter((cliente) => cliente._id !== clienteIdToDelete));
       setIsDeleteModalVisible(false);
       openNotificationWithIcon("success", "Cliente Eliminado", "El cliente ha sido eliminado exitosamente.");

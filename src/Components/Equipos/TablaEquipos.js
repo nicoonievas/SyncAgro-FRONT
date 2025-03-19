@@ -4,7 +4,7 @@ import { DeleteOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import useAxiosInterceptor from '../../utils/axiosConfig';
-import DynamicModal from "../ModalDinamica";
+import ModalEquipos from "./ModalEquipos";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -23,7 +23,7 @@ const TablaEquipos = ({ empresa }) => {
   const [empleadosLibres, setEmpleadosLibres] = useState([]);
   const [vehiculosLibres, setVehiculosLibres] = useState([]);
   const [empresaId, setEmpresaId] = useState(null);
-  const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
+  const [isModalEquiposVisible, setIsModalEquiposVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEquipos, setFilteredEquipos] = useState([]);
@@ -115,12 +115,12 @@ const TablaEquipos = ({ empresa }) => {
     setIsDeleteModalVisible(true);
   };
 
-  const showDynamicModal = (record) => {
+  const showModalEquipos = (record) => {
     setSelectedRecord(record);
-    setIsDynamicModalVisible(true);
+    setIsModalEquiposVisible(true);
     // console.log(record);
   };
-  const camposPermitidos = ["nombre", "numero", "estado", "empleados.nombre", "vehiculos.dominio"];
+
 
   const showEditModal = (equipo) => {
     setCurrentEquipo(equipo);
@@ -168,7 +168,8 @@ const TablaEquipos = ({ empresa }) => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:6001/api/equipo/${equipoIdToDelete}`);
+      // await axios.delete(`http://localhost:6001/api/equipo/${equipoIdToDelete}`);
+      await axios.put(`http://localhost:6001/api/equipo/${equipoIdToDelete}/delete`);
       setEquipos(prevEquipos => prevEquipos.filter(equipo => equipo._id !== equipoIdToDelete));
       setIsDeleteModalVisible(false);
       notification.success({ message: 'Equipo Eliminado', description: 'El Equipo ha sido eliminado exitosamente.' });
@@ -178,6 +179,12 @@ const TablaEquipos = ({ empresa }) => {
     }
   };
 
+  const colors = {
+    Inactivo: "rgba(247, 146, 64, 0.83)", // Verde
+    Libre: "rgba(55, 139, 58, 0.8)", // Rojo
+    Asignado: "rgba(211, 191, 11, 0.88)", // Amarillo
+};
+
   const columns = [
     {
       title: "Nombre del Equipo",
@@ -185,7 +192,7 @@ const TablaEquipos = ({ empresa }) => {
       key: "nombre",
 
       render: (text, record) => (
-        <a onClick={() => showDynamicModal(record)}>{text}</a>
+        <a onClick={() => showModalEquipos(record)}>{text}</a>
       ),
 
     },
@@ -225,9 +232,22 @@ const TablaEquipos = ({ empresa }) => {
     }
     ,
     {
-      title: "Estado",
-      dataIndex: "estado",
-      key: "estado"
+      title: 'Estado',
+        dataIndex: 'estado',
+        key: 'estado',
+        align: 'center',
+        render: (text) => (
+            <span
+                style={{
+                    backgroundColor: colors[text] || 'transparent',
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    color: '#fff',
+                }}
+            >
+                {text}
+            </span>
+        ),
     },
     {
       title: 'Acción', key: 'action', render: (_, record) => (
@@ -278,6 +298,9 @@ const TablaEquipos = ({ empresa }) => {
           {/* <Form.Item name="responsable" label="Responsable" rules={[{ required: true, message: "Campo obligatorio" }]}>
             <Input />
           </Form.Item> */}
+          <Form.Item name="descripcion" label="Descripcion" rules={[{ required: false}]}>
+            <Input />
+          </Form.Item>
 
           <Form.Item name="numero"
             label="Numero de Equipo"
@@ -348,13 +371,10 @@ const TablaEquipos = ({ empresa }) => {
         </Form>
       </Modal>
 
-      <DynamicModal
-        open={isDynamicModalVisible}
-        onClose={() => setIsDynamicModalVisible(false)}
-        record={selectedRecord}
-        camposPermitidos={camposPermitidos}
-        empresa={empresaId}
-        procedencia="equipos"
+      <ModalEquipos
+        open={isModalEquiposVisible}
+        onClose={() => setIsModalEquiposVisible(false)}
+        equipo={selectedRecord}
       />
     </>
   );

@@ -8,7 +8,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import FinishModal from './FinishModal';
 import useAxiosInterceptor from '../../utils/axiosConfig';
-import DynamicModal from "../ModalDinamica";
+import ModalLaboreo from "./ModalLaboreo";
 const { Option } = Select;
 const { Title } = Typography;
 
@@ -81,7 +81,7 @@ const TablaLaboreos = ({ empresa }) => {
   const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
-  const [isDynamicModalVisible, setIsDynamicModalVisible] = useState(false);
+  const [isModalLaboreoVisible, setIsModalLaboreoVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredLaboreos, setFilteredLaboreos] = useState([]);
 
@@ -166,7 +166,11 @@ const TablaLaboreos = ({ empresa }) => {
 
     setFilteredLaboreos(filtered);
   };
-
+  const colors = {
+    Activo: "rgba(30, 94, 155, 0.8)", // Verde
+    Finalizado: "rgba(55, 139, 58, 0.8)", // Rojo
+    Pendiente: "rgba(231, 173, 0, 0.8)", // Amarillo
+};
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
@@ -179,12 +183,11 @@ const TablaLaboreos = ({ empresa }) => {
     setIsFinishModalVisible(true);
   };
 
-  const showDynamicModal = (record) => {
+  const showModalLaboreo = (record) => {
     setSelectedRecord(record);
-    setIsDynamicModalVisible(true);
-    // console.log(record);
+    setIsModalLaboreoVisible(true);
+    console.log("Record en tabla:", record);
   };
-  const camposPermitidos = ["razonSocial", "nombre", "descripcion", "estado", "equipos.nombre", "fechaInicio", "fechaFin", "tiempoTrabajo", "utilidadNeta", "rentabilidadLaboreo"];
 
   const handleFinishModalClose = () => {
     setIsFinishModalVisible(false);
@@ -277,7 +280,7 @@ const TablaLaboreos = ({ empresa }) => {
       dataIndex: 'nombre',
       key: 'nombre',
       render: (text, record) => (
-        <a onClick={() => showDynamicModal(record)}>{text}</a>
+        <a onClick={() => showModalLaboreo(record)}>{text}</a>
       ),
 
     },
@@ -305,8 +308,21 @@ const TablaLaboreos = ({ empresa }) => {
     },
     {
       title: 'Estado',
-      dataIndex: 'estado',
-      key: 'estado'
+        dataIndex: 'estado',
+        key: 'estado',
+        align: 'center',
+        render: (text) => (
+            <span
+                style={{
+                    backgroundColor: colors[text] || 'transparent',
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    color: '#fff',
+                }}
+            >
+                {text}
+            </span>
+        ),
     },
     {
       title: 'Acción',
@@ -561,13 +577,10 @@ const TablaLaboreos = ({ empresa }) => {
         onUpdate={handleUpdate}
       />
 
-      <DynamicModal
-        open={isDynamicModalVisible}
-        onClose={() => setIsDynamicModalVisible(false)}
-        record={selectedRecord}
-        camposPermitidos={camposPermitidos}
-        empresa={empresaId}
-        procedencia="laboreos"
+      <ModalLaboreo
+        open={isModalLaboreoVisible}
+        onClose={() => setIsModalLaboreoVisible(false)}
+        laboreo={selectedRecord}
       />
 
 

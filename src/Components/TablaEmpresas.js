@@ -190,15 +190,16 @@ const TablaEmpresas = () => {
         pagination={pagination}
         onChange={handleTableChange}
       />
-
+      <hr />
       <br />
 
       <Button type="primary" onClick={handleClick}>
         {mostrarCrearEmpresas ? "Cerrar Formulario" : "Crear Empresa"}
       </Button>
+      <br />
 
       {mostrarCrearEmpresas && <CrearEmpresa onSuccess={handleCreateEmpresaSuccess} />}
-
+      <br />
       {/* Modal de Confirmación para Eliminación */}
       <Modal
         title="Confirmar Eliminación"
@@ -259,7 +260,6 @@ const TablaEmpresas = () => {
             <Select>
               <Option value="Activo">Activo</Option>
               <Option value="Inactivo">Inactivo</Option>
-              <Option value="En Reparación">En reparación</Option>
             </Select>
           </Form.Item>
 

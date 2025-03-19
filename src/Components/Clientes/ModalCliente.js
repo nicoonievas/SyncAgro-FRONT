@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import { Modal } from "antd";
 
-// Función para formatear la fecha (DD-MM-YYYY)
 const formatDate = (timestamp) => {
     if (!timestamp) return "Fecha no disponible";
     const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Meses en JS van de 0 a 11
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}`;
 };
 
 const ModalCliente = ({ cliente, onClose }) => {
@@ -16,13 +12,12 @@ const ModalCliente = ({ cliente, onClose }) => {
 
     useEffect(() => {
         if (cliente) {
-            setVisible(true);
-        }
-    }, [cliente]);
+            setVisible(true); // Se abre solo si cliente tiene un valor
+    }}, [cliente]);
 
     const handleClose = () => {
         setVisible(false);
-        onClose(); // Notificar al componente padre
+        onClose(); // Notificar al padre
     };
 
     return (

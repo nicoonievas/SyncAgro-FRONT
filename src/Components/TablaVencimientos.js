@@ -82,37 +82,37 @@ const TablasVencimientos = ({ empresa, usuario }) => {
   const handleSearchVehiculos = (e) => {
     const value = e.target.value;
     setSearchTermVehiculos(value);
-  
+
     if (!value) {
       setFilteredVehiculos(vehiculos);
       return;
     }
-  
+
     const filtered = vehiculos.filter((vehiculo) =>
       vehiculo.alias.toLowerCase().includes(value.toLowerCase()) ||
       vehiculo.marca.toLowerCase().includes(value.toLowerCase()) ||
       vehiculo.modelo.toLowerCase().includes(value.toLowerCase()) ||
       vehiculo.dominio.toLowerCase().includes(value.toLowerCase())
     );
-  
+
     setFilteredVehiculos(filtered);
   };
-  
+
   const handleSearchEmpleados = (e) => {
     const value = e.target.value;
     setSearchTermEmpleados(value);
-  
+
     if (!value) {
       setFilteredEmpleados(empleados);
       return;
     }
-  
+
     const filtered = empleados.filter((empleado) =>
       empleado.firstname.toLowerCase().includes(value.toLowerCase()) ||
       empleado.lastname.toLowerCase().includes(value.toLowerCase()) ||
       empleado.documento.includes(value)
     );
-  
+
     setFilteredEmpleados(filtered);
   };
 
@@ -387,7 +387,7 @@ const TablasVencimientos = ({ empresa, usuario }) => {
         }}
 
       />
-
+      <hr />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={5} style={{ marginTop: '0px' }}>Documentacion de Empleados</Title>
         <Input
