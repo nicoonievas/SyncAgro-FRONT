@@ -17,12 +17,24 @@ const CrearMarcaTipoModelo = () => {
   const [selectedMarca, setSelectedMarca] = useState(null);
   const [selectedTipo, setSelectedTipo] = useState(null);
 
-  // Obtener todas las marcas y modelos
-  useEffect(() => {
-    axios.get('http://localhost:6001/api/marcasModelos')
-      .then(response => setMarcas(response.data))
-      .catch(error => message.error('Error al cargar marcas y modelos'));
-  }, []);
+  // // Obtener todas las marcas y modelos
+  // useEffect(() => {
+  //   axios.get('http://localhost:6001/api/marcasModelos')
+  //     .then(response => setMarcas(response.data))
+  //     .catch(error => message.error('Error al cargar marcas y modelos'));
+  // }, []);
+
+
+    // Función para obtener todas las marcas y modelos
+    const fetchMarcas = () => {
+      axios.get('http://localhost:6001/api/marcasModelos')
+        .then(response => setMarcas(response.data))
+        .catch(error => message.error('Error al cargar marcas y modelos'));
+    };
+  
+    useEffect(() => {
+      fetchMarcas();
+    }, []);
 
   // Obtener tipos y modelos para una marca seleccionada
   const handleMarcaChange = (marca) => {
@@ -42,6 +54,7 @@ const CrearMarcaTipoModelo = () => {
     axios.post('http://localhost:6001/api/marcas', { marca: values.marca })
       .then(response => {
         openNotificationWithIcon('success', 'Marca agregada con éxito', 'La marca se ha agregado correctamente.');
+        fetchMarcas();
       })
       .catch(error => message.error('Error al agregar marca'))
       .finally(() => setLoading(false));
@@ -53,6 +66,7 @@ const CrearMarcaTipoModelo = () => {
     axios.post(`http://localhost:6001/api/tipos/${selectedMarca}`, { tipo: values.tipo })
       .then(response => {
         openNotificationWithIcon('success', 'Tipo agregado con éxito', 'El tipo se ha agregado correctamente.');
+        fetchMarcas();
       })
       .catch(error => message.error('Error al agregar tipo'))
       .finally(() => setLoading(false));
@@ -65,6 +79,7 @@ const CrearMarcaTipoModelo = () => {
     axios.post(`http://localhost:6001/api/modelos/${selectedMarca}/${selectedTipo}`, { modelos: [values.modelo] })
       .then(response => {
         openNotificationWithIcon('success', 'Modelo agregado con éxito', 'El modelo se ha agregado correctamente.');
+        fetchMarcas();
         console.log("Modelo Ingresado,", values.modelo)
       })
       .catch(error => {

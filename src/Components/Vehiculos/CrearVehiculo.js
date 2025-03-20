@@ -147,7 +147,7 @@ const CrearVehiculo = ({ usuario, empresa }) => {
             <Input />
           </Form.Item>
   
-          <Form.Item name="alias" label="Alias" style={{ flex: 1, marginBottom: 8 }}>
+          <Form.Item name="alias" label="Alias" rules={[{ required: true }]} style={{ flex: 1, marginBottom: 8 }}>
             <Input />
           </Form.Item>
         </div>

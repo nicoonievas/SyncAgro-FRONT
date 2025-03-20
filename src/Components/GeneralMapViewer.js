@@ -111,6 +111,8 @@ export default function MapComponent({ locations }) {
               <strong>{loc.apellido} {loc.cliente} </strong> <br />
               Campo: {loc.nombre}
               <br />
+              Laboreo: {loc.laboreoNombre}
+              <br />
               Grano: {loc.grano}
               <br />
               Tarea: {loc.tarea}

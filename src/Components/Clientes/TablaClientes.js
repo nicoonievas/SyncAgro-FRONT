@@ -321,6 +321,16 @@ const TablaClientes = ({ empresa, usuario }) => {
               ))}
             </Select>
           </Form.Item>
+          <Form.Item name="domicilio" label="Domicilio" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="telefono" label="Telefono" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="mail" label="Correo" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+
 
         <Form.Item name="estado" label="Estado">
                  <Select>

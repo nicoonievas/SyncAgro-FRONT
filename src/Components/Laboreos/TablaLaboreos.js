@@ -585,8 +585,8 @@ const TablaLaboreos = ({ empresa }) => {
             <Select>
               <Option value="Pendiente">Pendiente</Option>
               <Option value="Activo">Activo</Option>
-              <Option value="Inactivo">Inactivo</Option>
-              <Option value="Cancelado">Cancelado</Option>
+              {/* <Option value="Inactivo">Inactivo</Option>
+              <Option value="Cancelado">Cancelado</Option> */}
             </Select>
           </Form.Item>
 

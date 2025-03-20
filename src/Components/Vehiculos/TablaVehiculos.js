@@ -108,32 +108,32 @@ const TablaVehiculos = ({ empresa }) => {
       fecha_vencimiento_seguro: vehiculo.fecha_vencimiento_seguro ? dayjs(vehiculo.fecha_vencimiento_seguro) : null,
       fecha_vencimiento_vtv: vehiculo.fecha_vencimiento_vtv ? dayjs(vehiculo.fecha_vencimiento_vtv) : null,
     });
-    
+
 
     setIsEditModalVisible(true);
   };
 
-const handleSearch = (v) => {
-  const term = v.target.value;
-  setSearchTerm(term);
+  const handleSearch = (v) => {
+    const term = v.target.value;
+    setSearchTerm(term);
 
-  if (!term) {
-    setFilteredVehiculos(vehiculos); // Mostrar todos los datos cuando el input está vacío
-    return;
+    if (!term) {
+      setFilteredVehiculos(vehiculos); // Mostrar todos los datos cuando el input está vacío
+      return;
+    }
+
+    // Filtrar las vehiculos por nombre, marca, modelo o dominio
+
+    const filtered = vehiculos.filter(vehiculo =>
+      vehiculo.alias.toLowerCase().includes(term) ||
+      vehiculo.marca.toLowerCase().includes(term) ||
+      vehiculo.modelo.toLowerCase().includes(term) ||
+      vehiculo.dominio.toLowerCase().includes(term)
+    );
+
+    setFilteredVehiculos(filtered);
+
   }
-
-  // Filtrar las vehiculos por nombre, marca, modelo o dominio
-  
-  const filtered = vehiculos.filter(vehiculo =>
-    vehiculo.alias.toLowerCase().includes(term) ||
-    vehiculo.marca.toLowerCase().includes(term) ||
-    vehiculo.modelo.toLowerCase().includes(term) ||
-    vehiculo.dominio.toLowerCase().includes(term)
-  );
-
-  setFilteredVehiculos(filtered);
-
-}
 
 
 
@@ -168,7 +168,7 @@ const handleSearch = (v) => {
       const formattedValues = {
         ...values,
         fecha_vencimiento_seguro: values.fecha_vencimiento_seguro ? values.fecha_vencimiento_seguro.valueOf() : null,
-      fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.valueOf() : null,
+        fecha_vencimiento_vtv: values.fecha_vencimiento_vtv ? values.fecha_vencimiento_vtv.valueOf() : null,
       };
 
       await axios.put(`http://localhost:6001/api/vehiculo/${currentVehiculo._id}`, formattedValues);
@@ -198,7 +198,9 @@ const handleSearch = (v) => {
       console.error("Error eliminando vehículo:", error);
     }
   };
-
+  const validateMessages = {
+    required: '${label} es requerido!',
+  };
   // const estadoMapping = {
   //   0: "Inactivo",
   //   1: "Activo",
@@ -250,15 +252,16 @@ const handleSearch = (v) => {
   return (
     <>
       {/* Título de la tabla */}
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehiculos</Title>
-              <Input
-                style={{ width: 200 }}
-                placeholder="Buscar por Apellido o Nombre"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </div>      <Table
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={5} style={{ marginTop: '0px' }}>Gestión de Vehiculos</Title>
+        <Input
+          style={{ width: 200 }}
+          placeholder="Buscar por Apellido o Nombre"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </div>      
+      <Table
         columns={columns}
         dataSource={filteredVehiculos}
         rowKey="_id"
@@ -280,6 +283,7 @@ const handleSearch = (v) => {
         onCancel={handleCancel}
         okText="Eliminar"
         cancelText="Cancelar"
+        validateMessages={validateMessages}
       >
         <p>¿Estás seguro de que deseas eliminar este vehículo?</p>
       </Modal>
@@ -320,7 +324,7 @@ const handleSearch = (v) => {
             <Input />
           </Form.Item>
 
-          <Form.Item name="alias" label="Alias">
+          <Form.Item name="alias" label="Alias" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
