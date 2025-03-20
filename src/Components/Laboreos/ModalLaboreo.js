@@ -11,28 +11,13 @@ const formatDate = (timestamp) => {
     return `${day}-${month}-${year}`;
 };
 
-const ModalLaboreo = ({ laboreo, onClose }) => {
-    const [visible, setVisible] = useState(false);
-
-    useEffect(() => {
-        if (laboreo) {
-            setVisible(true);
-        }
-    }, [laboreo]);
-
-    console.log("Laboreo en Modal:", laboreo);
-
-    const handleClose = () => {
-        setVisible(false);
-        onClose(); // Notificar al componente padre
-    };
-
+const ModalLaboreo = ({ laboreo, visible, onClose }) => {
     return (
         <Modal
             title="Detalles del laboreo"
             open={visible}
-            onOk={handleClose}
-            onCancel={handleClose}
+            onOk={onClose}
+            onCancel={onClose}
         >
             {laboreo ? (
                 <>

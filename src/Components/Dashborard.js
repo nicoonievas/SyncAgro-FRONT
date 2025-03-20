@@ -234,17 +234,18 @@ const Dashboard = ({ empresa }) => {
         }, {});
     };
     const colores = [
-        '#FF5733', // Rojo cálido vibrante
-        '#FFBF00', // Amarillo brillante
-        '#33FF57', // Verde brillante
-        '#33A1FF', // Azul claro
-        // '#FF33A1', // Rosa fuerte
-        '#8033FF', // Morado vibrante
-        '#FFD700', // Amarillo dorado
-        '#FF8C00', // Naranja fuerte
-        '#00FFEF', // Cian brillante
-        '#A52A2A'  // Marrón, para contraste
+        'rgb(197, 47, 13)',  // Rojo cálido vibrante
+        'rgb(236, 191, 56)',  // Amarillo brillante
+        'rgb(64, 197, 88)',  // Verde brillante
+        'rgb(91, 166, 233)', // Azul claro
+        'rgb(214, 123, 172)', // Rosa fuerte
+        'rgb(92, 25, 199)', // Morado vibrante
+        'rgb(219, 195, 60)',  // Amarillo dorado
+        'rgba(255, 140, 0, 1)',  // Naranja fuerte
+        'rgb(42, 168, 160)',  // Cian brillante
+        'rgba(165, 42, 42, 1)'   // Marrón, para contraste
       ];
+      
       
       
 

@@ -170,7 +170,7 @@ const TablaLaboreos = ({ empresa }) => {
     Activo: "rgba(30, 94, 155, 0.8)", // Verde
     Finalizado: "rgba(55, 139, 58, 0.8)", // Rojo
     Pendiente: "rgba(231, 173, 0, 0.8)", // Amarillo
-};
+  };
 
   const showDeleteConfirm = (id) => {
     setLaboreoIdToDelete(id);
@@ -184,9 +184,13 @@ const TablaLaboreos = ({ empresa }) => {
   };
 
   const showModalLaboreo = (record) => {
-    setSelectedRecord(record);
+    setCurrentLaboreo(record);  // Guardamos el laboreo seleccionado
     setIsModalLaboreoVisible(true);
-    console.log("Record en tabla:", record);
+  };
+
+  const handleCloseModalLaboreo = () => {
+    setIsModalLaboreoVisible(false);
+    setCurrentLaboreo(null); // Limpiamos el estado cuando se cierra
   };
 
   const handleFinishModalClose = () => {
@@ -308,21 +312,21 @@ const TablaLaboreos = ({ empresa }) => {
     },
     {
       title: 'Estado',
-        dataIndex: 'estado',
-        key: 'estado',
-        align: 'center',
-        render: (text) => (
-            <span
-                style={{
-                    backgroundColor: colors[text] || 'transparent',
-                    padding: '5px 10px',
-                    borderRadius: '5px',
-                    color: '#fff',
-                }}
-            >
-                {text}
-            </span>
-        ),
+      dataIndex: 'estado',
+      key: 'estado',
+      align: 'center',
+      render: (text) => (
+        <span
+          style={{
+            backgroundColor: colors[text] || 'transparent',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            color: '#fff',
+          }}
+        >
+          {text}
+        </span>
+      ),
     },
     {
       title: 'Acción',
@@ -479,27 +483,51 @@ const TablaLaboreos = ({ empresa }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item
-            name="cliente"
-            label="Cliente"
-            rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
-          >
-            <Select
-              showSearch
-              placeholder="Buscar cliente"
-              optionFilterProp="children"
-              onChange={handleClienteSelect}
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {clientes.map((cliente) => (
-                <Option key={cliente._id} value={cliente._id}>
-                  {`${cliente.nombre} ${cliente.apellido}`}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="cliente"
+                label="Cliente"
+                rules={[{ required: true, message: 'Debe seleccionar un cliente' }]}
+              >
+                <Select disabled
+                  showSearch
+                  placeholder="Buscar cliente"
+                  optionFilterProp="children"
+                  onChange={handleClienteSelect}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {clientes.map((cliente) => (
+                    <Option key={cliente._id} value={cliente._id}>
+                      {`${cliente.nombre} ${cliente.apellido}`}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="camposAfectados"
+                label="Campos"
+                rules={[{ required: false, message: "Debe seleccionar al menos un campo" }]}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Seleccionar campos"
+                  optionLabelProp="children"
+                >
+                  {laboreos.camposAfectados?.map((campo) => (
+                    <Select.Option key={campo.id} value={campo.id}>
+                      {campo.nombre}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
           <Form.Item
             name="empleados"
             label="Empleados Adicionales"
@@ -578,9 +606,9 @@ const TablaLaboreos = ({ empresa }) => {
       />
 
       <ModalLaboreo
-        open={isModalLaboreoVisible}
-        onClose={() => setIsModalLaboreoVisible(false)}
-        laboreo={selectedRecord}
+        laboreo={currentLaboreo}
+        visible={isModalLaboreoVisible}
+        onClose={handleCloseModalLaboreo}
       />
 
 
